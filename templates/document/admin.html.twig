@@ -1,0 +1,251 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Doc2Sail - Administration{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <span class="text-5xl">⛵</span>
+                <div>
+                    <h1 class="text-4xl font-bold text-primary">Doc2Sail</h1>
+                    <p class="text-sm text-base-content/70">Administration des documents</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <!-- Link to Public View -->
+                <a href="{{ path('app_documents') }}" class="btn btn-outline btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Vue consultation
+                </a>
+                
+                <!-- Install PWA Button -->
+                <button id="installBtn" class="btn btn-primary btn-sm hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Installer l'app
+                </button>
+            </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="form-control">
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher un document..." class="input input-bordered w-full" />
+        </div>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="card bg-base-100 shadow-xl mb-8 border-2 border-primary/20">
+        <div class="card-body">
+            <h2 class="card-title text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Ajouter un document
+            </h2>
+            
+            <div id="dropZone" class="border-4 border-dashed border-base-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p class="text-lg font-semibold mb-2">Glissez-déposez votre fichier ici</p>
+                <p class="text-sm text-base-content/70 mb-4">ou cliquez pour sélectionner</p>
+                <p class="text-xs text-base-content/50">PDF, Word, Excel, Images (max 10MB)</p>
+                <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt">
+            </div>
+
+            <!-- Upload Form -->
+            <div id="uploadForm" class="hidden mt-4">
+                <div class="form-control mb-3">
+                    <label class="label">
+                        <span class="label-text font-semibold">Nom du document *</span>
+                    </label>
+                    <input type="text" id="documentName" placeholder="Nom du document" class="input input-bordered" required>
+                </div>
+                
+                <div class="form-control mb-3">
+                    <label class="label">
+                        <span class="label-text">Description (optionnelle)</span>
+                    </label>
+                    <textarea id="documentDescription" placeholder="Description du document" class="textarea textarea-bordered" rows="2"></textarea>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="uploadBtn" class="btn btn-primary flex-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Uploader
+                    </button>
+                    <button id="cancelBtn" class="btn btn-ghost">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Grid -->
+    <div class="mb-4 flex justify-between items-center">
+        <h2 class="text-2xl font-bold">
+            Mes Documents 
+            <span class="badge badge-primary" id="documentCount">{{ documents|length }}</span>
+        </h2>
+    </div>
+
+    <div id="documentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for document in documents %}
+            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow document-card" data-document-id="{{ document.id }}">
+                <div class="card-body">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="card-title text-lg">{{ document.name }}</h3>
+                            {% if document.description %}
+                                <p class="text-sm text-base-content/70 mt-1">{{ document.description }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- File Type Icon -->
+                        <div class="avatar placeholder">
+                            <div class="bg-primary text-primary-content rounded-lg w-12 h-12">
+                                <span class="text-xl">
+                                    {% if 'pdf' in document.mimeType %}
+                                        📄
+                                    {% elseif 'image' in document.mimeType %}
+                                        🖼️
+                                    {% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
+                                        📝
+                                    {% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
+                                        📊
+                                    {% else %}
+                                        📁
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider my-2"></div>
+
+                    <div class="flex items-center justify-between text-xs text-base-content/70 mb-4">
+                        <span class="badge badge-outline">{{ document.formattedSize }}</span>
+                        <span>{{ document.uploadedAt|date('d/m/Y H:i') }}</span>
+                    </div>
+
+                    <!-- Admin Actions -->
+                    <div class="card-actions justify-end gap-2">
+                        <div class="dropdown dropdown-top dropdown-end flex-1">
+                            <label tabindex="0" class="btn btn-sm btn-outline w-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                </svg>
+                                Actions
+                            </label>
+                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
+                                <li><a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Consulter
+                                </a></li>
+                                <li><a href="{{ path('app_document_download', {id: document.id}) }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Télécharger
+                                </a></li>
+                                <li><a class="text-error delete-btn" data-document-id="{{ document.id }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Supprimer
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-span-full text-center py-16">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p class="text-xl text-base-content/50">Aucun document pour le moment</p>
+                <p class="text-sm text-base-content/40 mt-2">Uploadez votre premier document ci-dessus</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast toast-top toast-end z-50"></div>
+
+<!-- PWA Install Handler -->
+<script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    // Écouter l'événement beforeinstallprompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('💾 beforeinstallprompt event fired');
+        // Empêcher l'affichage automatique
+        e.preventDefault();
+        // Stocker l'événement pour l'utiliser plus tard
+        deferredPrompt = e;
+        // Afficher le bouton d'installation
+        if (installBtn) {
+            installBtn.classList.remove('hidden');
+        }
+    });
+
+    // Gérer le clic sur le bouton d'installation
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            console.log('🖱️ Install button clicked');
+            if (!deferredPrompt) {
+                console.warn('⚠️ deferredPrompt not available');
+                alert('L\'installation PWA n\'est pas disponible. Assurez-vous d\'utiliser HTTPS ou ajoutez cette page aux favoris de votre navigateur.');
+                return;
+            }
+            
+            // Afficher le prompt d'installation
+            deferredPrompt.prompt();
+            
+            // Attendre la réponse de l'utilisateur
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`👤 User response: ${outcome}`);
+            
+            if (outcome === 'accepted') {
+                console.log('✅ PWA installed');
+            } else {
+                console.log('❌ PWA installation declined');
+            }
+            
+            // Réinitialiser deferredPrompt
+            deferredPrompt = null;
+            installBtn.classList.add('hidden');
+        });
+    }
+
+    // Vérifier si déjà installé
+    window.addEventListener('appinstalled', () => {
+        console.log('✅ PWA was installed');
+        if (installBtn) {
+            installBtn.classList.add('hidden');
+        }
+    });
+
+    // Pour les tests en HTTP, afficher un message dans la console
+    console.log('🔍 PWA Install Status:', {
+        serviceWorkerSupported: 'serviceWorker' in navigator,
+        protocol: window.location.protocol,
+        hostname: window.location.hostname
+    });
+</script>
+{% endblock %}

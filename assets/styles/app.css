@@ -1,3 +1,9 @@
+@import "tailwindcss";
+@source not "../../public";
+@plugin "daisyui" {
+    themes: light --default, dark --prefersdark, cupcake;
+}
+
 body {
-    background-color: skyblue;
+    background-color: lightgray;
 }
