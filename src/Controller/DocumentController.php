@@ -25,16 +25,6 @@ class DocumentController extends AbstractController
 		private ValidatorInterface $validator,
 	) {}
 
-	#[Route('/documents', name: 'app_documents')]
-	public function index(): Response
-	{
-		$documents = $this->documentRepository->findAllOrderedByDate();
-
-		return $this->render('document/index.html.twig', [
-			'documents' => $documents,
-		]);
-	}
-
 	#[Route('/admin', name: 'app_documents_admin')]
 	public function admin(): Response
 	{

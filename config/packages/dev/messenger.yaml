@@ -1,0 +1,11 @@
+framework:
+    messenger:
+        # En développement, envoi synchrone des emails pour voir immédiatement dans Mailpit
+        transports:
+            sync: "sync://"
+
+        routing:
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: sync
+            # Les autres messages restent async si besoin
+            # Symfony\Component\Notifier\Message\ChatMessage: async
+            # Symfony\Component\Notifier\Message\SmsMessage: async
