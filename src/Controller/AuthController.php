@@ -13,6 +13,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class AuthController extends AbstractController
 {
@@ -20,7 +21,8 @@ class AuthController extends AbstractController
 		private EntityManagerInterface $entityManager,
 		private UserRepository $userRepository,
 		private MagicLinkRepository $magicLinkRepository,
-		private MailerInterface $mailer
+		private MailerInterface $mailer,
+		private ParameterBagInterface $params
 	) {}
 
 	#[Route('/login', name: 'app_login')]
@@ -61,7 +63,7 @@ class AuthController extends AbstractController
 		], UrlGeneratorInterface::ABSOLUTE_URL);
 
 		$emailMessage = (new Email())
-			->from('noreply@doc2sail.local')
+			->from($this->params->get('mailer_from'))
 			->to($email)
 			->subject('🔐 Votre lien de connexion Doc2Sail')
 			->html($this->renderView('auth/magic_link_email.html.twig', [
