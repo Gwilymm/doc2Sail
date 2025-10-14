@@ -10,8 +10,6 @@ services:
       - "443:443/udp"
     volumes:
       - .:/app
-      - /app/vendor
-      - /app/var
     environment:
       APP_ENV: dev
       APP_SECRET: ${APP_SECRET:-changeme}
