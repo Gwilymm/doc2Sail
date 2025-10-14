@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion - Doc2Sail{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-sky-50 px-4">
+    <div class="max-w-md w-full">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <img src="{{ asset('logo.svg') }}" alt="Doc2Sail Logo" class="w-32 h-32 mx-auto mb-4 animate-bounce-slow" />
+            <h1 class="text-4xl font-bold text-primary mb-2">Doc2Sail</h1>
+            <p class="text-base-content/70">Authentification requise</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type == 'error' ? 'error' : (type == 'success' ? 'success' : 'info') }} mb-4 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        {% if type == 'error' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        {% elseif type == 'success' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        {% endif %}
+                    </svg>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <!-- Formulaire de connexion -->
+        <div class="card bg-base-100 shadow-2xl">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">✨ Magic Link</h2>
+                <p class="text-base-content/70 mb-4">Entrez votre email pour recevoir un lien de connexion sécurisé</p>
+                
+                <form action="{{ path('app_magic_link_request') }}" method="POST">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Adresse Email</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            placeholder="votre@email.com" 
+                            class="input input-bordered input-lg w-full"
+                            required
+                            autofocus
+                            autocomplete="email"
+                        />
+                    </div>
+
+                    <div class="form-control mt-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Nom d'affichage (optionnel)</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="display_name" 
+                            placeholder="ex: Capitaine Alex" 
+                            class="input input-bordered w-full"
+                            autocomplete="name"
+                        />
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/60">
+                                Uniquement pour vous identifier
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-control mt-6">
+                        <button type="submit" class="btn btn-primary btn-lg w-full gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Recevoir le magic link
+                        </button>
+                    </div>
+                </form>
+
+                <div class="divider mt-6">Accès public</div>
+                
+                <a href="{{ path('app_home') }}" class="btn btn-ghost btn-block gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Retour à l'accueil
+                </a>
+            </div>
+        </div>
+
+        <!-- Info RGPD -->
+        <div class="text-center mt-6 text-sm text-base-content/60">
+            <p class="flex items-center justify-center gap-2 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                Conforme RGPD
+            </p>
+            <p class="text-xs max-w-md mx-auto">
+                ✓ Email crypté (hash SHA-256)<br>
+                ✓ Aucun mot de passe stocké<br>
+                ✓ Links temporaires (15 min)<br>
+                ✓ Session sécurisée
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes bounce-slow {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 3s ease-in-out infinite;
+}
+</style>
+{% endblock %}
