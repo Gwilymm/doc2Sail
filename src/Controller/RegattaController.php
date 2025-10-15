@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Document;
 use App\Entity\Regatta;
 use App\Entity\RegattaInvitation;
 use App\Entity\User;
+use App\Repository\DocumentRepository;
 use App\Repository\RegattaRepository;
 use App\Repository\RegattaInvitationRepository;
 use App\Repository\UserRepository;
@@ -25,7 +27,8 @@ class RegattaController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private RegattaRepository $regattaRepository,
+    private RegattaRepository $regattaRepository,
+    private DocumentRepository $documentRepository,
         private UserRepository $userRepository,
         private RegattaInvitationRepository $invitationRepository,
         private ValidatorInterface $validator,
@@ -253,9 +256,20 @@ class RegattaController extends AbstractController
             return $this->redirectToRoute('app_regatta');
         }
 
+        $documents = $this->documentRepository->findByRegattaSorted($regatta);
+
+        $documentsByCategory = [];
+        foreach ($documents as $document) {
+            $category = $document->getCategory();
+            $documentsByCategory[$category][] = $document;
+        }
+
         return $this->render('regatta/documents.html.twig', [
             'regatta' => $regatta,
-            'documents' => $regatta->getDocuments(),
+            'documentsByCategory' => $documentsByCategory,
+            'documentsCount' => count($documents),
+            'documentCategories' => Document::AVAILABLE_CATEGORIES,
+            'defaultCategory' => Document::DEFAULT_CATEGORY,
         ]);
     }
 

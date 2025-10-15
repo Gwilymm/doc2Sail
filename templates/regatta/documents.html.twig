@@ -3,7 +3,7 @@
 {% block title %}Doc2Sail - {{ regatta.name }}{% endblock %}
 
 {% block body %}
-<div class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document" data-document-regatta-id-value="{{ regatta.id }}">
+<div class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document" data-document-regatta-id-value="{{ regatta.id }}" data-document-default-category-value="{{ defaultCategory }}">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
@@ -101,6 +101,21 @@
                 
                 <div class="form-control mb-3">
                     <label class="label">
+                        <span class="label-text font-semibold">Catégorie *</span>
+                    </label>
+                    <input type="text" id="documentCategory" class="input input-bordered" list="documentCategoriesList" value="{{ defaultCategory }}" required>
+                    <datalist id="documentCategoriesList">
+                        {% for category in documentCategories %}
+                            <option value="{{ category }}"></option>
+                        {% endfor %}
+                    </datalist>
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">Sélectionnez ou saisissez la catégorie du document</span>
+                    </label>
+                </div>
+
+                <div class="form-control mb-3">
+                    <label class="label">
                         <span class="label-text">Description (optionnelle)</span>
                     </label>
                     <textarea id="documentDescription" placeholder="Description du document" class="textarea textarea-bordered" rows="2"></textarea>
@@ -123,85 +138,96 @@
     <div class="mb-4 flex justify-between items-center">
         <h2 class="text-2xl font-bold">
             Mes Documents 
-            <span class="badge badge-primary" id="documentCount">{{ documents|length }}</span>
+            <span class="badge badge-primary" id="documentCount">{{ documentsCount }}</span>
         </h2>
     </div>
 
-    <div id="documentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for document in documents %}
-            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow document-card" data-document-id="{{ document.id }}">
-                <div class="card-body">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex-1">
-                            <h3 class="card-title text-lg">{{ document.name }}</h3>
-                            {% if document.description %}
-                                <p class="text-sm text-base-content/70 mt-1">{{ document.description }}</p>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- File Type Icon -->
-                        <div class="avatar placeholder">
-                            <div class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
-                                <span class="text-2xl">
-                                    {% if 'pdf' in document.mimeType %}
-                                        📄
-                                    {% elseif 'image' in document.mimeType %}
-                                        🖼️
-                                    {% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
-                                        📝
-                                    {% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
-                                        📊
-                                    {% else %}
-                                        📁
-                                    {% endif %}
-                                </span>
+    <div id="documentsGrid" class="space-y-8">
+        {% for category, documents in documentsByCategory %}
+            <div class="space-y-4 category-section" data-category="{{ category }}">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold">{{ category }}</h3>
+                    <span class="badge badge-outline">{{ documents|length }} document{% if documents|length > 1 %}s{% endif %}</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for document in documents %}
+                        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow document-card" data-document-id="{{ document.id }}">
+                            <div class="card-body">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="badge badge-primary badge-sm">{{ document.category }}</span>
+                                            <h3 class="card-title text-lg">{{ document.name }}</h3>
+                                        </div>
+                                        {% if document.description %}
+                                            <p class="text-sm text-base-content/70 mt-1">{{ document.description }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="avatar placeholder">
+                                        <div class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
+                                            <span class="text-2xl">
+                                                {% if 'pdf' in document.mimeType %}
+                                                    📄
+                                                {% elseif 'image' in document.mimeType %}
+                                                    🖼️
+                                                {% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
+                                                    📝
+                                                {% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
+                                                    📊
+                                                {% else %}
+                                                    📁
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="divider my-2"></div>
+
+                                <div class="flex items-center justify-between text-xs text-base-content/70 mb-4">
+                                    <span class="badge badge-outline">{{ document.formattedSize }}</span>
+                                    <span>{{ document.uploadedAt|date('d/m/Y H:i') }}</span>
+                                </div>
+
+                                <div class="card-actions justify-end gap-2">
+                                    <div class="dropdown dropdown-top dropdown-end flex-1">
+                                        <label tabindex="0" class="btn btn-sm btn-outline w-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                            </svg>
+                                            Actions
+                                        </label>
+                                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
+                                            <li><a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                Consulter
+                                            </a></li>
+                                            <li><a href="{{ path('app_document_download', {id: document.id}) }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                                Télécharger
+                                            </a></li>
+                                            <li><a class="text-error delete-btn" data-document-id="{{ document.id }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Supprimer
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="divider my-2"></div>
-
-                    <div class="flex items-center justify-between text-xs text-base-content/70 mb-4">
-                        <span class="badge badge-outline">{{ document.formattedSize }}</span>
-                        <span>{{ document.uploadedAt|date('d/m/Y H:i') }}</span>
-                    </div>
-
-                    <!-- Admin Actions -->
-                    <div class="card-actions justify-end gap-2">
-                        <div class="dropdown dropdown-top dropdown-end flex-1">
-                            <label tabindex="0" class="btn btn-sm btn-outline w-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                </svg>
-                                Actions
-                            </label>
-                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
-                                <li><a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                    Consulter
-                                </a></li>
-                                <li><a href="{{ path('app_document_download', {id: document.id}) }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Télécharger
-                                </a></li>
-                                <li><a class="text-error delete-btn" data-document-id="{{ document.id }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    Supprimer
-                                </a></li>
-                            </ul>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         {% else %}
-            <div class="col-span-full text-center py-16">
+            <div class="text-center py-16">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>

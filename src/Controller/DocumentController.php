@@ -40,6 +40,7 @@ class DocumentController extends AbstractController
 			$file = $request->files->get('file');
 			$name = $request->request->get('name');
 			$description = $request->request->get('description');
+			$category = $request->request->get('category');
 			$regattaId = $request->request->get('regatta_id');
 
 			error_log("=== UPLOAD DEBUG ===");
@@ -60,6 +61,7 @@ class DocumentController extends AbstractController
 			$document = new Document();
 			$document->setName($name ?: $file->getClientOriginalName());
 			$document->setDescription($description);
+			$document->setCategory($category);
 			$document->setFile($file);
 
 			// Associer à une régate si spécifié
@@ -72,6 +74,7 @@ class DocumentController extends AbstractController
 			}
 
 			error_log("Document entity created");
+			error_log("Document category: " . $document->getCategory());
 
 			// Valider l'entité
 			$errors = $this->validator->validate($document);
@@ -112,6 +115,7 @@ class DocumentController extends AbstractController
 					'name' => $document->getName(),
 					'size' => $document->getFormattedSize(),
 					'uploadedAt' => $document->getUploadedAt()->format('d/m/Y H:i'),
+					'category' => $document->getCategory(),
 				]
 			]);
 		} catch (\Exception $e) {
@@ -189,6 +193,7 @@ class DocumentController extends AbstractController
 				'size' => $doc->getFormattedSize(),
 				'mimeType' => $doc->getMimeType(),
 				'uploadedAt' => $doc->getUploadedAt()->format('d/m/Y H:i'),
+				'category' => $doc->getCategory(),
 			];
 		}, $documents);
 
