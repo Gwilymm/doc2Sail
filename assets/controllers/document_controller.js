@@ -77,6 +77,12 @@ export default class extends Controller {
 			uploadForm.classList.remove('hidden');
 		}
 
+		// Vider le champ catégorie quand un nouveau fichier est sélectionné
+		const categoryInput = document.getElementById('documentCategory');
+		if (categoryInput) {
+			categoryInput.value = '';
+		}
+
 		const nameInput = document.getElementById('documentName');
 		if (nameInput && !nameInput.value) {
 			nameInput.value = file.name;
