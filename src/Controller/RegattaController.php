@@ -489,9 +489,21 @@ class RegattaController extends AbstractController
             $categorySections['Autres documents'] = $otherDocuments;
         }
 
+        // Préparer les données des documents pour le téléchargement hors ligne
+        $documentsForOffline = [];
+        foreach ($documents as $document) {
+            $documentsForOffline[] = [
+                'id' => $document->getId(),
+                'name' => $document->getName(),
+                'filePath' => '/uploads/documents/' . $document->getFilename(),
+                'category' => $document->getCategory(),
+            ];
+        }
+
         return $this->render('regatta/public.html.twig', [
             'regatta' => $regatta,
             'documents' => $documents,
+            'documentsForOffline' => $documentsForOffline,
             'documentsByCategory' => $sortedDocumentsByCategory,
             'categorySections' => $categorySections,
         ]);

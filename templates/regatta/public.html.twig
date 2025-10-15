@@ -2,12 +2,61 @@
 
 {% block title %}{{ regatta.name }} - Doc2Sail{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Manifest dédié pour la partie publique -->
+    <link rel="manifest" href="{{ asset('manifest-public.json') }}">
+{% endblock %}
+
 {% block body %}
 {% include '_navbar.html.twig' %}
 
-<div class="container mx-auto px-4 py-8 max-w-7xl">
+<div class="container mx-auto px-4 py-8 max-w-7xl" 
+     data-controller="offline" 
+     data-offline-regatta-token-value="{{ regatta.accessToken }}"
+     data-offline-documents-value="{{ documentsForOffline|json_encode|e('html_attr') }}">
     <!-- Header -->
     <div class="mb-8">
+        <!-- Banner de téléchargement hors ligne -->
+        <div id="offlineBanner" class="alert alert-info mb-4 hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <div class="flex-1">
+                <h3 class="font-bold">📥 Télécharger pour consultation hors ligne</h3>
+                <div class="text-xs mt-1">
+                    Téléchargez tous les documents ({{ documents|length }} documents) pour y accéder même sans connexion internet
+                </div>
+            </div>
+            <button onclick="this.closest('[data-controller]').getAttribute('data-controller').split(' ').forEach(c => { if(window[c + 'Controller']) window[c + 'Controller'].downloadForOffline(); })" 
+                    class="btn btn-sm btn-primary" 
+                    data-action="click->offline#downloadForOffline">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Télécharger maintenant
+            </button>
+        </div>
+
+        <!-- Statut "Déjà en cache" -->
+        <div id="cachedStatus" class="alert alert-success mb-4 hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="flex-1">
+                <h3 class="font-bold">✅ Disponible hors ligne</h3>
+                <div class="text-xs mt-1">
+                    Dernière synchronisation : <span id="cacheDate"></span>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-ghost" data-action="click->offline#clearCache">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Réinitialiser
+            </button>
+        </div>
+
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
                 
@@ -138,6 +187,26 @@
 <!-- Toast Container -->
 <div id="toastContainer" class="toast toast-top toast-end z-50"></div>
 
+<!-- Modal de progression du téléchargement -->
+<dialog id="downloadModal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">📥 Téléchargement en cours...</h3>
+        <p class="mb-4">Préparation pour consultation hors ligne</p>
+        
+        <div class="mb-4">
+            <progress id="downloadProgress" class="progress progress-primary w-full" value="0" max="100"></progress>
+            <p id="downloadProgressText" class="text-sm text-center mt-2">0 / 0 documents</p>
+        </div>
+        
+        <p class="text-xs text-base-content/60">
+            ⚠️ Ne fermez pas cette page pendant le téléchargement
+        </p>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>Fermer</button>
+    </form>
+</dialog>
+
 <!-- Install PWA Button -->
 <button id="installBtn" class="btn btn-primary fixed bottom-4 right-4 hidden shadow-lg">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,5 +262,37 @@ installBtn.addEventListener('click', async () => {
         installBtn.classList.add('hidden');
     }
 });
+
+// Enregistrement Service Worker Public
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // D'abord, désinscrire les anciens SW avec mauvais scope
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(reg => {
+                if (reg.scope.includes('/public/')) {
+                    console.log('🗑️ Suppression ancien SW:', reg.scope);
+                    reg.unregister();
+                }
+            });
+        });
+        
+        // Puis enregistrer le nouveau avec bon scope
+        navigator.serviceWorker.register('/sw-public.js', {
+            scope: '/r/'
+        })
+        .then(registration => {
+            console.log('✅ Service Worker Public enregistré:', registration.scope);
+            console.log('📍 SW State:', registration.active ? 'actif' : 'en attente');
+            
+            // Forcer la mise à jour
+            registration.update();
+        })
+        .catch(error => {
+            console.error('❌ Erreur enregistrement SW Public:', error);
+        });
+    });
+} else {
+    console.warn('⚠️ Service Worker non supporté');
+}
 </script>
 {% endblock %}
