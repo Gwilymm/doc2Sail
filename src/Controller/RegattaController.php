@@ -27,8 +27,8 @@ class RegattaController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-    private RegattaRepository $regattaRepository,
-    private DocumentRepository $documentRepository,
+        private RegattaRepository $regattaRepository,
+        private DocumentRepository $documentRepository,
         private UserRepository $userRepository,
         private RegattaInvitationRepository $invitationRepository,
         private ValidatorInterface $validator,
