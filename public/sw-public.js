@@ -177,18 +177,22 @@ self.addEventListener('message', (event) => {
 		cacheAllDocuments(documents, regattaToken)
 			.then(() => {
 				// Notifier la page que c'est terminé
-				event.ports[ 0 ].postMessage({
-					type: 'CACHE_COMPLETE',
-					success: true
-				});
+				if (event.ports && event.ports[ 0 ]) {
+					event.ports[ 0 ].postMessage({
+						type: 'CACHE_COMPLETE',
+						success: true
+					});
+				}
 			})
 			.catch(error => {
 				console.error('❌ [SW Public] Erreur cache documents:', error);
-				event.ports[ 0 ].postMessage({
-					type: 'CACHE_COMPLETE',
-					success: false,
-					error: error.message
-				});
+				if (event.ports && event.ports[ 0 ]) {
+					event.ports[ 0 ].postMessage({
+						type: 'CACHE_COMPLETE',
+						success: false,
+						error: error.message
+					});
+				}
 			});
 	}
 
@@ -196,10 +200,12 @@ self.addEventListener('message', (event) => {
 		// Retourner le statut du cache
 		getCacheStatus(event.data.regattaToken)
 			.then(status => {
-				event.ports[ 0 ].postMessage({
-					type: 'CACHE_STATUS',
-					status
-				});
+				if (event.ports && event.ports[ 0 ]) {
+					event.ports[ 0 ].postMessage({
+						type: 'CACHE_STATUS',
+						status
+					});
+				}
 			});
 	}
 
@@ -207,10 +213,12 @@ self.addEventListener('message', (event) => {
 		// Vider le cache pour cette régate
 		clearRegattaCache(event.data.regattaToken)
 			.then(() => {
-				event.ports[ 0 ].postMessage({
-					type: 'CACHE_CLEARED',
-					success: true
-				});
+				if (event.ports && event.ports[ 0 ]) {
+					event.ports[ 0 ].postMessage({
+						type: 'CACHE_CLEARED',
+						success: true
+					});
+				}
 			});
 	}
 });
@@ -334,3 +342,94 @@ async function clearRegattaCache(regattaToken) {
 
 	console.log(`🗑️ [SW Public] Cache vidé pour régate ${regattaToken}`);
 }
+
+// ==========================================
+// NOTIFICATIONS PUSH
+// ==========================================
+
+/**
+ * Gestion de l'événement push
+ */
+self.addEventListener('push', (event) => {
+	console.log('📨 [SW Public] Push notification received');
+
+	let data = {
+		title: 'Nouveau document',
+		body: 'Un nouveau document est disponible',
+		icon: '/icon-192.png',
+		badge: '/icon-72.png',
+		data: {}
+	};
+
+	if (event.data) {
+		try {
+			data = event.data.json();
+			console.log('📨 [SW Public] Push data:', data);
+		} catch (e) {
+			console.warn('⚠️ [SW Public] Failed to parse push data:', e);
+		}
+	}
+
+	const notificationOptions = {
+		body: data.body,
+		icon: data.icon || '/icon-192.png',
+		badge: data.badge || '/icon-72.png',
+		vibrate: [ 200, 100, 200 ],
+		data: data.data || {},
+		tag: 'new-document',
+		renotify: true,
+		requireInteraction: false,
+		actions: [
+			{
+				action: 'open',
+				title: 'Voir',
+			},
+			{
+				action: 'close',
+				title: 'Fermer',
+			}
+		]
+	};
+
+	event.waitUntil(
+		self.registration.showNotification(data.title, notificationOptions)
+	);
+});
+
+/**
+ * Gestion du clic sur la notification
+ */
+self.addEventListener('notificationclick', (event) => {
+	console.log('🔔 [SW Public] Notification clicked:', event.action);
+
+	event.notification.close();
+
+	if (event.action === 'close') {
+		return;
+	}
+
+	// Ouvrir ou focus la fenêtre de l'app
+	event.waitUntil(
+		clients.matchAll({ type: 'window', includeUncontrolled: true })
+			.then(clientList => {
+				// Si une fenêtre est déjà ouverte, la focus
+				for (const client of clientList) {
+					if (client.url.includes('/r/') && 'focus' in client) {
+						return client.focus();
+					}
+				}
+				// Sinon ouvrir une nouvelle fenêtre
+				if (clients.openWindow) {
+					const url = event.notification.data?.url || '/';
+					return clients.openWindow(url);
+				}
+			})
+	);
+});
+
+/**
+ * Gestion de la fermeture de la notification
+ */
+self.addEventListener('notificationclose', (event) => {
+	console.log('🚫 [SW Public] Notification closed');
+});

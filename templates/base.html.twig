@@ -1,69 +1,134 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}Doc2Sail - Gestion Documents de Régate{% endblock %}</title>
-        
-        <!-- PWA Meta Tags -->
-        <meta name="description" content="Application PWA pour gérer vos documents de régate de voile">
-        <meta name="theme-color" content="#0284c7">
-        <link rel="manifest" href="{{ asset('manifest.json') }}">
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-        <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
-        
-        <!-- Apple Touch Icon -->
-        <link rel="apple-touch-icon" href="{{ asset('icon-192.png') }}">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
-        {% endblock %}
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>
+			{% block title %}Doc2Sail - Gestion Documents de Régate
+			{% endblock %}
+		</title>
 
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-        {% endblock %}
-        
-        <!-- Theme Controller Script -->
-        <script>
-            // Load theme from localStorage on page load
-            (function() {
-                const theme = localStorage.getItem('theme') || 'light';
-                document.documentElement.setAttribute('data-theme', theme);
-            })();
-        </script>
-    </head>
-    <body class="bg-base-200 min-h-screen">
-        {% block body %}{% endblock %}
-        
-        <!-- Service Worker Registration -->
-        <script>
-            // Register service worker even in HTTP for testing (disabled by default in production)
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    // Forcer la mise à jour du Service Worker
-                    navigator.serviceWorker.getRegistrations().then(registrations => {
-                        registrations.forEach(reg => {
-                            reg.update(); // Force la mise à jour
-                        });
-                    });
+		<!-- PWA Meta Tags -->
+		<meta name="description" content="Application PWA pour gérer vos documents de régate de voile">
+		<meta name="theme-color" content="#0284c7">
+		<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+		<link
+		rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
 
-                    navigator.serviceWorker.register('/sw.js')
-                        .then(reg => {
-                            console.log('✅ Service Worker enregistré', reg);
-                            // Force l'affichage du prompt d'installation
-                            window.addEventListener('beforeinstallprompt', (e) => {
-                                console.log('💾 PWA peut être installée');
-                                // Stocker l'événement pour l'utiliser plus tard
-                                window.deferredPrompt = e;
-                            });
-                        })
-                        .catch(err => console.warn('⚠️ Service Worker error:', err));
-                });
-            } else {
-                console.log('❌ Service Worker non supporté par ce navigateur');
-            }
-        </script>
-    </body>
+		<!-- Apple Touch Icon -->
+		<link rel="apple-touch-icon" href="{{ asset('icon-192.png') }}">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		{% block stylesheets %}
+			<!-- Manifest (peut être surchargé dans les templates enfants) -->
+			<link rel="manifest" href="{{ asset('manifest.json') }}">
+			{{ encore_entry_link_tags('app') }}
+		{% endblock %}
+
+		{% block javascripts %}
+			{{ encore_entry_script_tags('app') }}
+		{% endblock %}
+
+		<!-- Theme Controller Script -->
+		<script>
+			// Load theme from localStorage on page load
+( function ()
+{
+
+
+
+const theme = localStorage.getItem( 'theme' ) || 'light';
+document.documentElement.setAttribute( 'data-theme', theme );
+
+
+
+} )();
+		</script>
+	</head>
+	<body class="bg-base-200 min-h-screen"> {% block body %}{% endblock %}
+
+		<!-- Service Worker Registration -->
+		<script>
+			// Register service worker even in HTTP for testing (disabled by default in production)
+if ( 'serviceWorker' in navigator )
+{
+
+
+
+window.addEventListener( 'load', () => { // Ne pas enregistrer /sw.js sur les pages publiques (elles ont leur propre SW)
+const isPublicPage = window.location.pathname.startsWith( '/r/' );
+
+if ( isPublicPage )
+{
+
+
+
+console.log( '📍 Page publique détectée, SW spécifique sera chargé' );
+return;
+
+
+
+}
+
+// Forcer la mise à jour du Service Worker
+navigator.serviceWorker.getRegistrations().then( registrations => {
+
+
+
+registrations.forEach( reg => {
+
+
+
+reg.update(); // Force la mise à jour
+
+
+
+} );
+
+
+
+} );
+
+navigator.serviceWorker.register( '/sw.js' ).then( reg => {
+
+
+
+console.log( '✅ Service Worker enregistré', reg );
+// Force l'affichage du prompt d'installation
+window.addEventListener( 'beforeinstallprompt', ( e ) => {
+
+
+
+console.log( '💾 PWA peut être installée' );
+// Stocker l'événement pour l'utiliser plus tard
+window.deferredPrompt = e;
+
+
+
+} );
+
+
+
+} ).catch( err => console.warn( '⚠️ Service Worker error:', err ) );
+
+
+
+} );
+
+
+
+}
+else
+{
+
+
+
+console.log( '❌ Service Worker non supporté par ce navigateur' );
+
+
+
+}
+		</script>
+	</body>
 </html>
