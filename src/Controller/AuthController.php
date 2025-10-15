@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\MagicLink;
-use App\Repository\MagicLinkRepository;
+use App\Entity\User;
+use App\Repository\RegattaInvitationRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,22 +14,24 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
 
 class AuthController extends AbstractController
 {
 	public function __construct(
 		private EntityManagerInterface $entityManager,
 		private UserRepository $userRepository,
-		private MagicLinkRepository $magicLinkRepository,
+		private RegattaInvitationRepository $invitationRepository,
 		private MailerInterface $mailer,
-		private ParameterBagInterface $params
+		private ParameterBagInterface $params,
+		private LoginLinkHandlerInterface $loginLinkHandler
 	) {}
 
 	#[Route('/login', name: 'app_login')]
 	public function login(): Response
 	{
 		// Si déjà authentifié, rediriger vers la gestion des régates
-		if ($this->isAuthenticated()) {
+		if ($this->getUser()) {
 			return $this->redirectToRoute('app_regatta');
 		}
 
@@ -50,25 +52,18 @@ class AuthController extends AbstractController
 		// Trouver ou créer l'utilisateur
 		$user = $this->userRepository->findOrCreateByEmail($email, $displayName ?: null);
 
-		// Créer un nouveau magic link
-		$magicLink = new MagicLink();
-		$magicLink->setUser($user);
-
-		$this->entityManager->persist($magicLink);
-		$this->entityManager->flush();
+		// Générer un login link avec Symfony
+		$loginLinkDetails = $this->loginLinkHandler->createLoginLink($user);
+		$loginUrl = $loginLinkDetails->getUrl();
 
 		// Envoyer l'email
-		$loginUrl = $this->generateUrl('app_magic_link_verify', [
-			'token' => $magicLink->getToken()
-		], UrlGeneratorInterface::ABSOLUTE_URL);
-
 		$emailMessage = (new Email())
 			->from($this->params->get('mailer_from'))
 			->to($email)
 			->subject('🔐 Votre lien de connexion Doc2Sail')
 			->html($this->renderView('auth/magic_link_email.html.twig', [
 				'loginUrl' => $loginUrl,
-				'expiresAt' => $magicLink->getExpiresAt(),
+				'expiresAt' => new \DateTimeImmutable('+15 minutes'),
 				'displayName' => $user->getDisplayName()
 			]));
 
@@ -86,50 +81,39 @@ class AuthController extends AbstractController
 		return $this->redirectToRoute('app_login');
 	}
 
-	#[Route('/login/verify/{token}', name: 'app_magic_link_verify')]
-	public function verifyMagicLink(string $token, Request $request): Response
+	#[Route('/login/check', name: 'app_login_check')]
+	public function loginCheck(Request $request): Response
 	{
-		$magicLink = $this->magicLinkRepository->findValidToken($token);
+		// Si l'utilisateur est authentifié, rediriger vers regatta
+		/** @var User|null $user */
+		$user = $this->getUser();
 
-		if (!$magicLink || !$magicLink->isValid()) {
-			$this->addFlash('error', '❌ Ce lien est invalide ou a expiré. Demandez un nouveau lien.');
-			return $this->redirectToRoute('app_login');
+		if ($user) {
+			// Mettre à jour le dernier login
+			$user->setLastLoginAt(new \DateTimeImmutable());
+			$this->entityManager->flush();
+
+			// Vérifier s'il y a une invitation en attente
+			$session = $request->getSession();
+			$pendingInvitationToken = $session->get('pending_invitation_token');
+			if ($pendingInvitationToken) {
+				$session->remove('pending_invitation_token');
+				return $this->redirectToRoute('app_regatta_accept_invitation', ['token' => $pendingInvitationToken]);
+			}
+
+			return $this->redirectToRoute('app_regatta');
 		}
 
-		// Marquer le lien comme utilisé
-		$magicLink->setUsed(true);
-		$this->entityManager->flush();
-
-		// Mettre à jour le dernier login
-		$user = $magicLink->getUser();
-		$user->setLastLoginAt(new \DateTimeImmutable());
-		$this->entityManager->flush();
-
-		// Créer la session
-		$session = $request->getSession();
-		$session->set('user_id', $user->getId());
-		$session->set('authenticated', true);
-		$session->set('auth_time', time());
-
-		$this->addFlash('success', sprintf(
-			'✅ Bienvenue %s !',
-			$user->getDisplayName() ?? 'sur Doc2Sail'
-		));
-
-		return $this->redirectToRoute('app_regatta');
+		// Sinon, rediriger vers login
+		$this->addFlash('error', '❌ Ce lien est invalide ou a expiré.');
+		return $this->redirectToRoute('app_login');
 	}
 
 	#[Route('/logout', name: 'app_logout')]
 	public function logout(Request $request): Response
 	{
-		$request->getSession()->invalidate();
-		$this->addFlash('info', 'Vous avez été déconnecté.');
-		return $this->redirectToRoute('app_home');
-	}
-
-	private function isAuthenticated(): bool
-	{
-		$session = $this->container->get('request_stack')->getCurrentRequest()?->getSession();
-		return $session && $session->get('authenticated', false) === true;
+		// Cette méthode sera interceptée par le firewall Symfony
+		// Le logout est géré automatiquement dans security.yaml
+		throw new \LogicException('This method should be intercepted by the logout key on your firewall.');
 	}
 }

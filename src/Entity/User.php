@@ -6,10 +6,11 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+class User implements UserInterface
 {
 	#[ORM\Id]
 	#[ORM\GeneratedValue]
@@ -17,7 +18,9 @@ class User
 	private ?int $id = null;
 
 	#[ORM\Column(length: 255, unique: true)]
-	private ?string $emailHash = null; // Email hashé (Argon2id)	#[ORM\Column(length: 100, nullable: true)]
+	private ?string $emailHash = null; // Email hashé (Argon2id)
+
+	#[ORM\Column(length: 100, nullable: true)]
 	private ?string $displayName = null; // Nom d'affichage optionnel (ex: "Skipper Alpha")
 
 	#[ORM\Column]
@@ -32,9 +35,16 @@ class User
 	#[ORM\OneToMany(targetEntity: Regatta::class, mappedBy: 'owner', cascade: ['persist', 'remove'])]
 	private Collection $regattas;
 
+	/**
+	 * @var Collection<int, Regatta>
+	 */
+	#[ORM\ManyToMany(targetEntity: Regatta::class, mappedBy: 'coOwners')]
+	private Collection $sharedRegattas;
+
 	public function __construct()
 	{
 		$this->regattas = new ArrayCollection();
+		$this->sharedRegattas = new ArrayCollection();
 		$this->createdAt = new \DateTimeImmutable();
 	}
 
@@ -132,5 +142,51 @@ class User
 		}
 
 		return $this;
+	}
+
+	/**
+	 * @return Collection<int, Regatta>
+	 */
+	public function getSharedRegattas(): Collection
+	{
+		return $this->sharedRegattas;
+	}
+
+	public function addSharedRegatta(Regatta $regatta): static
+	{
+		if (!$this->sharedRegattas->contains($regatta)) {
+			$this->sharedRegattas->add($regatta);
+			$regatta->addCoOwner($this);
+		}
+
+		return $this;
+	}
+
+	public function removeSharedRegatta(Regatta $regatta): static
+	{
+		if ($this->sharedRegattas->removeElement($regatta)) {
+			$regatta->removeCoOwner($this);
+		}
+
+		return $this;
+	}
+
+	// ===== Méthodes UserInterface pour Symfony Security =====
+
+	public function getUserIdentifier(): string
+	{
+		// L'ID est l'identifiant unique de l'utilisateur
+		return (string) $this->id;
+	}
+
+	public function getRoles(): array
+	{
+		// Tous les utilisateurs authentifiés ont le rôle USER
+		return ['ROLE_USER'];
+	}
+
+	public function eraseCredentials(): void
+	{
+		// Rien à effacer car on n'utilise pas de mot de passe en clair
 	}
 }
