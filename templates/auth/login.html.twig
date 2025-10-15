@@ -3,7 +3,9 @@
 {% block title %}Connexion - Doc2Sail{% endblock %}
 
 {% block body %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-sky-50 px-4">
+{% include '_navbar.html.twig' %}
+
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 px-4">
     <div class="max-w-md w-full">
         <!-- Logo -->
         <div class="text-center mb-8">
@@ -31,9 +33,9 @@
         {% endfor %}
 
         <!-- Formulaire de connexion -->
-        <div class="card bg-base-100 shadow-2xl">
+        <div class="card bg-base-100 shadow-2xl border border-base-300">
             <div class="card-body">
-                <h2 class="card-title text-2xl mb-4">✨ Magic Link</h2>
+                <h2 class="card-title text-2xl mb-4 text-base-content">✨ Magic Link</h2>
                 <p class="text-base-content/70 mb-4">Entrez votre email pour recevoir un lien de connexion sécurisé</p>
                 
                 <form action="{{ path('app_login') }}" method="POST">

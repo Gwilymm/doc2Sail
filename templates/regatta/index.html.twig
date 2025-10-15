@@ -3,25 +3,32 @@
 {% block title %}Doc2Sail - Gestion des Régates{% endblock %}
 
 {% block body %}
+{% include '_navbar.html.twig' %}
+
 <div class="container mx-auto px-4 py-8 max-w-7xl">
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
-                <span class="text-5xl">⛵</span>
+                <span class="text-5xl">⚙️</span>
                 <div>
-                    <h1 class="text-4xl font-bold text-primary">Doc2Sail</h1>
-                    <p class="text-sm text-base-content/70">Gestion des régates</p>
+                    <h1 class="text-4xl font-bold text-primary">Gestion des régates</h1>
                 </div>
             </div>
             
-            <div class="flex gap-2">
+            <!-- Desktop buttons - hidden on mobile -->
+            <div class="hidden md:flex gap-2">
                 <a href="{{ path('app_logout') }}" class="btn btn-ghost btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     Déconnexion
                 </a>
-                <button onclick="createRegattaModal.showModal()" class="btn btn-primary btn-sm">Nouvelle régate</button>
+                <button onclick="createRegattaModal.showModal()" class="btn btn-primary btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nouvelle régate
+                </button>
             </div>
         </div>
     </div>
@@ -57,6 +64,21 @@
             </div>
         {% endfor %}
     </div>
+</div>
+
+<!-- FAB (Floating Action Button) - Visible only on mobile -->
+<div class="md:hidden">
+    <button onclick="createRegattaModal.showModal()" class="btn btn-lg btn-circle btn-primary shadow-xl fixed bottom-6 right-6 z-50">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+    </button>
 </div>
 
 <dialog id="createRegattaModal" class="modal">

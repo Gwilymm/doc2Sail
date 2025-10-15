@@ -3,6 +3,8 @@
 {% block title %}Doc2Sail - {{ regatta.name }}{% endblock %}
 
 {% block body %}
+{% include '_navbar.html.twig' %}
+
 <div class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document" data-document-regatta-id-value="{{ regatta.id }}" data-document-default-category-value="{{ defaultCategory }}">
     <!-- Header -->
     <div class="mb-8">
@@ -15,7 +17,8 @@
                 </div>
             </div>
             
-            <div class="flex gap-2">
+            <!-- Desktop buttons - hidden on mobile -->
+            <div class="hidden md:flex gap-2">
                 <button onclick="inviteCoOwnerModal.showModal()" class="btn btn-accent btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -28,14 +31,11 @@
                     </svg>
                     Retour aux régates
                 </a>
-                </a>
             </div>
         </div>
         
-        <!-- Search Bar -->
-        <div class="form-control">
-            <input type="text" id="searchInput" placeholder="🔍 Rechercher un document..." class="input input-bordered w-full" />
-        </div>
+        <!-- Category Filter -->
+      
     </div>
 
     <!-- Public URL Share -->
@@ -141,92 +141,116 @@
             <span class="badge badge-primary" id="documentCount">{{ documentsCount }}</span>
         </h2>
     </div>
+        <div class="card bg-base-100 shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="text-sm font-semibold mb-3">🔍 Filtrer par catégorie</h3>
+                <div id="categoryFilters" class="flex flex-wrap gap-2">
+                    {% for category in documentsByCategory|keys %}
+                        <label class="cursor-pointer">
+                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" onchange="filterCategories()">
+                            <span class="text-sm">{{ category }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
 
     <div id="documentsGrid" class="space-y-8">
-        {% for category, documents in documentsByCategory %}
-            <div class="space-y-4 category-section" data-category="{{ category }}">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-semibold">{{ category }}</h3>
-                    <span class="badge badge-outline">{{ documents|length }} document{% if documents|length > 1 %}s{% endif %}</span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {% for document in documents %}
-                        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow document-card" data-document-id="{{ document.id }}">
-                            <div class="card-body">
-                                <div class="flex items-start justify-between mb-3">
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="badge badge-primary badge-sm">{{ document.category }}</span>
-                                            <h3 class="card-title text-lg">{{ document.name }}</h3>
-                                        </div>
-                                        {% if document.description %}
-                                            <p class="text-sm text-base-content/70 mt-1">{{ document.description }}</p>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="avatar placeholder">
-                                        <div class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
-                                            <span class="text-2xl">
-                                                {% if 'pdf' in document.mimeType %}
-                                                    📄
-                                                {% elseif 'image' in document.mimeType %}
-                                                    🖼️
-                                                {% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
-                                                    📝
-                                                {% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
-                                                    📊
-                                                {% else %}
-                                                    📁
-                                                {% endif %}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="divider my-2"></div>
-
-                                <div class="flex items-center justify-between text-xs text-base-content/70 mb-4">
-                                    <span class="badge badge-outline">{{ document.formattedSize }}</span>
-                                    <span>{{ document.uploadedAt|date('d/m/Y H:i') }}</span>
-                                </div>
-
-                                <div class="card-actions justify-end gap-2">
-                                    <div class="dropdown dropdown-top dropdown-end flex-1">
-                                        <label tabindex="0" class="btn btn-sm btn-outline w-full">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                            </svg>
-                                            Actions
-                                        </label>
-                                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
-                                            <li><a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                                Consulter
-                                            </a></li>
-                                            <li><a href="{{ path('app_document_download', {id: document.id}) }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                </svg>
-                                                Télécharger
-                                            </a></li>
-                                            <li><a class="text-error delete-btn" data-document-id="{{ document.id }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                                Supprimer
-                                            </a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
+        {% for sectionTitle, categoriesInSection in categorySections %}
+            <div class="section-group">
+                <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                    {% if sectionTitle == 'Documents de course' %}
+                        🏆 {{ sectionTitle }}
+                    {% else %}
+                        📋 {{ sectionTitle }}
+                    {% endif %}
+                </h2>
+                
+                {% for category, documents in categoriesInSection %}
+                    <div class="space-y-3 category-section mb-8" data-category="{{ category }}">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold">{{ category }}</h3>
+                            <span class="badge badge-outline">{{ documents|length }} document{% if documents|length > 1 %}s{% endif %}</span>
                         </div>
+                        <div class="space-y-2">
+                            {% for document in documents %}
+                                <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow document-card" data-document-id="{{ document.id }}">
+                                    <div class="card-body p-4">
+                                        <div class="flex items-center gap-4">
+                                            <!-- Icône du fichier -->
+                                            <div class="avatar placeholder flex-shrink-0">
+                                                <div class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
+                                                    <span class="text-2xl">
+                                                        {% if 'pdf' in document.mimeType %}
+                                                            📄
+                                                        {% elseif 'image' in document.mimeType %}
+                                                            🖼️
+                                                        {% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
+                                                            📝
+                                                        {% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
+                                                            📊
+                                                        {% else %}
+                                                            📁
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Informations du document -->
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <span class="badge badge-primary badge-sm">{{ document.category }}</span>
+                                                    <h3 class="font-semibold text-base truncate">{{ document.name }}</h3>
+                                                </div>
+                                                <div class="flex items-center gap-3 text-xs text-base-content/70">
+                                                    <span class="badge badge-outline badge-sm">{{ document.formattedSize }}</span>
+                                                    <span>{{ document.uploadedAt|date('d/m/Y H:i') }}</span>
+                                                    {% if document.description %}
+                                                        <span class="truncate hidden sm:inline">{{ document.description }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+
+                                            <!-- Actions -->
+                                            <div class="flex-shrink-0">
+                                                <div class="dropdown dropdown-end">
+                                                    <label tabindex="0" class="btn btn-sm btn-ghost btn-circle">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                                        </svg>
+                                                    </label>
+                                                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
+                                                        <li><a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            Consulter
+                                                        </a></li>
+                                                        <li><a href="{{ path('app_document_download', {id: document.id}) }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                            </svg>
+                                                            Télécharger
+                                                        </a></li>
+                                                        <li><a class="text-error delete-btn" data-document-id="{{ document.id }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                            Supprimer
+                                                        </a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                     {% endfor %}
                 </div>
             </div>
         {% endfor %}
+        {% endfor %}
+    </div>
 
         <div id="documentsEmptyState" class="text-center py-16 {% if documentsCount > 0 %}hidden{% endif %}">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,6 +260,15 @@
             <p class="text-sm text-base-content/40 mt-2">Uploadez votre premier document ci-dessus</p>
         </div>
     </div>
+</div>
+
+<!-- FAB (Floating Action Button) for Inviting Co-Owner - Visible only on mobile -->
+<div class="md:hidden">
+    <button onclick="inviteCoOwnerModal.showModal()" class="btn btn-lg btn-circle btn-accent shadow-xl fixed bottom-6 right-6 z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg>
+    </button>
 </div>
 
 <!-- Modal Invite Co-Owner -->
@@ -357,6 +390,31 @@
         document.getElementById('toastContainer').appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
+
+    // Category Filter
+    function filterCategories() {
+        const checkboxes = document.querySelectorAll('#categoryFilters input[type="checkbox"]');
+        const selectedCategories = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        // Si aucune checkbox n'est cochée, tout masquer
+        const showAll = selectedCategories.length === 0;
+        
+        document.querySelectorAll('.category-section').forEach(section => {
+            const category = section.getAttribute('data-category');
+            if (showAll) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = selectedCategories.includes(category) ? 'block' : 'none';
+            }
+        });
+    }
+
+    // Initialiser : tout masquer par défaut
+    document.addEventListener('DOMContentLoaded', () => {
+        filterCategories();
+    });
 
     // Invite co-owner
     async function inviteCoOwner() {

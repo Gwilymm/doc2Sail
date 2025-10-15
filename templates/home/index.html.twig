@@ -1,32 +1,59 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Doc2Sail - Gestion documentaire pour régates de voile{% endblock %}
+{% block title %}{{ 'home.title'|trans }}{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50">
+
+
+<div class="min-h-screen bg-base-100">
+    <!-- Language Selector - Fixed Top Right -->
+    <div class="fixed top-4 right-4 z-50">
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-sm btn-ghost gap-2 bg-base-100 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                {{ app.request.locale|upper }}
+            </label>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-2">
+                <li>
+                    <a href="{{ path('app_change_language', {locale: 'fr'}) }}" class="{% if app.request.locale == 'fr' %}active{% endif %}">
+                        🇫🇷 {{ 'language.french'|trans }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('app_change_language', {locale: 'en'}) }}" class="{% if app.request.locale == 'en' %}active{% endif %}">
+                        🇬🇧 {{ 'language.english'|trans }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
     <!-- Hero Section avec animation -->
-    <div class="hero min-h-screen relative overflow-hidden">
+    <div class="hero min-h-screen relative overflow-hidden bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
         <!-- Animated background waves -->
-        <div class="absolute inset-0 opacity-20">
+        <div class="absolute inset-0 opacity-10">
             <svg class="absolute bottom-0 w-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-                <path fill="#0ea5e9" fill-opacity="0.3" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,197.3C1248,203,1344,149,1392,122.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" class="animate-pulse"></path>
+                <path fill="currentColor" class="text-primary" fill-opacity="0.3" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,197.3C1248,203,1344,149,1392,122.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" class="animate-pulse"></path>
             </svg>
         </div>
         
         <div class="hero-content text-center z-10 px-4">
             <div class="max-w-4xl">
-                <div class="mb-8 animate-bounce-slow mask mask-squircle">
+                
+                    <div class="mb-8 animate-bounce-slow mask mask-squircle">
                     <img src="{{ asset('logo.svg') }}" alt="Doc2Sail Logo" class="w-48 h-48 mx-auto drop-shadow-2xl" />
                 </div>
+            
                 <h1 class="text-6xl md:text-7xl font-bold text-primary mb-6 animate-fade-in">
-                    Doc2Sail
+                    {{ 'home.hero.title'|trans }}
                 </h1>
-                <p class="text-2xl md:text-3xl mb-8 text-base-content/80 animate-slide-up">
-                    La solution moderne pour gérer vos documents de régate
+                <p class="text-2xl md:text-3xl mb-8 text-base-content animate-slide-up">
+                    {{ 'home.hero.subtitle'|trans }}
                 </p>
                 <p class="text-lg mb-12 text-base-content/70 max-w-2xl mx-auto animate-slide-up-delayed">
-                    Centralisez, organisez et partagez tous vos documents de voile en toute simplicité. 
-                    Accessible partout, même hors ligne.
+                    {{ 'home.hero.description'|trans }}
                 </p>
                 <div class="flex gap-4 justify-center flex-wrap animate-slide-up-more-delayed">
                     <a href="{{ path('app_regatta') }}" class="btn btn-primary btn-lg gap-2 shadow-xl hover:scale-105 transition-transform">
@@ -34,14 +61,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        Gérer mes régates
+                        {{ 'home.hero.button_manage'|trans }}
                     </a>
                     <a href="{{ path('app_regatta') }}" class="btn btn-outline btn-lg gap-2 hover:scale-105 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        Consulter les documents
+                        {{ 'home.hero.button_view'|trans }}
                     </a>
                 </div>
             </div>
@@ -49,104 +76,108 @@
     </div>
 
     <!-- Features Section -->
-    <div class="container mx-auto px-4 py-20 max-w-7xl">
-        <h2 class="text-4xl font-bold text-center mb-16">
-            Pourquoi choisir Doc2Sail ?
-        </h2>
-        
-        <div class="grid md:grid-cols-3 gap-8">
-            <!-- Feature 1 -->
-            <div class="card bg-base-100 shadow-2xl hover:shadow-blue-200 transition-all duration-300 hover:-translate-y-2">
-                <div class="card-body items-center text-center">
-                    <div class="text-6xl mb-4 animate-bounce">📱</div>
-                    <h3 class="card-title text-2xl mb-3">PWA Mobile</h3>
-                    <p class="text-base-content/70">
-                        Installez l'app sur votre téléphone ou tablette. Fonctionne même hors ligne pour un accès permanent à vos documents.
-                    </p>
-                    <div class="badge badge-primary badge-lg mt-4">Hors ligne</div>
+    <div class="bg-base-200 py-20">
+        <div class="container mx-auto px-4 max-w-7xl">
+            <h2 class="text-4xl font-bold text-center mb-16 text-base-content">
+                {{ 'home.features.title'|trans }}
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-base-300">
+                    <div class="card-body items-center text-center">
+                        <div class="text-6xl mb-4 animate-bounce">📱</div>
+                        <h3 class="card-title text-2xl mb-3">{{ 'home.features.pwa.title'|trans }}</h3>
+                        <p class="text-base-content/70">
+                            {{ 'home.features.pwa.description'|trans }}
+                        </p>
+                        <div class="badge badge-primary badge-lg mt-4">{{ 'home.features.pwa.badge'|trans }}</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Feature 2 -->
-            <div class="card bg-base-100 shadow-2xl hover:shadow-blue-200 transition-all duration-300 hover:-translate-y-2">
-                <div class="card-body items-center text-center">
-                    <div class="text-6xl mb-4 animate-bounce" style="animation-delay: 0.1s">🔐</div>
-                    <h3 class="card-title text-2xl mb-3">Partage Sécurisé</h3>
-                    <p class="text-base-content/70">
-                        Générez des liens uniques et sécurisés pour chaque régate. Partagez uniquement ce qui doit l'être avec votre équipage.
-                    </p>
-                    <div class="badge badge-secondary badge-lg mt-4">Crypté</div>
+                <!-- Feature 2 -->
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-base-300">
+                    <div class="card-body items-center text-center">
+                        <div class="text-6xl mb-4 animate-bounce" style="animation-delay: 0.1s">🔐</div>
+                        <h3 class="card-title text-2xl mb-3">{{ 'home.features.secure.title'|trans }}</h3>
+                        <p class="text-base-content/70">
+                            {{ 'home.features.secure.description'|trans }}
+                        </p>
+                        <div class="badge badge-secondary badge-lg mt-4">{{ 'home.features.secure.badge'|trans }}</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Feature 3 -->
-            <div class="card bg-base-100 shadow-2xl hover:shadow-blue-200 transition-all duration-300 hover:-translate-y-2">
-                <div class="card-body items-center text-center">
-                    <div class="text-6xl mb-4 animate-bounce" style="animation-delay: 0.2s">🗂️</div>
-                    <h3 class="card-title text-2xl mb-3">Organisation Simple</h3>
-                    <p class="text-base-content/70">
-                        Une régate = un dossier. Upload drag & drop, recherche instantanée, catégorisation automatique de vos documents.
-                    </p>
-                    <div class="badge badge-accent badge-lg mt-4">Intuitif</div>
+                <!-- Feature 3 -->
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-base-300">
+                    <div class="card-body items-center text-center">
+                        <div class="text-6xl mb-4 animate-bounce" style="animation-delay: 0.2s">🗂️</div>
+                        <h3 class="card-title text-2xl mb-3">{{ 'home.features.organize.title'|trans }}</h3>
+                        <p class="text-base-content/70">
+                            {{ 'home.features.organize.description'|trans }}
+                        </p>
+                        <div class="badge badge-accent badge-lg mt-4">{{ 'home.features.organize.badge'|trans }}</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Sailing Images Section -->
-    <div class="bg-gradient-to-r from-blue-600 to-sky-500 py-20">
+    <div class="bg-gradient-to-r from-primary to-secondary py-20">
         <div class="container mx-auto px-4 max-w-7xl">
-            <h2 class="text-4xl font-bold text-center mb-12 text-white">
-                Conçu par des marins, pour des marins
+            <h2 class="text-4xl font-bold text-center mb-12 text-primary-content">
+                {{ 'home.sailing.title'|trans }}
             </h2>
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center text-white">
+                <div class="text-center text-primary-content">
                     <div class="text-7xl mb-4">🏆</div>
-                    <h3 class="text-2xl font-bold mb-2">Courses</h3>
-                    <p class="opacity-90">Instructions de course, horaires, tracés GPS</p>
+                    <h3 class="text-2xl font-bold mb-2">{{ 'home.sailing.races.title'|trans }}</h3>
+                    <p class="opacity-90">{{ 'home.sailing.races.description'|trans }}</p>
                 </div>
-                <div class="text-center text-white">
+                <div class="text-center text-primary-content">
                     <div class="text-7xl mb-4">📋</div>
-                    <h3 class="text-2xl font-bold mb-2">Règlements</h3>
-                    <p class="opacity-90">Avis de course, règles de classe, règlement général</p>
+                    <h3 class="text-2xl font-bold mb-2">{{ 'home.sailing.rules.title'|trans }}</h3>
+                    <p class="opacity-90">{{ 'home.sailing.rules.description'|trans }}</p>
                 </div>
-                <div class="text-center text-white">
+                <div class="text-center text-primary-content">
                     <div class="text-7xl mb-4">📊</div>
-                    <h3 class="text-2xl font-bold mb-2">Résultats</h3>
-                    <p class="opacity-90">Classements, temps, pénalités, protestations</p>
+                    <h3 class="text-2xl font-bold mb-2">{{ 'home.sailing.results.title'|trans }}</h3>
+                    <p class="opacity-90">{{ 'home.sailing.results.description'|trans }}</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- How it works -->
-    <div class="container mx-auto px-4 py-20 max-w-7xl">
-        <h2 class="text-4xl font-bold text-center mb-16">
-            Comment ça marche ?
-        </h2>
-        
-        <div class="flex flex-col gap-8 max-w-3xl mx-auto">
-            <div class="flex gap-6 items-start">
-                <div class="badge badge-primary badge-lg text-2xl w-16 h-16 flex-shrink-0">1</div>
-                <div>
-                    <h3 class="text-2xl font-bold mb-2">Créez votre régate</h3>
-                    <p class="text-base-content/70">Ajoutez le nom, les dates et une description. Un dossier dédié est automatiquement créé.</p>
-                </div>
-            </div>
+    <div class="bg-base-100 py-20">
+        <div class="container mx-auto px-4 max-w-7xl">
+            <h2 class="text-4xl font-bold text-center mb-16 text-base-content">
+                {{ 'home.howto.title'|trans }}
+            </h2>
             
-            <div class="flex gap-6 items-start">
-                <div class="badge badge-secondary badge-lg text-2xl w-16 h-16 flex-shrink-0">2</div>
-                <div>
-                    <h3 class="text-2xl font-bold mb-2">Uploadez vos documents</h3>
-                    <p class="text-base-content/70">Glissez-déposez vos PDF, images, tableurs directement depuis votre ordinateur ou téléphone.</p>
+            <div class="flex flex-col gap-8 max-w-3xl mx-auto">
+                <div class="flex gap-6 items-start">
+                    <div class="badge badge-primary badge-lg text-2xl w-16 h-16 flex-shrink-0 flex items-center justify-center">1</div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-base-content">{{ 'home.howto.step1.title'|trans }}</h3>
+                        <p class="text-base-content/70">{{ 'home.howto.step1.description'|trans }}</p>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="flex gap-6 items-start">
-                <div class="badge badge-accent badge-lg text-2xl w-16 h-16 flex-shrink-0">3</div>
-                <div>
-                    <h3 class="text-2xl font-bold mb-2">Partagez l'URL sécurisée</h3>
-                    <p class="text-base-content/70">Copiez le lien unique et partagez-le avec votre équipage. Ils auront accès aux documents en lecture seule.</p>
+                
+                <div class="flex gap-6 items-start">
+                    <div class="badge badge-secondary badge-lg text-2xl w-16 h-16 flex-shrink-0 flex items-center justify-center">2</div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-base-content">{{ 'home.howto.step2.title'|trans }}</h3>
+                        <p class="text-base-content/70">{{ 'home.howto.step2.description'|trans }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-6 items-start">
+                    <div class="badge badge-accent badge-lg text-2xl w-16 h-16 flex-shrink-0 flex items-center justify-center">3</div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-base-content">{{ 'home.howto.step3.title'|trans }}</h3>
+                        <p class="text-base-content/70">{{ 'home.howto.step3.description'|trans }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -155,16 +186,16 @@
     <!-- CTA Section -->
     <div class="bg-base-200 py-20">
         <div class="container mx-auto px-4 text-center">
-            <h2 class="text-4xl font-bold mb-6">Prêt à embarquer ?</h2>
+            <h2 class="text-4xl font-bold mb-6">{{ 'home.cta.title'|trans }}</h2>
             <p class="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
-                Commencez à organiser vos documents de régate dès maintenant. Simple, rapide et gratuit.
+                {{ 'home.cta.description'|trans }}
             </p>
             <div class="flex gap-4 justify-center flex-wrap">
                 <a href="{{ path('app_regatta') }}" class="btn btn-primary btn-lg gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    Créer ma première régate
+                    {{ 'home.cta.button'|trans }}
                 </a>
             </div>
         </div>
@@ -177,10 +208,10 @@
             <p class="font-bold text-xl">
                 Doc2Sail
             </p> 
-            <p class="text-sm text-base-content/70">Gestion documentaire pour régates de voile</p>
+            <p class="text-sm text-base-content/70">{{ 'home.footer.tagline'|trans }}</p>
         </div>
         <div>
-            <p class="text-sm">{{ "now"|date("Y") }} - Mise a l'eau par la BHN Corp. </p>
+            <p class="text-sm">{{ "now"|date("Y") }} - {{ 'home.footer.copyright'|trans }}</p>
         </div>
     </footer>
 </div>
