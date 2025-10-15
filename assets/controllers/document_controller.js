@@ -97,16 +97,16 @@ export default class extends Controller {
 
 		const name = nameInput ? nameInput.value.trim() : '';
 		const description = descriptionInput ? descriptionInput.value : '';
-		const category = categoryInput ? categoryInput.value.trim() : '';
+		let category = categoryInput ? categoryInput.value.trim() : '';
 
 		if (!name) {
 			this.showToast('Le nom du document est obligatoire', 'error');
 			return;
 		}
 
+		// Si la catégorie est vide, utiliser la valeur par défaut
 		if (!category) {
-			this.showToast('La catégorie est obligatoire', 'error');
-			return;
+			category = this.hasDefaultCategoryValue ? this.defaultCategoryValue : 'Autre';
 		}
 
 		const formData = new FormData();

@@ -61,10 +61,9 @@ class DocumentController extends AbstractController
 			$document = new Document();
 			$document->setName($name ?: $file->getClientOriginalName());
 			$document->setDescription($description);
-			$document->setCategory($category);
-			$document->setFile($file);
-
-			// Associer à une régate si spécifié
+			// Si la catégorie est vide, utiliser la valeur par défaut
+			$document->setCategory($category ?: Document::DEFAULT_CATEGORY);
+			$document->setFile($file);			// Associer à une régate si spécifié
 			if ($regattaId) {
 				$regatta = $this->entityManager->getRepository(Regatta::class)->find($regattaId);
 				if ($regatta) {
