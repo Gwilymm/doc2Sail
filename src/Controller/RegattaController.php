@@ -40,20 +40,19 @@ class RegattaController extends AbstractController
     #[Route('/regatta', name: 'app_regatta')]
     public function index(Request $request): Response
     {
-        dump('=== REGATTA INDEX CALLED ===');
-        dump('Is Authenticated: ' . ($this->getUser() ? 'YES' : 'NO'));
+
+
 
         /** @var User|null $currentUser */
         /** @var User|null $currentUser */
         $currentUser = $this->getUser();
 
-        if ($currentUser) {
-            dump('Current User ID: ' . $currentUser->getId());
-            dump('Current User Roles:', $currentUser->getRoles());
-            dump('Current User Identifier:', $currentUser->getUserIdentifier());
-        } else {
-            dump('NO USER - SHOULD BE REDIRECTED BY SECURITY');
+        // if not authenticated, should be redirected by security
+        if (!$currentUser) {
+            return $this->redirectToRoute('app_login');
         }
+
+
 
         // Symfony Security gère déjà l'accès avec access_control
         // Pas besoin de vérification manuelle ici
@@ -264,9 +263,38 @@ class RegattaController extends AbstractController
             $documentsByCategory[$category][] = $document;
         }
 
+        // Organiser les catégories par sections
+        $courseCategories = ['AC', 'IC', 'Modifications'];
+        $otherCategories = ['Gestion de course', 'Jury', 'Résultats'];
+
+        $categorySections = [];
+
+        // Section "Documents de course"
+        $courseDocuments = [];
+        foreach ($courseCategories as $cat) {
+            if (isset($documentsByCategory[$cat])) {
+                $courseDocuments[$cat] = $documentsByCategory[$cat];
+            }
+        }
+        if (!empty($courseDocuments)) {
+            $categorySections['Documents de course'] = $courseDocuments;
+        }
+
+        // Section "Autres documents"
+        $otherDocuments = [];
+        foreach ($otherCategories as $cat) {
+            if (isset($documentsByCategory[$cat])) {
+                $otherDocuments[$cat] = $documentsByCategory[$cat];
+            }
+        }
+        if (!empty($otherDocuments)) {
+            $categorySections['Autres documents'] = $otherDocuments;
+        }
+
         return $this->render('regatta/documents.html.twig', [
             'regatta' => $regatta,
             'documentsByCategory' => $documentsByCategory,
+            'categorySections' => $categorySections,
             'documentsCount' => count($documents),
             'documentCategories' => Document::AVAILABLE_CATEGORIES,
             'defaultCategory' => Document::DEFAULT_CATEGORY,
@@ -413,9 +441,59 @@ class RegattaController extends AbstractController
             throw $this->createNotFoundException('Cette régate n\'existe pas ou n\'est plus accessible.');
         }
 
+        // Grouper les documents par catégorie
+        $documents = $regatta->getDocuments();
+        $documentsByCategory = [];
+
+        foreach ($documents as $document) {
+            $category = $document->getCategory();
+            if (!isset($documentsByCategory[$category])) {
+                $documentsByCategory[$category] = [];
+            }
+            $documentsByCategory[$category][] = $document;
+        }
+
+        // Trier les catégories selon l'ordre défini
+        $sortedDocumentsByCategory = [];
+        foreach (Document::AVAILABLE_CATEGORIES as $category) {
+            if (isset($documentsByCategory[$category])) {
+                $sortedDocumentsByCategory[$category] = $documentsByCategory[$category];
+            }
+        }
+
+        // Organiser les catégories par sections
+        $courseCategories = ['AC', 'IC', 'Modifications'];
+        $otherCategories = ['Gestion de course', 'Jury', 'Résultats'];
+
+        $categorySections = [];
+
+        // Section "Documents de course"
+        $courseDocuments = [];
+        foreach ($courseCategories as $cat) {
+            if (isset($sortedDocumentsByCategory[$cat])) {
+                $courseDocuments[$cat] = $sortedDocumentsByCategory[$cat];
+            }
+        }
+        if (!empty($courseDocuments)) {
+            $categorySections['Documents de course'] = $courseDocuments;
+        }
+
+        // Section "Autres documents"
+        $otherDocuments = [];
+        foreach ($otherCategories as $cat) {
+            if (isset($sortedDocumentsByCategory[$cat])) {
+                $otherDocuments[$cat] = $sortedDocumentsByCategory[$cat];
+            }
+        }
+        if (!empty($otherDocuments)) {
+            $categorySections['Autres documents'] = $otherDocuments;
+        }
+
         return $this->render('regatta/public.html.twig', [
             'regatta' => $regatta,
-            'documents' => $regatta->getDocuments(),
+            'documents' => $documents,
+            'documentsByCategory' => $sortedDocumentsByCategory,
+            'categorySections' => $categorySections,
         ]);
     }
 

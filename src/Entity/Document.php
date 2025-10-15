@@ -14,16 +14,12 @@ class Document
 	public const DEFAULT_CATEGORY = 'Autre';
 
 	public const AVAILABLE_CATEGORIES = [
-		'Administration',
-		'Navigation',
-		'Securite',
-		'Equipage',
-		'Finances',
-		'Technique',
-		'Communication',
-		'Logistique',
-		'Sante',
-		'Autre',
+		'AC',
+		'IC',
+		'Modifications',
+		'Gestion de course',
+		'Jury',
+		'Résultats',
 	];
 	#[ORM\Id]
 	#[ORM\GeneratedValue]

@@ -1,0 +1,62 @@
+# Messages français
+home:
+    title: "Doc2Sail - Gestion documentaire pour régates de voile"
+    hero:
+        title: "Doc2Sail"
+        subtitle: "La solution moderne pour gérer vos documents de régate"
+        description: "Centralisez, organisez et partagez tous vos documents de voile en toute simplicité. Accessible partout, même hors ligne."
+        button_manage: "Gérer mes régates"
+        button_view: "Consulter les documents"
+
+    features:
+        title: "Pourquoi choisir Doc2Sail ?"
+        pwa:
+            title: "PWA Mobile"
+            description: "Installez l'app sur votre téléphone ou tablette. Fonctionne même hors ligne pour un accès permanent à vos documents."
+            badge: "Hors ligne"
+        secure:
+            title: "Partage Sécurisé"
+            description: "Générez des liens uniques et sécurisés pour chaque régate. Partagez uniquement ce qui doit l'être avec votre équipage."
+            badge: "Crypté"
+        organize:
+            title: "Organisation Simple"
+            description: "Une régate = un dossier. Upload drag & drop, recherche instantanée, catégorisation automatique de vos documents."
+            badge: "Intuitif"
+
+    sailing:
+        title: "Conçu par des marins, pour des marins"
+        races:
+            title: "Courses"
+            description: "Instructions de course, horaires, tracés GPS"
+        rules:
+            title: "Règlements"
+            description: "Avis de course, règles de classe, règlement général"
+        results:
+            title: "Résultats"
+            description: "Classements, temps, pénalités, protestations"
+
+    howto:
+        title: "Comment ça marche ?"
+        step1:
+            title: "Créez votre régate"
+            description: "Ajoutez le nom, les dates et une description. Un dossier dédié est automatiquement créé."
+        step2:
+            title: "Uploadez vos documents"
+            description: "Glissez-déposez vos PDF, images, tableurs directement depuis votre ordinateur ou téléphone."
+        step3:
+            title: "Partagez l'URL sécurisée"
+            description: "Copiez le lien unique et partagez-le avec votre équipage. Ils auront accès aux documents en lecture seule."
+
+    cta:
+        title: "Prêt à embarquer ?"
+        description: "Commencez à organiser vos documents de régate dès maintenant. Simple, rapide et gratuit."
+        button: "Créer ma première régate"
+
+    footer:
+        tagline: "Gestion documentaire pour régates de voile"
+        copyright: "Mise à l'eau par la BHN Corp."
+
+language:
+    french: "Français"
+    english: "English"
+    select: "Langue"

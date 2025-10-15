@@ -3,7 +3,3 @@
 @plugin "daisyui" {
     themes: light --default, dark --prefersdark, cupcake;
 }
-
-body {
-    background-color: lightgray;
-}
