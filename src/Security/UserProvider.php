@@ -49,11 +49,21 @@ class UserProvider implements UserProviderInterface
 	 */
 	public function loadUserByIdentifier(string $identifier): UserInterface
 	{
+		dump('=== UserProvider::loadUserByIdentifier CALLED ===');
+		dump('Identifier: ' . $identifier);
+
 		$user = $this->userRepository->find($identifier);
 
 		if (!$user) {
+			dump('USER NOT FOUND!');
 			throw new UserNotFoundException(sprintf('User with identifier "%s" not found.', $identifier));
 		}
+
+		dump('User loaded:', [
+			'id' => $user->getId(),
+			'roles' => $user->getRoles(),
+			'identifier' => $user->getUserIdentifier()
+		]);
 
 		return $user;
 	}
