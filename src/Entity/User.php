@@ -20,6 +20,9 @@ class User implements UserInterface
 	#[ORM\Column(length: 255, unique: true)]
 	private ?string $emailHash = null; // Email hashé (Argon2id)
 
+	#[ORM\Column(type: 'json')]
+	private array $roles = [];
+
 	#[ORM\Column(length: 100, nullable: true)]
 	private ?string $displayName = null; // Nom d'affichage optionnel (ex: "Skipper Alpha")
 
@@ -181,8 +184,17 @@ class User implements UserInterface
 
 	public function getRoles(): array
 	{
-		// Tous les utilisateurs authentifiés ont le rôle USER
-		return ['ROLE_USER'];
+		$roles = $this->roles;
+		// Garantir que chaque utilisateur a au moins ROLE_USER
+		$roles[] = 'ROLE_USER';
+
+		return array_unique($roles);
+	}
+
+	public function setRoles(array $roles): static
+	{
+		$this->roles = $roles;
+		return $this;
 	}
 
 	public function eraseCredentials(): void

@@ -33,6 +33,13 @@
             // Register service worker even in HTTP for testing (disabled by default in production)
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
+                    // Forcer la mise à jour du Service Worker
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        registrations.forEach(reg => {
+                            reg.update(); // Force la mise à jour
+                        });
+                    });
+
                     navigator.serviceWorker.register('/sw.js')
                         .then(reg => {
                             console.log('✅ Service Worker enregistré', reg);

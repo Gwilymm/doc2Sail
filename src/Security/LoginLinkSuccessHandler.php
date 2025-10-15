@@ -29,10 +29,13 @@ class LoginLinkSuccessHandler implements AuthenticationSuccessHandlerInterface
 		// Vérifier s'il y a une invitation en attente
 		$session = $request->getSession();
 		$pendingInvitationToken = $session->get('pending_invitation_token');
+
 		if ($pendingInvitationToken) {
 			$session->remove('pending_invitation_token');
 			return new RedirectResponse(
-				$this->urlGenerator->generate('app_regatta_accept_invitation', ['token' => $pendingInvitationToken])
+				$this->urlGenerator->generate('app_regatta_accept_invitation', [
+					'token' => $pendingInvitationToken
+				])
 			);
 		}
 
