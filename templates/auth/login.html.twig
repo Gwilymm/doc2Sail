@@ -36,7 +36,7 @@
                 <h2 class="card-title text-2xl mb-4">✨ Magic Link</h2>
                 <p class="text-base-content/70 mb-4">Entrez votre email pour recevoir un lien de connexion sécurisé</p>
                 
-                <form action="{{ path('app_magic_link_request') }}" method="POST">
+                <form action="{{ path('app_login') }}" method="POST">
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Adresse Email</span>
@@ -80,7 +80,7 @@
                     </div>
                 </form>
 
-                <div class="divider mt-6">Accès public</div>
+                
                 
                 <a href="{{ path('app_home') }}" class="btn btn-ghost btn-block gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

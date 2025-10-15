@@ -1,8 +1,9 @@
-const CACHE_NAME = 'doc2sail-v1';
+const CACHE_NAME = 'doc2sail-v2'; // Changé pour forcer le rafraîchissement
 const urlsToCache = [
-	'/',
-	'/admin',
 	'/manifest.json'
+	// Temporairement désactivé le cache des routes pour debug
+	// '/',
+	// '/admin',
 ];
 
 // Install Service Worker
@@ -47,11 +48,18 @@ self.addEventListener('fetch', (event) => {
 		return;
 	}
 
+	// Ne pas intercepter les requêtes d'authentification
+	if (event.request.url.includes('/login') ||
+		event.request.url.includes('/regatta') ||
+		event.request.url.includes('/logout')) {
+		return; // Laisser passer sans cache
+	}
+
 	event.respondWith(
 		fetch(event.request)
 			.then((response) => {
-				// Si la requête réussit, mettre en cache
-				if (response && response.status === 200) {
+				// Ne mettre en cache que les réponses 200 (pas les redirections 302)
+				if (response && response.status === 200 && response.type === 'basic') {
 					const responseToCache = response.clone();
 					caches.open(CACHE_NAME).then((cache) => {
 						cache.put(event.request, responseToCache);
