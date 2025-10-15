@@ -85,8 +85,45 @@ self.addEventListener('fetch', (event) => {
 						});
 					}
 					return response;
+				}).catch(err => {
+					console.warn('⚠️ [SW Public] Échec téléchargement document:', err);
+					// Retourner une erreur gracieuse
+					return new Response('Document non disponible hors ligne', {
+						status: 503,
+						statusText: 'Service Unavailable',
+						headers: { 'Content-Type': 'text/plain' }
+					});
 				});
 			})
+		);
+		return;
+	}
+
+	// Routes de visualisation de documents : Network First avec fallback cache
+	if (url.pathname.startsWith('/document/') && url.pathname.includes('/view')) {
+		event.respondWith(
+			fetch(request)
+				.then(response => {
+					// Mettre en cache la page de visualisation
+					if (response && response.status === 200) {
+						const responseToCache = response.clone();
+						caches.open(STATIC_CACHE).then(cache => {
+							cache.put(request, responseToCache);
+						});
+					}
+					return response;
+				})
+				.catch(() => {
+					// Si pas de réseau, utiliser le cache
+					return caches.match(request).then(cachedResponse => {
+						if (cachedResponse) {
+							console.log('📦 [SW Public] Page de visualisation depuis cache (hors ligne)');
+							return cachedResponse;
+						}
+						// Si pas en cache, rediriger vers la page de régate
+						return Response.redirect(url.origin + '/r/', 302);
+					});
+				})
 		);
 		return;
 	}
@@ -137,6 +174,7 @@ self.addEventListener('fetch', (event) => {
 						const responseToCache = response.clone();
 						caches.open(STATIC_CACHE).then(cache => {
 							cache.put(request, responseToCache);
+							console.log('💾 [SW Public] Page régate mise en cache:', url.pathname);
 						});
 					}
 					return response;
@@ -145,13 +183,32 @@ self.addEventListener('fetch', (event) => {
 					// Si pas de réseau, utiliser le cache
 					return caches.match(request).then(cachedResponse => {
 						if (cachedResponse) {
-							console.log('📦 [SW Public] Page depuis cache (hors ligne)');
+							console.log('📦 [SW Public] Page régate depuis cache (hors ligne)');
 							return cachedResponse;
 						}
 						// Retourner une page d'erreur hors ligne
 						return new Response(
-							'<html><body><h1>Mode hors ligne</h1><p>Cette page n\'est pas disponible hors ligne.</p></body></html>',
-							{ headers: { 'Content-Type': 'text/html' } }
+							`<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Mode hors ligne</title>
+	<style>
+		body { font-family: system-ui; text-align: center; padding: 50px; }
+		h1 { color: #ef4444; }
+	</style>
+</head>
+<body>
+	<h1>📡 Mode hors ligne</h1>
+	<p>Cette page n'est pas disponible hors ligne.</p>
+	<p>Veuillez vous connecter à Internet ou télécharger la régate pour consultation hors ligne.</p>
+</body>
+</html>`,
+							{ 
+								status: 503,
+								headers: { 'Content-Type': 'text/html; charset=utf-8' } 
+							}
 						);
 					});
 				})
@@ -228,29 +285,26 @@ self.addEventListener('message', (event) => {
 // ==========================================
 
 /**
- * Télécharger et mettre en cache tous les documents
+ * Télécharger et mettre en cache tous les documents d'une régate spécifique
  */
 async function cacheAllDocuments(documents, regattaToken) {
-	console.log(`📥 [SW Public] Téléchargement de ${documents.length} documents...`);
+	console.log(`📥 [SW Public] Téléchargement de ${documents.length} documents pour la régate ${regattaToken}...`);
 
 	const cache = await caches.open(DOCUMENTS_CACHE);
+	const staticCache = await caches.open(STATIC_CACHE);
 	const urlsToCache = [];
 
-	// Préparer les URLs des documents
+	// Préparer les URLs des documents (uniquement filePath)
 	documents.forEach(doc => {
 		if (doc.filePath) {
 			urlsToCache.push(doc.filePath);
 		}
-		if (doc.viewUrl) {
-			urlsToCache.push(doc.viewUrl);
-		}
-		if (doc.downloadUrl) {
-			urlsToCache.push(doc.downloadUrl);
-		}
 	});
 
-	// Télécharger tous les documents en parallèle (par batch de 5)
-	const batchSize = 5;
+	console.log(`📦 [SW Public] URLs à télécharger:`, urlsToCache);
+
+	// Télécharger tous les documents en parallèle (par batch de 3)
+	const batchSize = 3;
 	for (let i = 0; i < urlsToCache.length; i += batchSize) {
 		const batch = urlsToCache.slice(i, i + batchSize);
 		await Promise.all(
@@ -258,7 +312,10 @@ async function cacheAllDocuments(documents, regattaToken) {
 				fetch(url)
 					.then(response => {
 						if (response && response.status === 200) {
+							console.log(`✅ [SW Public] Téléchargé: ${url}`);
 							return cache.put(url, response);
+						} else {
+							console.warn(`⚠️ [SW Public] Statut ${response.status} pour ${url}`);
 						}
 					})
 					.catch(err => {
@@ -280,7 +337,22 @@ async function cacheAllDocuments(documents, regattaToken) {
 		});
 	}
 
-	// Sauvegarder les métadonnées dans le cache
+	// Mettre en cache les pages de visualisation pour chaque document
+	console.log('📄 [SW Public] Mise en cache des pages de visualisation...');
+	for (const doc of documents) {
+		try {
+			const viewUrl = `/document/${doc.id}/view`;
+			const response = await fetch(viewUrl);
+			if (response && response.status === 200) {
+				await staticCache.put(viewUrl, response);
+				console.log(`✅ [SW Public] Page de visualisation mise en cache: ${viewUrl}`);
+			}
+		} catch (err) {
+			console.warn(`⚠️ [SW Public] Erreur mise en cache page visualisation doc ${doc.id}:`, err);
+		}
+	}
+
+	// Sauvegarder les métadonnées dans le cache avec le token de la régate
 	const metadata = {
 		regattaToken,
 		documents,
@@ -295,7 +367,7 @@ async function cacheAllDocuments(documents, regattaToken) {
 		})
 	);
 
-	console.log('✅ [SW Public] Tous les documents sont en cache');
+	console.log(`✅ [SW Public] Tous les documents de la régate ${regattaToken} sont en cache`);
 }
 
 /**

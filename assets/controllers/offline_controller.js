@@ -112,15 +112,11 @@ export default class extends Controller {
 				}
 			};
 
-			// Préparer les données des documents pour le SW
-			const documents = this.documentsValue.map(doc => ({
-				id: doc.id,
-				filePath: doc.filePath,
-				viewUrl: `/document/${doc.id}/view`,
-				downloadUrl: `/document/${doc.id}/download`
-			}));
-
-			console.log(`📥 Lancement du téléchargement de ${documents.length} documents...`);
+		// Préparer les données des documents pour le SW
+		const documents = this.documentsValue.map(doc => ({
+			id: doc.id,
+			filePath: doc.filePath
+		}));			console.log(`📥 Lancement du téléchargement de ${documents.length} documents...`);
 
 			navigator.serviceWorker.controller.postMessage(
 				{
