@@ -6,6 +6,7 @@ use App\Entity\Document;
 use App\Entity\Regatta;
 use App\Repository\DocumentRepository;
 use App\Service\DocumentUploader;
+use App\Service\RegattaNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -23,6 +24,7 @@ class DocumentController extends AbstractController
 		private DocumentRepository $documentRepository,
 		private DocumentUploader $documentUploader,
 		private ValidatorInterface $validator,
+		private RegattaNotificationService $notificationService,
 	) {}
 
 	#[Route('/admin', name: 'app_documents_admin')]
@@ -105,6 +107,21 @@ class DocumentController extends AbstractController
 			$this->entityManager->flush();
 
 			error_log("Document saved with ID: " . $document->getId());
+
+			// Envoyer la notification Mercure si le document est lié à une régate
+			if ($document->getRegatta()) {
+				try {
+					$this->notificationService->notifyNewDocument(
+						$document->getRegatta()->getAccessToken(),
+						$document->getName(),
+						$document->getCategory()
+					);
+					error_log("Notification sent for regatta: " . $document->getRegatta()->getAccessToken());
+				} catch (\Exception $e) {
+					error_log("Notification error: " . $e->getMessage());
+					// On ne bloque pas l'upload si la notification échoue
+				}
+			}
 
 			return new JsonResponse([
 				'success' => true,
