@@ -49,6 +49,7 @@ class User implements UserInterface
 		$this->regattas = new ArrayCollection();
 		$this->sharedRegattas = new ArrayCollection();
 		$this->createdAt = new \DateTimeImmutable();
+		$this->roles = ['ROLE_USER']; // Initialiser avec le rôle par défaut
 	}
 
 	public function getId(): ?int

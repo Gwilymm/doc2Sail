@@ -37,9 +37,20 @@ class RegattaController extends AbstractController
     #[Route('/regatta', name: 'app_regatta')]
     public function index(Request $request): Response
     {
+        dump('=== REGATTA INDEX CALLED ===');
+        dump('Is Authenticated: ' . ($this->getUser() ? 'YES' : 'NO'));
+
         /** @var User|null $currentUser */
         /** @var User|null $currentUser */
         $currentUser = $this->getUser();
+
+        if ($currentUser) {
+            dump('Current User ID: ' . $currentUser->getId());
+            dump('Current User Roles:', $currentUser->getRoles());
+            dump('Current User Identifier:', $currentUser->getUserIdentifier());
+        } else {
+            dump('NO USER - SHOULD BE REDIRECTED BY SECURITY');
+        }
 
         // Symfony Security gère déjà l'accès avec access_control
         // Pas besoin de vérification manuelle ici
