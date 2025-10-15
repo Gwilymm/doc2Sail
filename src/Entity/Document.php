@@ -11,6 +11,20 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks]
 class Document
 {
+	public const DEFAULT_CATEGORY = 'Autre';
+
+	public const AVAILABLE_CATEGORIES = [
+		'Administration',
+		'Navigation',
+		'Securite',
+		'Equipage',
+		'Finances',
+		'Technique',
+		'Communication',
+		'Logistique',
+		'Sante',
+		'Autre',
+	];
 	#[ORM\Id]
 	#[ORM\GeneratedValue]
 	#[ORM\Column]
@@ -38,6 +52,11 @@ class Document
 	#[ORM\ManyToOne(targetEntity: Regatta::class, inversedBy: 'documents')]
 	#[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
 	private ?Regatta $regatta = null;
+
+	#[ORM\Column(length: 100)]
+	#[Assert\NotBlank(message: 'La catégorie du document est obligatoire')]
+	#[Assert\Length(max: 100, maxMessage: 'La catégorie ne peut pas dépasser 100 caractères')]
+	private ?string $category = self::DEFAULT_CATEGORY;
 
 	// Propriété temporaire pour l'upload (non persistée en BDD)
 	#[Assert\File(
@@ -182,6 +201,19 @@ class Document
 	public function setRegatta(?Regatta $regatta): static
 	{
 		$this->regatta = $regatta;
+
+		return $this;
+	}
+
+	public function getCategory(): string
+	{
+		return $this->category ?? self::DEFAULT_CATEGORY;
+	}
+
+	public function setCategory(?string $category): static
+	{
+		$normalized = $category ? trim($category) : null;
+		$this->category = $normalized !== '' ? $normalized : self::DEFAULT_CATEGORY;
 
 		return $this;
 	}

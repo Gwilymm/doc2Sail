@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Document;
+use App\Entity\Regatta;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -37,6 +38,17 @@ class DocumentRepository extends ServiceEntityRepository
 			->orWhere('d.description LIKE :query')
 			->setParameter('query', '%' . $query . '%')
 			->orderBy('d.uploadedAt', 'DESC')
+			->getQuery()
+			->getResult();
+	}
+
+	public function findByRegattaSorted(Regatta $regatta): array
+	{
+		return $this->createQueryBuilder('d')
+			->andWhere('d.regatta = :regatta')
+			->setParameter('regatta', $regatta)
+			->orderBy('d.category', 'ASC')
+			->addOrderBy('d.name', 'ASC')
 			->getQuery()
 			->getResult();
 	}
