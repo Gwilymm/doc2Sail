@@ -205,9 +205,9 @@ self.addEventListener('fetch', (event) => {
 	<p>Veuillez vous connecter à Internet ou télécharger la régate pour consultation hors ligne.</p>
 </body>
 </html>`,
-							{ 
+							{
 								status: 503,
-								headers: { 'Content-Type': 'text/html; charset=utf-8' } 
+								headers: { 'Content-Type': 'text/html; charset=utf-8' }
 							}
 						);
 					});
