@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Link - Doc2Sail</title>
+    <title>Invitation Régate - Doc2Sail</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -50,6 +50,12 @@
             margin: 20px 0;
             border-left: 4px solid #0284c7;
         }
+        .regatta-info {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
         .footer {
             text-align: center;
             color: #666;
@@ -65,7 +71,7 @@
 <body>
     <div class="container">
         <div class="logo">
-            <div style="text-align: center; margin-bottom: 20px;">
+       <div style="text-align: center; margin-bottom: 20px;">
                 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="80px" height="80px" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024" xml:space="preserve" style="display: inline-block; border-radius: 16px;">
 <path fill="#3571AF" opacity="1.000000" stroke="none" 
@@ -1768,39 +1774,53 @@ z"/>
             <h1>Doc2Sail</h1>
         </div>
 
-        <h2>🔐 Votre lien de connexion</h2>
+        <h2>🎯 Invitation à rejoindre une régate</h2>
         
-        {% if displayName %}
-            <p>Bonjour <strong>{{ displayName }}</strong> !</p>
-        {% else %}
-            <p>Bonjour !</p>
-        {% endif %}
+        <p>Bonjour !</p>
 
-        <p>Cliquez sur le bouton ci-dessous pour vous connecter à Doc2Sail :</p>
+        <p><strong>{{ invitedBy.displayName ?? 'Un utilisateur' }}</strong> vous invite à devenir copropriétaire de la régate :</p>
+
+        <div class="regatta-info">
+            <h3 style="margin-top: 0; color: #0284c7;">⛵ {{ regatta.name }}</h3>
+            <p style="margin: 5px 0;"><strong>📅 Dates :</strong> {{ regatta.startDate|date('d/m/Y') }} - {{ regatta.endDate|date('d/m/Y') }}</p>
+            {% if regatta.description %}
+                <p style="margin: 5px 0;"><strong>📝 Description :</strong> {{ regatta.description }}</p>
+            {% endif %}
+            <p style="margin: 5px 0;"><strong>📄 Documents :</strong> {{ regatta.documents|length }} document(s)</p>
+        </div>
+
+        <div class="info">
+            <strong>🤝 En tant que copropriétaire, vous pourrez :</strong><br>
+            • Consulter tous les documents de la régate<br>
+            • Ajouter de nouveaux documents<br>
+            • Modifier et supprimer des documents<br>
+            • Gérer la régate avec le propriétaire
+        </div>
+
+        <p>Cliquez sur le bouton ci-dessous pour accepter l'invitation :</p>
 
         <div style="text-align: center;">
-            <a href="{{ loginUrl }}" class="button">
-                ✨ Se connecter maintenant
+            <a href="{{ invitationUrl }}" class="button">
+                ✨ Accepter l'invitation
             </a>
         </div>
 
         <div class="info">
-            <strong>⏱️ Attention :</strong> Ce lien expire le <span class="expire">{{ expiresAt|date('d/m/Y à H:i') }}</span>
-            <br>(valable 15 minutes)
+            <strong>⏱️ Attention :</strong> Cette invitation expire le <span class="expire">{{ invitation.expiresAt|date('d/m/Y à H:i') }}</span>
+            <br>(valable 7 jours)
         </div>
 
         <p style="font-size: 12px; color: #666;">
             Si le bouton ne fonctionne pas, copiez-collez ce lien dans votre navigateur :<br>
-            <code style="background: #f3f4f6; padding: 5px; display: block; margin-top: 10px; word-break: break-all;">{{ loginUrl }}</code>
+            <code style="background: #f3f4f6; padding: 5px; display: block; margin-top: 10px; word-break: break-all;">{{ invitationUrl }}</code>
         </p>
 
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
 
         <p style="font-size: 12px; color: #999;">
             <strong>🔒 Sécurité :</strong><br>
-            • Vous n'avez pas demandé ce lien ? Ignorez cet email.<br>
-            • Ne partagez jamais ce lien avec personne.<br>
-            • Le lien ne peut être utilisé qu'une seule fois.
+            • Vous n'avez pas demandé cette invitation ? Ignorez cet email.<br>
+            • L'invitation ne peut être utilisée qu'une seule fois.
         </p>
 
         <div class="footer">

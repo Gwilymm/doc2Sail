@@ -51,12 +51,21 @@ class Regatta
     private ?string $accessToken = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'regattas')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Assert\NotNull(message: 'Un propriétaire doit être défini')]
     private ?User $owner = null;
+
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'sharedRegattas')]
+    #[ORM\JoinTable(name: 'regatta_co_owners')]
+    private Collection $coOwners;
 
     public function __construct()
     {
         $this->documents = new ArrayCollection();
+        $this->coOwners = new ArrayCollection();
         $this->createdAt = new \DateTime();
         $this->accessToken = bin2hex(random_bytes(32));
     }
@@ -178,6 +187,40 @@ class Regatta
         $this->owner = $owner;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getCoOwners(): Collection
+    {
+        return $this->coOwners;
+    }
+
+    public function addCoOwner(User $coOwner): static
+    {
+        if (!$this->coOwners->contains($coOwner)) {
+            $this->coOwners->add($coOwner);
+        }
+
+        return $this;
+    }
+
+    public function removeCoOwner(User $coOwner): static
+    {
+        $this->coOwners->removeElement($coOwner);
+
+        return $this;
+    }
+
+    public function isCoOwner(User $user): bool
+    {
+        return $this->coOwners->contains($user);
+    }
+
+    public function canManage(User $user): bool
+    {
+        return $this->owner === $user || $this->isCoOwner($user);
     }
 
     public function __toString(): string

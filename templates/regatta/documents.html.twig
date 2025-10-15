@@ -16,6 +16,12 @@
             </div>
             
             <div class="flex gap-2">
+                <button onclick="inviteCoOwnerModal.showModal()" class="btn btn-accent btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                    Inviter un copropriétaire
+                </button>
                 <a href="{{ path('app_regatta') }}" class="btn btn-outline btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -48,6 +54,21 @@
             </div>
         </div>
     </div>
+
+    <!-- Co-owners Section -->
+    {% if regatta.coOwners|length > 0 %}
+    <div class="alert mb-8">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        <div class="flex-1">
+            <h3 class="font-bold">Copropriétaires ({{ regatta.coOwners|length }})</h3>
+            <div class="text-xs mt-1 flex flex-wrap gap-2">
+                {% for coOwner in regatta.coOwners %}
+                    <span class="badge badge-primary">{{ coOwner.displayName ?? 'Utilisateur' }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Upload Zone -->
     <div class="card bg-base-100 shadow-xl mb-8 border-2 border-primary/20">
@@ -191,6 +212,47 @@
     </div>
 </div>
 
+<!-- Modal Invite Co-Owner -->
+<dialog id="inviteCoOwnerModal" class="modal">
+    <div class="modal-box">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="inviteCoOwnerModal.close()">✕</button>
+        <h3 class="font-bold text-lg mb-4">🤝 Inviter un copropriétaire</h3>
+        <p class="text-sm text-base-content/70 mb-4">
+            Le copropriétaire pourra consulter, ajouter, modifier et supprimer des documents de cette régate.
+        </p>
+        <form onsubmit="event.preventDefault(); inviteCoOwner();">
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text">Adresse email *</span>
+                </label>
+                <input 
+                    type="email" 
+                    id="inviteEmail" 
+                    name="email" 
+                    class="input input-bordered" 
+                    placeholder="exemple@email.com"
+                    required 
+                />
+                <label class="label">
+                    <span class="label-text-alt">Un email d'invitation sera envoyé à cette adresse</span>
+                </label>
+            </div>
+            <div class="modal-action">
+                <button type="button" class="btn" onclick="inviteCoOwnerModal.close()">Annuler</button>
+                <button type="submit" class="btn btn-accent">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Envoyer l'invitation
+                </button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button type="submit">close</button>
+    </form>
+</dialog>
+
 <!-- Toast Container -->
 <div id="toastContainer" class="toast toast-top toast-end z-50"></div>
 
@@ -268,6 +330,40 @@
         toast.innerHTML = '<span>URL copiée dans le presse-papier!</span>';
         document.getElementById('toastContainer').appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Invite co-owner
+    async function inviteCoOwner() {
+        const email = document.getElementById('inviteEmail').value;
+        
+        if (!email || !email.includes('@')) {
+            showToast('Veuillez entrer une adresse email valide', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/regatta/{{ regatta.id }}/invite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast(result.message, 'success');
+                inviteCoOwnerModal.close();
+                document.getElementById('inviteEmail').value = '';
+            } else {
+                showToast(result.error || 'Erreur lors de l\'envoi de l\'invitation', 'error');
+                if (result.debug_url) {
+                    console.log('Debug URL:', result.debug_url);
+                }
+            }
+        } catch (error) {
+            showToast('Erreur lors de l\'envoi de l\'invitation', 'error');
+            console.error(error);
+        }
     }
 </script>
 {% endblock %}
