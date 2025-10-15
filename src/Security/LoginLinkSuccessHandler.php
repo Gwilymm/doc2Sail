@@ -26,17 +26,25 @@ class LoginLinkSuccessHandler implements AuthenticationSuccessHandlerInterface
 		$user->setLastLoginAt(new \DateTimeImmutable());
 		$this->entityManager->flush();
 
-		// Vérifier s'il y a une invitation en attente
-		$session = $request->getSession();
-		$pendingInvitationToken = $session->get('pending_invitation_token');
+                // Vérifier s'il y a une invitation en attente
+                $session = $request->getSession();
 
-		if ($pendingInvitationToken) {
-			$session->remove('pending_invitation_token');
-			return new RedirectResponse(
-				$this->urlGenerator->generate('app_regatta_accept_invitation', [
-					'token' => $pendingInvitationToken
-				])
-			);
+                if ($session) {
+                        // Marquer l'utilisateur comme authentifié pour les protections basées sur la session
+                        $session->set('authenticated', true);
+                        $session->set('user_id', $user->getId());
+                        $session->set('auth_time', time());
+                }
+
+                $pendingInvitationToken = $session?->get('pending_invitation_token');
+
+                if ($pendingInvitationToken) {
+                        $session?->remove('pending_invitation_token');
+                        return new RedirectResponse(
+                                $this->urlGenerator->generate('app_regatta_accept_invitation', [
+                                        'token' => $pendingInvitationToken
+                                ])
+                        );
 		}
 
 		// Rediriger vers la page des régates
