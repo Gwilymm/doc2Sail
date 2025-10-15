@@ -1,7 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
 
-import { Controller } from '@hotwired/stimulus';
-
 export default class extends Controller {
 	static values = {
 		regattaId: Number,
@@ -16,10 +14,10 @@ export default class extends Controller {
 
 		this.selectedFile = null;
 		this.setupDropZone();
+		this.applyDefaultCategory();
 		this.setupSearch();
 		this.setupDeleteButtons();
 		this.setupInstallButton();
-		this.applyDefaultCategory();
 		this.toggleCategorySections();
 	}
 
@@ -345,45 +343,5 @@ export default class extends Controller {
 		if (categoryInput && this.hasDefaultCategoryValue && !categoryInput.value) {
 			categoryInput.value = this.defaultCategoryValue;
 		}
-	}
-}
-				const { outcome } = await deferredPrompt.userChoice;
-				console.log(`User response: ${outcome}`);
-				deferredPrompt = null;
-				installBtn.classList.add('hidden');
-			}
-		});
-
-		window.addEventListener('appinstalled', () => {
-			this.showToast('App installée avec succès!', 'success');
-			installBtn.classList.add('hidden');
-		});
-	}
-
-	showToast(message, type = 'info') {
-		const container = document.getElementById('toastContainer');
-		if (!container) return;
-
-		const toast = document.createElement('div');
-
-		const alertClass = {
-			success: 'alert-success',
-			error: 'alert-error',
-			info: 'alert-info',
-			warning: 'alert-warning'
-		}[ type ] || 'alert-info';
-
-		toast.className = `alert ${alertClass} shadow-lg`;
-		toast.innerHTML = `
-            <div>
-                <span>${message}</span>
-            </div>
-        `;
-
-		container.appendChild(toast);
-
-		setTimeout(() => {
-			toast.remove();
-		}, 3000);
 	}
 }
