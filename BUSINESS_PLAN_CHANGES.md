@@ -67,11 +67,11 @@ Stable (meilleure structure)
 
 ### 2. CHURN RÉVISÉ (Plus Réaliste)
 
-| Période | Ancien | Nouveau | Benchmark SaaS |
-|---------|--------|---------|----------------|
-| **An 1** | 8%/mois (96% annuel ❌) | 5%/mois (45% annuel) | 3,5% idéal |
-| **An 2** | 5%/mois | 2,5%/mois (26% annuel) | 3,5% idéal |
-| **An 3** | 3%/mois | 1%/mois (12% annuel) | 0,5-1% optimal |
+| Période  | Ancien                 | Nouveau                | Benchmark SaaS |
+| -------- | ---------------------- | ---------------------- | -------------- |
+| **An 1** | 8%/mois (96% annuel ❌) | 5%/mois (45% annuel)   | 3,5% idéal     |
+| **An 2** | 5%/mois                | 2,5%/mois (26% annuel) | 3,5% idéal     |
+| **An 3** | 3%/mois                | 1%/mois (12% annuel)   | 0,5-1% optimal |
 
 **Impact** :
 - Churn An 1 initial était **irréaliste** (96% = quasi-faillite)
@@ -84,11 +84,11 @@ Stable (meilleure structure)
 
 #### LTV/CAC Ratio
 
-| Année | Ancien | Nouveau | Benchmark |
-|-------|--------|---------|-----------|
-| **An 1** | 2:1 | **2,1:1** | 3:1 min |
-| **An 2** | 3:1 | **4:1** | 3:1 min |
-| **An 3** | 4:1 | **5,5:1** | 3-5:1 |
+| Année    | Ancien | Nouveau   | Benchmark |
+| -------- | ------ | --------- | --------- |
+| **An 1** | 2:1    | **2,1:1** | 3:1 min   |
+| **An 2** | 3:1    | **4:1**   | 3:1 min   |
+| **An 3** | 4:1    | **5,5:1** | 3-5:1     |
 
 **Amélioration** : +33% en moyenne grâce au pricing optimisé
 
@@ -96,11 +96,11 @@ Stable (meilleure structure)
 
 #### ARPU (Average Revenue Per User)
 
-| Année | Ancien | Nouveau | Croissance |
-|-------|--------|---------|------------|
-| **An 1** | 25€ | **45€** | +80% |
-| **An 2** | 31€ | **57€** | +84% |
-| **An 3** | 33€ | **71€** | +115% |
+| Année    | Ancien | Nouveau | Croissance |
+| -------- | ------ | ------- | ---------- |
+| **An 1** | 25€    | **45€** | +80%       |
+| **An 2** | 31€    | **57€** | +84%       |
+| **An 3** | 33€    | **71€** | +115%      |
 
 ---
 
@@ -108,11 +108,11 @@ Stable (meilleure structure)
 
 #### Revenus ARR
 
-| Année | Ancien | Nouveau | Amélioration |
-|-------|--------|---------|--------------|
-| **An 1** | 15K€ | **21,6K€** | +44% |
-| **An 2** | 75K€ | **102K€** | +36% |
-| **An 3** | 200K€ | **300K€** | +50% |
+| Année    | Ancien | Nouveau    | Amélioration |
+| -------- | ------ | ---------- | ------------ |
+| **An 1** | 15K€   | **21,6K€** | +44%         |
+| **An 2** | 75K€   | **102K€**  | +36%         |
+| **An 3** | 200K€  | **300K€**  | +50%         |
 
 **Total 3 ans** : 290K€ → **423,6K€** (+46%)
 
@@ -120,11 +120,11 @@ Stable (meilleure structure)
 
 #### Résultats Nets
 
-| Année | Ancien | Nouveau | Amélioration |
-|-------|--------|---------|--------------|
-| **An 1** | -11K€ | **-4,4K€** | +6,6K€ ✅ |
-| **An 2** | 0€ | **+17K€** | +17K€ ✅ |
-| **An 3** | +20K€ | **+120K€** | +100K€ ✅ |
+| Année    | Ancien | Nouveau    | Amélioration |
+| -------- | ------ | ---------- | ------------ |
+| **An 1** | -11K€  | **-4,4K€** | +6,6K€ ✅     |
+| **An 2** | 0€     | **+17K€**  | +17K€ ✅      |
+| **An 3** | +20K€  | **+120K€** | +100K€ ✅     |
 
 **Total 3 ans** : +9K€ → **+132,6K€** (+1375% 🚀)
 
@@ -132,11 +132,11 @@ Stable (meilleure structure)
 
 #### Marges Nettes
 
-| Année | Ancien | Nouveau | Amélioration |
-|-------|--------|---------|--------------|
-| **An 1** | -73% | **-20%** | +53 pts |
-| **An 2** | 0% | **+16,5%** | +16,5 pts |
-| **An 3** | +10% | **+35%** | +25 pts |
+| Année    | Ancien | Nouveau    | Amélioration |
+| -------- | ------ | ---------- | ------------ |
+| **An 1** | -73%   | **-20%**   | +53 pts      |
+| **An 2** | 0%     | **+16,5%** | +16,5 pts    |
+| **An 3** | +10%   | **+35%**   | +25 pts      |
 
 ---
 
@@ -296,9 +296,9 @@ Augmentation : +50-80%
 
 ### Scénario Conservateur (Ancien)
 
-| An 1 | An 2 | An 3 | Total |
-|------|------|------|-------|
-| -11K€ | 0€ | +20K€ | **+9K€** |
+| An 1  | An 2 | An 3  | Total    |
+| ----- | ---- | ----- | -------- |
+| -11K€ | 0€   | +20K€ | **+9K€** |
 
 **Risque** : Churn 96% An 1 = **faillite probable**
 
@@ -306,8 +306,8 @@ Augmentation : +50-80%
 
 ### Scénario Optimisé (Nouveau)
 
-| An 1 | An 2 | An 3 | Total |
-|------|------|------|-------|
+| An 1   | An 2  | An 3   | Total        |
+| ------ | ----- | ------ | ------------ |
 | -4,4K€ | +17K€ | +120K€ | **+132,6K€** |
 
 **Avantages** :
@@ -320,8 +320,8 @@ Augmentation : +50-80%
 
 ### Scénario Ambitieux (+30% clients)
 
-| An 1 | An 2 | An 3 | Total |
-|------|------|------|-------|
+| An 1 | An 2  | An 3   | Total      |
+| ---- | ----- | ------ | ---------- |
 | -2K€ | +30K€ | +180K€ | **+208K€** |
 
 Si acquisition surperforme (partenariat FFVoile majeur)

@@ -38,12 +38,12 @@
 
 ### Grille Tarifaire
 
-| Plan | Prix | Cible | ARR/Client |
-|------|------|-------|------------|
-| **Gratuit** | 0€ | Acquisition | 0€ |
-| **Club** | 39€/mois | Clubs moyens (5-10 régates/an) | 468€ |
-| **Pro** | 149€/mois | Comités pros (15+ régates/an) | 1 788€ |
-| **Entreprise** | 499€+/mois | Fédérations, Ligues | 5 988€+ |
+| Plan           | Prix       | Cible                          | ARR/Client |
+| -------------- | ---------- | ------------------------------ | ---------- |
+| **Gratuit**    | 0€         | Acquisition                    | 0€         |
+| **Club**       | 39€/mois   | Clubs moyens (5-10 régates/an) | 468€       |
+| **Pro**        | 149€/mois  | Comités pros (15+ régates/an)  | 1 788€     |
+| **Entreprise** | 499€+/mois | Fédérations, Ligues            | 5 988€+    |
 
 **ROI Client** :
 - Club : 6 400% (économie 2 700€/an pour 468€ coût)
@@ -55,10 +55,10 @@
 
 ### Taille du Marché
 
-| Géographie | Régates/an | Clubs | TAM |
-|------------|-----------|-------|-----|
-| **France** | 5 000 | 1 200 | 2,6M€ |
-| **Europe** | 50 000 | 15 000 | 15M€ |
+| Géographie | Régates/an | Clubs  | TAM   |
+| ---------- | ---------- | ------ | ----- |
+| **France** | 5 000      | 1 200  | 2,6M€ |
+| **Europe** | 50 000     | 15 000 | 15M€  |
 
 ### Segmentation
 
@@ -80,14 +80,14 @@
 
 ### Aucun Concurrent Direct
 
-| Critère | Doc2Sail | Google Drive | SharePoint | Sites Persos |
-|---------|----------|--------------|------------|--------------|
-| **Mobile-first** | ✅✅✅ | ⚠️ | ❌ | ⚠️ |
-| **Mode Offline** | ✅✅✅ | ⚠️ | ❌ | ❌ |
-| **Notifications temps réel** | ✅✅✅ | ❌ | ⚠️ | ❌ |
-| **Setup <5min** | ✅✅✅ | ⚠️ | ❌ | ❌ |
-| **Catégories métier** | ✅✅✅ | ❌ | ❌ | ❌ |
-| **Prix** | ✅✅ | ✅✅✅ | ❌ | ⚠️ |
+| Critère                      | Doc2Sail | Google Drive | SharePoint | Sites Persos |
+| ---------------------------- | -------- | ------------ | ---------- | ------------ |
+| **Mobile-first**             | ✅✅✅      | ⚠️            | ❌          | ⚠️            |
+| **Mode Offline**             | ✅✅✅      | ⚠️            | ❌          | ❌            |
+| **Notifications temps réel** | ✅✅✅      | ❌            | ⚠️          | ❌            |
+| **Setup <5min**              | ✅✅✅      | ⚠️            | ❌          | ❌            |
+| **Catégories métier**        | ✅✅✅      | ❌            | ❌          | ❌            |
+| **Prix**                     | ✅✅       | ✅✅✅          | ❌          | ⚠️            |
 
 **Barrières à l'entrée** :
 - Expertise métier (connaissance régates, règles, vocabulaire)
@@ -125,14 +125,14 @@
 
 ### Objectifs 3 Ans
 
-| Métrique | An 1 (2026) | An 2 (2027) | An 3 (2028) |
-|----------|-------------|-------------|-------------|
-| **Clients payants** | 40 | 150 | 350 |
-| **ARR** | 21,6K€ | 102K€ | 300K€ |
-| **MRR** | 1,8K€ | 8,5K€ | 25K€ |
-| **Churn mensuel** | <5% | <2,5% | <1% |
-| **LTV/CAC** | 2,1:1 | 4:1 | 5,5:1 |
-| **Marge nette** | -20% | +16,5% | +35% |
+| Métrique            | An 1 (2026) | An 2 (2027) | An 3 (2028) |
+| ------------------- | ----------- | ----------- | ----------- |
+| **Clients payants** | 40          | 150         | 350         |
+| **ARR**             | 21,6K€      | 102K€       | 300K€       |
+| **MRR**             | 1,8K€       | 8,5K€       | 25K€        |
+| **Churn mensuel**   | <5%         | <2,5%       | <1%         |
+| **LTV/CAC**         | 2,1:1       | 4:1         | 5,5:1       |
+| **Marge nette**     | -20%        | +16,5%      | +35%        |
 
 ### Validation Benchmarks SaaS 2025
 
@@ -152,14 +152,14 @@
 
 **Utilisation des Fonds** :
 
-| Poste | Montant | % |
-|-------|---------|---|
-| Marketing & Acquisition | 8K€ | 40% |
-| Développement Features (Billing, Analytics) | 6K€ | 30% |
-| Infrastructure & Outils SaaS | 3K€ | 15% |
-| Juridique & Admin | 2K€ | 10% |
-| Buffer (imprévus) | 1K€ | 5% |
-| **TOTAL** | **20K€** | **100%** |
+| Poste                                       | Montant  | %        |
+| ------------------------------------------- | -------- | -------- |
+| Marketing & Acquisition                     | 8K€      | 40%      |
+| Développement Features (Billing, Analytics) | 6K€      | 30%      |
+| Infrastructure & Outils SaaS                | 3K€      | 15%      |
+| Juridique & Admin                           | 2K€      | 10%      |
+| Buffer (imprévus)                           | 1K€      | 5%       |
+| **TOTAL**                                   | **20K€** | **100%** |
 
 **Alternative** : Bootstrapping possible avec 10K€ apport personnel
 
@@ -196,12 +196,12 @@
 
 ### Compte de Résultat 3 Ans
 
-| Année | Revenus | Coûts | Résultat | Marge |
-|-------|---------|-------|----------|-------|
-| **2026** | 21,6K€ | 26K€ | **-4,4K€** | -20% |
-| **2027** | 102K€ | 85K€ | **+17K€** | +16,5% |
-| **2028** | 300K€ | 180K€ | **+120K€** | +35% |
-| **Total** | **423,6K€** | **291K€** | **+132,6K€** | - |
+| Année     | Revenus     | Coûts     | Résultat     | Marge  |
+| --------- | ----------- | --------- | ------------ | ------ |
+| **2026**  | 21,6K€      | 26K€      | **-4,4K€**   | -20%   |
+| **2027**  | 102K€       | 85K€      | **+17K€**    | +16,5% |
+| **2028**  | 300K€       | 180K€     | **+120K€**   | +35%   |
+| **Total** | **423,6K€** | **291K€** | **+132,6K€** | -      |
 
 **Rentabilité** : Atteinte dès **M10 de l'Année 2** (vs An 3 prévu initialement)
 
@@ -255,12 +255,12 @@
 
 ## ⚠️ RISQUES & MITIGATION
 
-| Risque | Probabilité | Impact | Mitigation |
-|--------|-------------|--------|------------|
-| **Adoption lente** | Élevée (60%) | Critique | Freemium + partenariat FFVoile + démos salons |
-| **Concurrent majeur** | Moyenne (30%) | Élevé | Partenariats préventifs + innovation continue |
-| **Downtime technique** | Moyenne (40%) | Élevé | Infrastructure redondante + monitoring 24/7 |
-| **Cash flow négatif** | Élevée (50%) | Critique | Bootstrapping + paiements annuels upfront |
+| Risque                 | Probabilité   | Impact   | Mitigation                                    |
+| ---------------------- | ------------- | -------- | --------------------------------------------- |
+| **Adoption lente**     | Élevée (60%)  | Critique | Freemium + partenariat FFVoile + démos salons |
+| **Concurrent majeur**  | Moyenne (30%) | Élevé    | Partenariats préventifs + innovation continue |
+| **Downtime technique** | Moyenne (40%) | Élevé    | Infrastructure redondante + monitoring 24/7   |
+| **Cash flow négatif**  | Élevée (50%)  | Critique | Bootstrapping + paiements annuels upfront     |
 
 **Risque global** : **Modéré** (marché de niche, mais inexploité et défendable)
 
