@@ -6,10 +6,16 @@ services:
         build:
             context: .
             dockerfile: Dockerfile.prod
+            args:
+                BUILDKIT_CONTEXT_KEEP_GIT_DIR: 1
         container_name: doc2sail-app
         restart: unless-stopped
         ports:
             - "127.0.0.1:8000:80"
+        dns:
+            - 8.8.8.8
+            - 8.8.4.4
+            - 1.1.1.1
         volumes:
             # Seulement les volumes nécessaires en production
             - app-var:/app/var
