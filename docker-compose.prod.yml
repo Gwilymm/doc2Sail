@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  ###> Application FrankenPHP (Production) ###
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: doc2sail-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:80"
+    volumes:
+      # Seulement les volumes nécessaires en production
+      - app-var:/app/var
+      - app-uploads:/app/public/uploads
+    environment:
+      APP_ENV: prod
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: "sqlite:///%kernel.project_dir%/var/data.db"
+      MERCURE_URL: http://mercure/.well-known/mercure
+      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL:-https://doc2sail.platypus-home.noho.st/.well-known/mercure}
+      MERCURE_JWT_SECRET: ${MERCURE_JWT_SECRET}
+      MAILER_DSN: ${MAILER_DSN:-smtp://localhost:25}
+      MAILER_FROM: ${MAILER_FROM:-noreply@doc2sail.platypus-home.noho.st}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@doc2sail.platypus-home.noho.st}
+    networks:
+      - doc2sail-network
+    # Limites de ressources pour Raspberry Pi
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+  ###< Application FrankenPHP ###
+
+  ###> Mercure Hub ###
+  mercure:
+    image: dunglas/mercure:latest
+    container_name: doc2sail-mercure
+    restart: unless-stopped
+    command: caddy run --config /etc/caddy/Caddyfile
+    ports:
+      - "127.0.0.1:3000:80"
+    environment:
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_SECRET}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_SECRET}
+      MERCURE_EXTRA_DIRECTIVES: |
+        anonymous
+        cors_origins https://doc2sail.platypus-home.noho.st http://localhost:8000
+    volumes:
+      - mercure-data:/data
+      - mercure-config:/config
+    networks:
+      - doc2sail-network
+    # Limites de ressources
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+  ###< Mercure Hub ###
+
+volumes:
+  app-var:
+    driver: local
+  app-uploads:
+    driver: local
+  mercure-data:
+    driver: local
+  mercure-config:
+    driver: local
+
+networks:
+  doc2sail-network:
+    driver: bridge

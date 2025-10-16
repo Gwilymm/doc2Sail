@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+
+# Symfony
+/var/cache/*
+/var/log/*
+/var/tmp/*
+!/var/cache/.gitkeep
+!/var/log/.gitkeep
+!/var/tmp/.gitkeep
+
+# Tests
+/tests
+/phpunit.xml.dist
+/.phpunit.result.cache
+
+# Documentation
+*.md
+doc exemple/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Deploy scripts
+deploy*.sh
+RASPBERRY*.md
+DEPLOY*.md
+OFFLINE*.md
+OPTIMIZATIONS.md
