@@ -1,131 +1,91 @@
-# 📱 Doc2Sail - PWA de Gestion de Documents de Régate
 
-Application PWA Symfony pour gérer des documents de régate de voile.
+# 📱 Doc2Sail
 
-## 🚀 Fonctionnalités
+**Doc2Sail** is a modern Progressive Web App (PWA) for managing and sharing sailing regatta documents. It offers a simple, mobile-friendly, and secure interface for clubs and event organizers.
 
-- ⛵ **Deux interfaces** :
-  - `/` - Page de consultation (lecture seule)
-  - `/admin` - Page d'administration (upload + suppression)
+## ✨ Main Features
 
-- 📁 **Gestion de documents** :
-  - Upload par drag & drop
-  - Support : PDF, Word, Excel, Images (max 10MB)
-  - Métadonnées : nom, description, taille, date
-  - Recherche en temps réel
+- 🔒 Magic link authentication (passwordless login)
+- 📁 Document management (PDF, Word, Excel, images)
+- 🔍 Instant search and filtering
+- 🖥️ Two interfaces: public view and admin panel
+- � Installable PWA (offline support, icon, notifications)
+- 🏷️ Rich metadata (name, description, date, size)
+- 🗑️ Upload, delete, and organize files
 
-- 📱 **PWA** :
-  - Installable sur mobile et desktop
-  - Mode offline
-  - Service Worker
-  - Icône personnalisée
+## 🛠️ Tech Stack
 
-## 🛠️ Technologies
+- **Backend**: Symfony 7, Doctrine ORM, SQLite
+- **Frontend**: Tailwind CSS 4, DaisyUI, Stimulus, Turbo
+- **Build**: Webpack Encore
+- **Deployment**: Docker, Docker Compose
 
-- **Backend** : Symfony 7.3 + Doctrine + SQLite
-- **Frontend** : Tailwind CSS 4 + DaisyUI
-- **JS** : Stimulus + Turbo
-- **Build** : Webpack Encore
-
-## 📦 Installation
+## � Quick Start
 
 ```bash
-# Cloner le projet
-cd /home/gwilym/Documents/Perso/doc2Sail
+# Clone the repository
+git clone https://github.com/your-username/doc2Sail.git
+cd doc2Sail
 
-# Installer les dépendances PHP
+# Install PHP dependencies
 composer install
 
-# Installer les dépendances Node
+# Install JS dependencies
 pnpm install
 
-# Créer la base de données
+# Create the database and run migrations
 php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
 
-# Compiler les assets
-pnpm run dev
-# ou en mode watch
-pnpm run watch
+# Build assets
+pnpm run build
 ```
 
-## 🚀 Démarrage
+## 🏁 Running the App
 
 ```bash
-# Démarrer le serveur Symfony
+# Start the Symfony server
 symfony server:start
 
-# Ou avec php.ini personnalisé
-php -c php.ini -S localhost:8000 -t public/
-
-# Accéder à l'application
-# Consultation : http://localhost:8000/
-# Administration : http://localhost:8000/admin
+# Or with native PHP
+php -S localhost:8000 -t public/
 ```
 
-## 📂 Structure
+- Public access: http://localhost:8000/
+- Admin access: http://localhost:8000/admin
 
-```
-doc2Sail/
-├── assets/               # Sources JS/CSS
-│   ├── app.js
-│   ├── styles/app.css
-│   └── controllers/      # Stimulus controllers
-├── public/
-│   ├── uploads/         # Documents uploadés
-│   ├── manifest.json    # PWA manifest
-│   └── sw.js           # Service Worker
-├── src/
-│   ├── Controller/      # DocumentController
-│   ├── Entity/         # Document entity
-│   ├── Repository/     # DocumentRepository
-│   └── Service/        # DocumentUploader
-├── templates/
-│   └── document/
-│       ├── index.html.twig  # Page consultation
-│       └── admin.html.twig  # Page admin
-└── var/
-    ├── data.db         # Base SQLite
-    └── tmp/           # Upload temporaire
-```
+## 📂 Project Structure
 
-## 🎨 Design
+- `assets/`: JS, CSS, Stimulus controllers
+- `public/`: static files, uploads, manifest, service worker
+- `src/`: Symfony logic (controllers, entities, services)
+- `templates/`: Twig views
+- `var/`: SQLite database, cache, logs
 
-- **Tailwind CSS 4** : Framework CSS utility-first
-- **DaisyUI** : Composants UI pré-stylés
-- **Responsive** : Mobile-first design
-- **Thèmes** : Light/Dark support
+## 🎨 Design & UX
+
+- Responsive, mobile-first
+- Light/dark themes
+- Modern UI with DaisyUI
 
 ## 🔐 Permissions
 
 ```bash
-# Donner les permissions aux dossiers
 chmod -R 777 var/
 chmod -R 777 public/uploads/
 ```
 
-## 📱 Installation PWA
+## 📱 PWA Installation
 
-1. Ouvrir l'application dans un navigateur
-2. Cliquer sur "Installer l'app"
-3. L'icône apparaît sur l'écran d'accueil
+1. Open the app in a compatible browser
+2. Click “Install app” or add to home screen
 
-## 🐛 Dépannage
+## � Troubleshooting
 
-### Erreur upload_tmp_dir
-Le fichier `php.ini` local est configuré pour utiliser `var/tmp/`
-
-### Assets non compilés
-```bash
-pnpm run dev
-```
-
-### Base de données manquante
-```bash
-php bin/console doctrine:database:create
-php bin/console doctrine:migrations:migrate
-```
+- **Assets not built**: `pnpm run build`
+- **Missing database**: `php bin/console doctrine:database:create && php bin/console doctrine:migrations:migrate`
+- **Upload issues**: check permissions on `var/` and `public/uploads/`
 
 ## 📝 License
 
-Propriétaire
+Proprietary – for club/association internal use.
