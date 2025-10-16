@@ -32,19 +32,17 @@ class TestEmailCommand extends Command
 
 	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
-		$io = new SymfonyStyle($input, $output);
-		$email = $input->getArgument('email');
+	$io = new SymfonyStyle($input, $output);
+	$email = $input->getArgument('email');
 
-		$io->title('🧪 Test d\'envoi d\'email - Doc2Sail');
-		$io->text(sprintf('Envoi d\'un email de test à : <info>%s</info>', $email));
+	$io->title('🧪 Test d\'envoi d\'email - Doc2Sail');
+	$io->text(sprintf('Envoi d\'un email de test à : <info>%s</info>', $email));
 
-		$message = (new Email())
-			->from('noreply@doc2sail.local')
-			->to($email)
-			->subject('🧪 Email de test - Doc2Sail')
-			->html($this->getTestEmailHtml());
-
-		try {
+	$message = (new Email())
+		->from($_ENV['MAILER_FROM'] ?? 'contact@doc2sail.com')
+		->to($email)
+		->subject('🧪 Email de test - Doc2Sail')
+		->html($this->getTestEmailHtml());		try {
 			$this->mailer->send($message);
 
 			$io->success([
@@ -131,8 +129,10 @@ class TestEmailCommand extends Command
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">⛵</div>
-            <h1>Doc2Sail</h1>
+            <div class="logo">
+                <img src="https://doc2sail.com/icon-192.png" alt="Doc2Sail" style="width: 80px; height: 80px;">
+            </div>
+            <h1>Doc2Sail 25</h1>
         </div>
 
         <h2>🧪 Email de test</h2>
