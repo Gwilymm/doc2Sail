@@ -50,12 +50,8 @@ class DocumentController extends AbstractController
 				return new JsonResponse(['error' => 'Aucun fichier fourni'], 400);
 			}
 
-			// Taille maximale autorisée (en octets) - correspond au message UI: 10MB
-			$maxSize = 100 * 1024 * 1024;
-			if ($file && $file->getSize() > $maxSize) {
-				// Retourner un JSON clair avec le code 413 (Payload Too Large)
-				return new JsonResponse(['error' => 'Fichier trop volumineux. Taille maximale : 10MB'], 413);
-			}
+			
+			
 
 			// Créer l'entité Document
 			$document = new Document();
@@ -77,7 +73,7 @@ class DocumentController extends AbstractController
 
 			// Valider l'entité
 			$errors = $this->validator->validate($document);
-			dump($errors);
+			
 			if (count($errors) > 0) {
 				$errorMessages = [];
 				foreach ($errors as $error) {

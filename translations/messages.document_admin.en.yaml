@@ -11,7 +11,7 @@ document_admin:
     dropzone:
         drag_drop: "Drag and drop your file here"
         or_click: "or click to select"
-        types: "PDF, Word, Excel, Images (max 10MB)"
+    types: "PDF, Word, Excel, Images (max 100MB)"
     form:
         name:
             label: "Document name *"
