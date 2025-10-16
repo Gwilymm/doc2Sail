@@ -45,13 +45,13 @@ class DocumentController extends AbstractController
 			$category = $request->request->get('category');
 			$regattaId = $request->request->get('regatta_id');
 
-			
+
 			if (!$file) {
 				return new JsonResponse(['error' => 'Aucun fichier fourni'], 400);
 			}
 
 			// Taille maximale autorisée (en octets) - correspond au message UI: 10MB
-			$maxSize = 10 * 1024 * 1024;
+			$maxSize = 100 * 1024 * 1024;
 			if ($file && $file->getSize() > $maxSize) {
 				// Retourner un JSON clair avec le code 413 (Payload Too Large)
 				return new JsonResponse(['error' => 'Fichier trop volumineux. Taille maximale : 10MB'], 413);
@@ -63,7 +63,7 @@ class DocumentController extends AbstractController
 			$document->setDescription($description);
 			// Si la catégorie est vide, utiliser la valeur par défaut
 			$document->setCategory($category ?: Document::DEFAULT_CATEGORY);
-			$document->setFile($file);			
+			$document->setFile($file);
 			// Associer à une régate si spécifié
 			if ($regattaId) {
 				$regatta = $this->entityManager->getRepository(Regatta::class)->find($regattaId);
@@ -73,7 +73,7 @@ class DocumentController extends AbstractController
 				}
 			}
 
-		
+
 
 			// Valider l'entité
 			$errors = $this->validator->validate($document);
