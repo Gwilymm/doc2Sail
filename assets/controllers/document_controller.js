@@ -92,16 +92,19 @@ export default class extends Controller {
 	}
 
 	async uploadFile() {
-		console.log('mes couilles');
+
 		if (!this.selectedFile) {
 			this.showToast('Aucun fichier sélectionné', 'error');
 			return;
 		}
 
 		// Client-side size check to avoid sending very large files and getting HTML error responses
-		const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+		// Limit set to 100MB
+		const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+		console.log('Selected file size:', this.selectedFile.size);
+		cxonsole.log('Max allowed size:', MAX_SIZE);
 		if (this.selectedFile.size > MAX_SIZE) {
-			this.showToast('Fichier trop volumineux (max 10MB)', 'error');
+			this.showToast('Fichier trop volumineux (max 100MB)', 'error');
 			return;
 		}
 
@@ -155,7 +158,7 @@ export default class extends Controller {
 				data = { success: false, error: raw };
 			}
 
-			console.log('Upload response:', data);
+			console.log('Upload response:', response);
 
 			if (response.status === 413) {
 				// Payload too large: show a friendly, localized message
@@ -169,7 +172,7 @@ export default class extends Controller {
 				this.showToast(message, 'error');
 			}
 		} catch (error) {
-			console.error('Upload error:', error);
+			console.error('Upload error mes couilles:', error);
 			this.showToast('Erreur de connexion', 'error');
 		} finally {
 			if (uploadBtn) {
@@ -277,7 +280,7 @@ export default class extends Controller {
 		}
 	}
 
-	/* setupInstallButton() {
+	setupInstallButton() {
 		let deferredPrompt;
 		const installBtn = document.getElementById('installBtn');
 		if (!installBtn) return;
@@ -304,7 +307,7 @@ export default class extends Controller {
 			this.showToast('App installée avec succès!', 'success');
 			installBtn.classList.add('hidden');
 		});
-	} */
+	}
 
 	showToast(message, type = 'info') {
 		const container = document.getElementById('toastContainer');

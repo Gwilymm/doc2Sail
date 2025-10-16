@@ -56,7 +56,7 @@ class Document
 
 	// Propriété temporaire pour l'upload (non persistée en BDD)
 	#[Assert\File(
-		maxSize: '10M',
+		maxSize: '100M',
 		mimeTypes: [
 			'application/pdf',
 			'application/msword',

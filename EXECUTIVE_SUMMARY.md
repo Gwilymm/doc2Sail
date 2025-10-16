@@ -102,7 +102,7 @@
 
 **Fonctionnalités** :
 - ✅ Gestion multi-régates
-- ✅ Upload documents (PDF, Word, Excel, Images ≤10MB)
+- ✅ Upload documents (PDF, Word, Excel, Images ≤100MB)
 - ✅ Catégorisation métier (AC, IC, Modifications, etc.)
 - ✅ Pages publiques (URL unique + QR Code)
 - ✅ PWA installable (iOS, Android, Desktop)
