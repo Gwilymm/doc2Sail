@@ -30,5 +30,10 @@ services:
             $vapidPrivateKey: "%env(VAPID_PRIVATE_KEY)%"
             $vapidSubject: "%env(VAPID_SUBJECT)%"
 
+    # Configuration de la commande de test du Magic Link
+    App\Command\TestMagicLinkCommand:
+        arguments:
+            $mailerFrom: "%mailer_from%"
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
