@@ -16,6 +16,11 @@ services:
       DATABASE_URL: "sqlite:///%kernel.project_dir%/var/data.db"
       MAILER_DSN: smtp://mailer:1025
       MAILER_FROM: noreply@doc2sail.local
+    # Configuration DNS pour résoudre les problèmes de résolution pendant le build
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
     depends_on:
       - mailer
   ###< Application FrankenPHP ###
