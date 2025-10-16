@@ -16,6 +16,8 @@ services:
             - 8.8.8.8
             - 8.8.4.4
             - 1.1.1.1
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
         volumes:
             # Seulement les volumes nécessaires en production
             - app-var:/app/var
@@ -27,8 +29,8 @@ services:
             MERCURE_URL: http://mercure/.well-known/mercure
             MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL:-https://doc2sail.platypus-home.noho.st/.well-known/mercure}
             MERCURE_JWT_SECRET: ${MERCURE_JWT_SECRET}
-            MAILER_DSN: ${MAILER_DSN:-smtp://localhost:25}
-            MAILER_FROM: ${MAILER_FROM:-noreply@doc2sail.platypus-home.noho.st}
+            MAILER_DSN: ${MAILER_DSN}
+            MAILER_FROM: ${MAILER_FROM}
             VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
             VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
             VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@doc2sail.platypus-home.noho.st}
