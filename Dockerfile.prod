@@ -4,9 +4,20 @@
 # ============================================
 # Stage 1: Composer - Install PHP dependencies
 # ============================================
-FROM composer:2 AS composer-builder
+FROM dunglas/frankenphp:1-php8.3-alpine AS composer-builder
 
 WORKDIR /app
+
+# Installer Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Installer les extensions PHP nécessaires pour Composer
+RUN install-php-extensions \
+    pdo_sqlite \
+    intl \
+    zip \
+    xsl \
+    gmp
 
 # Copier seulement les fichiers de dépendances
 COPY composer.json composer.lock symfony.lock ./
