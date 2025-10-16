@@ -42,6 +42,8 @@ RUN install-php-extensions \
     intl \
     zip \
     gd \
+    xsl \
+    gmp \
     apcu
 
 # Copier les dépendances Composer depuis le builder
