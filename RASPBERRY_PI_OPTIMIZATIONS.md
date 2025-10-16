@@ -95,11 +95,11 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 
 ## 🎯 Comparaison des options
 
-| Option | Temps initial | Temps mise à jour | Complexité | Recommandé |
-|--------|---------------|-------------------|------------|------------|
-| **Option 1** (Build local + transfer) | ~5-10 min | ~3-5 min | Moyenne | ✅ Oui |
-| **Option 2** (Rsync sans build) | ~2-3 min | ~1-2 min | Faible | ✅ Oui |
-| **Option 3** (Build sur Pi) | ~30-60 min | ~20-40 min | Faible | ❌ Non |
+| Option                                | Temps initial | Temps mise à jour | Complexité | Recommandé |
+| ------------------------------------- | ------------- | ----------------- | ---------- | ---------- |
+| **Option 1** (Build local + transfer) | ~5-10 min     | ~3-5 min          | Moyenne    | ✅ Oui      |
+| **Option 2** (Rsync sans build)       | ~2-3 min      | ~1-2 min          | Faible     | ✅ Oui      |
+| **Option 3** (Build sur Pi)           | ~30-60 min    | ~20-40 min        | Faible     | ❌ Non      |
 
 ---
 
