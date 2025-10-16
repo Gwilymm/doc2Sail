@@ -45,16 +45,7 @@ class DocumentController extends AbstractController
 			$category = $request->request->get('category');
 			$regattaId = $request->request->get('regatta_id');
 
-			error_log("=== UPLOAD DEBUG ===");
-			error_log("File received: " . ($file ? 'YES' : 'NO'));
-			error_log("Regatta ID: " . ($regattaId ?: 'NONE'));
-			if ($file) {
-				error_log("File name: " . $file->getClientOriginalName());
-				error_log("File size: " . $file->getSize());
-				error_log("File mime: " . $file->getClientMimeType());
-				error_log("File error: " . $file->getError());
-			}
-
+			
 			if (!$file) {
 				return new JsonResponse(['error' => 'Aucun fichier fourni'], 400);
 			}
@@ -65,7 +56,8 @@ class DocumentController extends AbstractController
 			$document->setDescription($description);
 			// Si la catégorie est vide, utiliser la valeur par défaut
 			$document->setCategory($category ?: Document::DEFAULT_CATEGORY);
-			$document->setFile($file);			// Associer à une régate si spécifié
+			$document->setFile($file);			
+			// Associer à une régate si spécifié
 			if ($regattaId) {
 				$regatta = $this->entityManager->getRepository(Regatta::class)->find($regattaId);
 				if ($regatta) {
@@ -74,11 +66,11 @@ class DocumentController extends AbstractController
 				}
 			}
 
-			error_log("Document entity created");
-			error_log("Document category: " . $document->getCategory());
+		
 
 			// Valider l'entité
 			$errors = $this->validator->validate($document);
+			dump($errors);
 			if (count($errors) > 0) {
 				$errorMessages = [];
 				foreach ($errors as $error) {
