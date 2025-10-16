@@ -1,0 +1,23 @@
+# Login translations English
+login:
+    title: "Login - Doc2Sail"
+    subtitle: "Authentication required"
+    magic:
+        title: "Magic Link"
+        description: "Enter your email to receive a secure login link"
+    email:
+        label: "Email address"
+        placeholder: "you@example.com"
+    display_name:
+        label: "Display name (optional)"
+        placeholder: "e.g. Captain Alex"
+        hint: "Only used to identify you"
+    button:
+        send: "Send magic link"
+    back_home: "Back to home"
+    gdpr:
+        title: "GDPR compliant"
+        encrypted_email: "Encrypted email (SHA-256 hash)"
+        no_password: "No password stored"
+        links_ttl: "Temporary links (15 min)"
+        secure_session: "Secure session"

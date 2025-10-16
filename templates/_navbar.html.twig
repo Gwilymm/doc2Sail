@@ -14,7 +14,7 @@
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
 					</svg>
-					Accueil
+					   {{ 'navbar.home'|trans }}
 				</a>
 			</li>
 			{% if app.user %}
@@ -23,7 +23,7 @@
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
 						</svg>
-						Mes Régates
+						   {{ 'navbar.my_regattas'|trans }}
 					</a>
 				</li>
 			{% endif %}
@@ -43,12 +43,12 @@
 			<ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-40 mt-2 border border-base-300">
 				<li>
 					<a href="{{ path('app_change_language', {locale: 'fr'}) }}" class="{% if app.request.locale == 'fr' %}active{% endif %}">
-						🇫🇷 Français
+						   🇫🇷 {{ 'language.french'|trans }}
 					</a>
 				</li>
 				<li>
 					<a href="{{ path('app_change_language', {locale: 'en'}) }}" class="{% if app.request.locale == 'en' %}active{% endif %}">
-						🇬🇧 English
+						   🇬🇧 {{ 'language.english'|trans }}
 					</a>
 				</li>
 			</ul>
@@ -79,11 +79,11 @@
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
 					</svg>
-					<span class="hidden sm:inline">{{ app.user.displayName ?? 'Utilisateur' }}</span>
+					   <span class="hidden sm:inline">{{ app.user.displayName ?? ('navbar.user'|trans) }}</span>
 				</label>
 				<ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300">
 					<li class="menu-title">
-						<span>Navigation</span>
+						   <span>{{ 'navbar.navigation'|trans }}</span>
 					</li>
 					<li>
 						<a href="{{ path('app_regatta') }}" class="gap-2">
@@ -98,7 +98,7 @@
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
 							</svg>
-							Documents
+							   {{ 'navbar.documents'|trans }}
 						</a>
 					</li>
 					<div class="divider my-1"></div>
@@ -107,7 +107,7 @@
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
 							</svg>
-							Déconnexion
+							   {{ 'navbar.logout'|trans }}
 						</a>
 					</li>
 				</ul>
@@ -118,7 +118,7 @@
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
 				</svg>
-				<span class="hidden sm:inline">Connexion</span>
+				   <span class="hidden sm:inline">{{ 'navbar.login'|trans }}</span>
 			</a>
 		{% endif %}
 
@@ -153,7 +153,7 @@
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
 							</svg>
-							Déconnexion
+							   {{ 'navbar.logout'|trans }}
 						</a>
 					</li>
 				{% endif %}

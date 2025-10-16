@@ -97,6 +97,13 @@ export default class extends Controller {
 			return;
 		}
 
+		// Client-side size check to avoid sending very large files and getting HTML error responses
+		const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+		if (this.selectedFile.size > MAX_SIZE) {
+			this.showToast('Fichier trop volumineux (max 10MB)', 'error');
+			return;
+		}
+
 		const nameInput = document.getElementById('documentName');
 		const descriptionInput = document.getElementById('documentDescription');
 		const categoryInput = document.getElementById('documentCategory');
@@ -136,7 +143,16 @@ export default class extends Controller {
 				method: 'POST',
 				body: formData
 			});
-			const data = await response.json();
+			let data = null;
+			// Try to parse JSON; if server returned HTML (e.g. 413 page), handle gracefully
+			const text = await response.text();
+			try {
+				data = JSON.parse(text);
+			} catch (e) {
+				console.error('Upload response is not JSON:', text);
+				this.showToast('Erreur lors de l\'upload: réponse invalide du serveur', 'error');
+				return;
+			}
 
 			if (response.ok && data.success) {
 				this.showToast('Document uploadé avec succès!', 'success');

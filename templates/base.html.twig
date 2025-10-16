@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app.request.locale }}">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>
-			{% block title %}Doc2Sail - Gestion Documents de Régate
+			{% block title %}{{ 'base.title'|trans }}
 			{% endblock %}
 		</title>
 
-		<!-- PWA Meta Tags -->
-		<meta name="description" content="Application PWA pour gérer vos documents de régate de voile">
+	<!-- PWA Meta Tags -->
+	<meta name="description" content="{{ 'base.description'|trans }}">
 		<meta name="theme-color" content="#0284c7">
 		<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 		<link
