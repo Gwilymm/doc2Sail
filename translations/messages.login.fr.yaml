@@ -1,0 +1,23 @@
+# Traductions login français
+login:
+    title: "Connexion - Doc2Sail"
+    subtitle: "Authentification requise"
+    magic:
+        title: "Magic Link"
+        description: "Entrez votre email pour recevoir un lien de connexion sécurisé"
+    email:
+        label: "Adresse Email"
+        placeholder: "votre@email.com"
+    display_name:
+        label: "Nom d'affichage (optionnel)"
+        placeholder: "ex: Capitaine Alex"
+        hint: "Uniquement pour vous identifier"
+    button:
+        send: "Recevoir le magic link"
+    back_home: "Retour à l'accueil"
+    gdpr:
+        title: "Conforme RGPD"
+        encrypted_email: "Email crypté (hash SHA-256)"
+        no_password: "Aucun mot de passe stocké"
+        links_ttl: "Liens temporaires (15 min)"
+        secure_session: "Session sécurisée"

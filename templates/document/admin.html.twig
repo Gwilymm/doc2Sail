@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Doc2Sail - Administration{% endblock %}
+{% block title %}{{ 'document_admin.title'|trans }}{% endblock %}
 
 {% block body %}
 <div class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document">
@@ -11,7 +11,7 @@
                 <span class="text-5xl">⛵</span>
                 <div>
                     <h1 class="text-4xl font-bold text-primary">Doc2Sail</h1>
-                    <p class="text-sm text-base-content/70">Administration des documents</p>
+                    <p class="text-sm text-base-content/70">{{ 'document_admin.header.subtitle'|trans }}</p>
                 </div>
             </div>
             
@@ -21,8 +21,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
-                    Retour aux régates
-                </a>
+                    {{ 'document_admin.back_to_regattas'|trans }}
                 </a>
                 
                 <!-- Install PWA Button -->
@@ -30,14 +29,14 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Installer l'app
+                    {{ 'document_admin.install_app'|trans }}
                 </button>
             </div>
         </div>
         
         <!-- Search Bar -->
         <div class="form-control">
-            <input type="text" id="searchInput" placeholder="🔍 Rechercher un document..." class="input input-bordered w-full" />
+            <input type="text" id="searchInput" placeholder="{{ 'document_admin.search.placeholder'|trans }}" class="input input-bordered w-full" />
         </div>
     </div>
 
@@ -48,16 +47,16 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                Ajouter un document
+                {{ 'document_admin.add.title'|trans }}
             </h2>
             
             <div id="dropZone" class="border-4 border-dashed border-base-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <p class="text-lg font-semibold mb-2">Glissez-déposez votre fichier ici</p>
-                <p class="text-sm text-base-content/70 mb-4">ou cliquez pour sélectionner</p>
-                <p class="text-xs text-base-content/50">PDF, Word, Excel, Images (max 10MB)</p>
+                <p class="text-lg font-semibold mb-2">{{ 'document_admin.dropzone.drag_drop'|trans }}</p>
+                <p class="text-sm text-base-content/70 mb-4">{{ 'document_admin.dropzone.or_click'|trans }}</p>
+                <p class="text-xs text-base-content/50">{{ 'document_admin.dropzone.types'|trans }}</p>
                 <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt">
             </div>
 
@@ -65,16 +64,16 @@
             <div id="uploadForm" class="hidden mt-4">
                 <div class="form-control mb-3">
                     <label class="label">
-                        <span class="label-text font-semibold">Nom du document *</span>
+                        <span class="label-text font-semibold">{{ 'document_admin.form.name.label'|trans }}</span>
                     </label>
-                    <input type="text" id="documentName" placeholder="Nom du document" class="input input-bordered" required>
+                    <input type="text" id="documentName" placeholder="{{ 'document_admin.form.name.placeholder'|trans }}" class="input input-bordered" required>
                 </div>
                 
                 <div class="form-control mb-3">
                     <label class="label">
-                        <span class="label-text">Description (optionnelle)</span>
+                        <span class="label-text">{{ 'document_admin.form.description.label'|trans }}</span>
                     </label>
-                    <textarea id="documentDescription" placeholder="Description du document" class="textarea textarea-bordered" rows="2"></textarea>
+                    <textarea id="documentDescription" placeholder="{{ 'document_admin.form.description.placeholder'|trans }}" class="textarea textarea-bordered" rows="2"></textarea>
                 </div>
 
                 <div class="flex gap-2">
@@ -82,9 +81,9 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        Uploader
+                        {{ 'document_admin.upload.button'|trans }}
                     </button>
-                    <button id="cancelBtn" class="btn btn-ghost">Annuler</button>
+                    <button id="cancelBtn" class="btn btn-ghost">{{ 'document_admin.cancel.button'|trans }}</button>
                 </div>
             </div>
         </div>
@@ -93,7 +92,7 @@
     <!-- Documents Grid -->
     <div class="mb-4 flex justify-between items-center">
         <h2 class="text-2xl font-bold">
-            Mes Documents 
+            {{ 'document_admin.my_documents'|trans }}
             <span class="badge badge-primary" id="documentCount">{{ documents|length }}</span>
         </h2>
     </div>
@@ -144,7 +143,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                                 </svg>
-                                Actions
+                                {{ 'document_admin.actions'|trans }}
                             </label>
                             <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
                                 <li><a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
@@ -152,19 +151,19 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
-                                    Consulter
+                                    {{ 'document_admin.action.view'|trans }}
                                 </a></li>
                                 <li><a href="{{ path('app_document_download', {id: document.id}) }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
-                                    Télécharger
+                                    {{ 'document_admin.action.download'|trans }}
                                 </a></li>
                                 <li><a class="text-error delete-btn" data-document-id="{{ document.id }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
-                                    Supprimer
+                                    {{ 'document_admin.action.delete'|trans }}
                                 </a></li>
                             </ul>
                         </div>
@@ -176,8 +175,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <p class="text-xl text-base-content/50">Aucun document pour le moment</p>
-                <p class="text-sm text-base-content/40 mt-2">Uploadez votre premier document ci-dessus</p>
+                <p class="text-xl text-base-content/50">{{ 'document_admin.empty.title'|trans }}</p>
+                <p class="text-sm text-base-content/40 mt-2">{{ 'document_admin.empty.subtitle'|trans }}</p>
             </div>
         {% endfor %}
     </div>
@@ -210,7 +209,7 @@
             console.log('🖱️ Install button clicked');
             if (!deferredPrompt) {
                 console.warn('⚠️ deferredPrompt not available');
-                alert('L\'installation PWA n\'est pas disponible. Assurez-vous d\'utiliser HTTPS ou ajoutez cette page aux favoris de votre navigateur.');
+                alert("{{ 'document_admin.alert.pwa_unavailable'|trans }}");
                 return;
             }
             
