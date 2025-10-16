@@ -3,3 +3,8 @@
 @plugin "daisyui" {
     themes: light --default, dark --prefersdark, cupcake;
 }
+
+.font-emoji {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+        sans-serif;
+}
