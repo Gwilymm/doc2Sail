@@ -92,6 +92,7 @@ export default class extends Controller {
 	}
 
 	async uploadFile() {
+		console.log('mes couilles');
 		if (!this.selectedFile) {
 			this.showToast('Aucun fichier sélectionné', 'error');
 			return;
@@ -143,23 +144,29 @@ export default class extends Controller {
 				method: 'POST',
 				body: formData
 			});
+
+			// Read raw text first to avoid JSON parse errors when nginx returns HTML (413 pages)
+			const raw = await response.text();
 			let data = null;
-			// Try to parse JSON; if server returned HTML (e.g. 413 page), handle gracefully
-			const text = await response.text();
 			try {
-				data = JSON.parse(text);
+				data = raw ? JSON.parse(raw) : {};
 			} catch (e) {
-				console.error('Upload response is not JSON:', text);
-				this.showToast('Erreur lors de l\'upload: réponse invalide du serveur', 'error');
-				return;
+				// Not JSON (likely an HTML error page). We'll convert to a safe object.
+				data = { success: false, error: raw };
 			}
 
-			if (response.ok && data.success) {
+			console.log('Upload response:', data);
+
+			if (response.status === 413) {
+				// Payload too large: show a friendly, localized message
+				this.showToast('Fichier trop volumineux (dépasse la limite autorisée).', 'error');
+			} else if (response.ok && data && data.success) {
 				this.showToast('Document uploadé avec succès!', 'success');
 				this.resetForm();
 				setTimeout(() => window.location.reload(), 1000);
 			} else {
-				this.showToast(data.error || 'Erreur lors de l\'upload', 'error');
+				const message = data && data.error ? data.error : (raw && raw.length ? (raw.length > 200 ? raw.slice(0, 200) + '...' : raw) : 'Erreur lors de l\'upload');
+				this.showToast(message, 'error');
 			}
 		} catch (error) {
 			console.error('Upload error:', error);
@@ -270,7 +277,7 @@ export default class extends Controller {
 		}
 	}
 
-	setupInstallButton() {
+	/* setupInstallButton() {
 		let deferredPrompt;
 		const installBtn = document.getElementById('installBtn');
 		if (!installBtn) return;
@@ -297,7 +304,7 @@ export default class extends Controller {
 			this.showToast('App installée avec succès!', 'success');
 			installBtn.classList.add('hidden');
 		});
-	}
+	} */
 
 	showToast(message, type = 'info') {
 		const container = document.getElementById('toastContainer');
