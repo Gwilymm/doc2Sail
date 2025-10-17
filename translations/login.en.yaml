@@ -1,7 +1,22 @@
 login:
   title: "Login"
   subtitle: "Sign in to access your account"
-  username: "Username"
-  email: "Email"
-  password: "Password"
-  submit: "Sign in"
+  magic:
+    title: "Magic Login"
+    description: "Enter your email address and receive a secure login link — no password required."
+  email:
+    label: "Email address"
+    placeholder: "your@example.com"
+  display_name:
+    label: "Display name"
+    placeholder: "Ex: John Doe"
+    hint: "Used to personalize your interface (optional)"
+  button:
+    send: "Sign in"
+  back_home: "Back to home"
+  gdpr:
+    title: "Data Protection"
+    encrypted_email: "Your email address is encrypted and stored securely."
+    no_password: "No password is stored on our servers."
+    links_ttl: "Sent links automatically expire for your security."
+    secure_session: "Secure sessions protect access to your account."

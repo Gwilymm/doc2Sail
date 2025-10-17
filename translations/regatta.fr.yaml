@@ -1,0 +1,65 @@
+title: "Gestion des régates"
+logout: "Déconnexion"
+new_regatta: "Nouvelle régate"
+documents_count: "document(s)"
+actions:
+  delete: "Supprimer"
+  manage: "Gérer"
+modal:
+  create_title: "Nouvelle régate"
+  cancel: "Annuler"
+  create: "Créer"
+form:
+  name: "Nom"
+  start_date: "Début"
+  end_date: "Fin"
+  description: "Description"
+confirm:
+  delete: "Êtes-vous sûr de vouloir supprimer la régate \"%name%\" ?\n\n⚠️ Tous les documents associés seront également supprimés !"
+errors:
+  delete_failed: "Erreur lors de la suppression"
+  create_failed: "Erreur lors de la création"
+no_regattas: "Aucune régate"
+create_first: "Créer une régate"
+documents:
+  invite_co_owner: "Inviter un copropriétaire"
+  back_to_regattas: "Retour aux régates"
+  share_url:
+    title: "URL de partage"
+    copy: "Copier"
+  co_owners:
+    title: "Copropriétaires (%count%)"
+    default_name: "Utilisateur"
+  upload:
+    title: "Ajouter un document"
+    drag_drop: "Glissez-déposez votre fichier ici"
+    or_click: "ou cliquez pour sélectionner"
+    supported_files: "PDF, Word, Excel, Images (max 100MB)"
+    form:
+      name: "Nom du document"
+      name_placeholder: "Nom du document"
+      category: "Catégorie"
+      category_help: "Sélectionnez ou saisissez la catégorie du document"
+      description: "Description (optionnelle)"
+      description_placeholder: "Description du document"
+      upload: "Uploader"
+      cancel: "Annuler"
+  my_documents: "Mes Documents"
+  filter:
+    title: "🔍 Filtrer par catégorie"
+  document_count: "document(s)"
+  actions:
+    view: "Consulter"
+    download: "Télécharger"
+    delete: "Supprimer"
+  empty:
+    title: "Aucun document pour le moment"
+    subtitle: "Uploadez votre premier document ci-dessus"
+  invite_modal:
+    title: "🤝 Inviter un copropriétaire"
+    description: "Le copropriétaire pourra consulter, ajouter, modifier et supprimer des documents de cette régate."
+    email: "Adresse email"
+    email_placeholder: "exemple@email.com"
+    email_help: "Un email d'invitation sera envoyé à cette adresse"
+    cancel: "Annuler"
+    send: "Envoyer l'invitation"

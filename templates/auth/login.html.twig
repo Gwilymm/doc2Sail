@@ -1,13 +1,11 @@
 {% extends 'base.html.twig' %}
+
 {% trans_default_domain 'login' %}
-{% block title
-%}
+{% block title%}
 	{{ "login.title" | trans }}
 {% endblock %}
 {% block body %}
-	{% include
-'_navbar.html.twig' %}
-
+	{% include'_navbar.html.twig' %}
 	<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 px-4">
 		<div
 			class="max-w-md w-full">
@@ -17,17 +15,10 @@
 				<h1 class="text-4xl font-bold text-primary mb-2">Doc2Sail</h1>
 				<p class="text-base-content/70">{{ "login.subtitle" | trans }}</p>
 			</div>
-
 			<!-- Flash Messages -->
 			{% for type, messages in app.flashes %}
 				{% for message in messages %}
-					<div class="alert alert-{{
-														                type == 'error'
-														                    ? 'error'
-														                    : type == 'success'
-														                    ? 'success'
-														                    : 'info'
-														            }} mb-4 shadow-lg">
+					<div class="alert alert-{{type == 'error'? 'error' : type == 'success' ? 'success' : 'info'}} mb-4 shadow-lg">
 						<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
 							{% if type == 'error' %}
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -117,21 +108,4 @@
 			</div>
 		</div>
 	</div>
-
-	<style>
-		@keyframes bounce-slow
-		{
-			0,
-			100%
-			{transform:translateY(0)
-			}
-			50%
-			{transform:translateY(-20px)
-			}
-		}
-
-		.animate-bounce-slow
-		{animation:bounce-slow 3s ease-in-out infinite
-		}
-	</style>
 {% endblock %}
