@@ -1,251 +1,134 @@
 {% extends 'base.html.twig' %}
-{% trans_default_domain 'document_admin' %}
 
-{% block title %}{{ 'document_admin.title'|trans }}{% endblock %}
-
+{% trans_default_domain 'login' %}
+{% block title%}
+	{{ "login.title" | trans }}
+{% endblock %}
 {% block body %}
-<div class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document">
-    <!-- Header -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <span class="text-5xl">⛵</span>
-                <div>
-                    <h1 class="text-4xl font-bold text-primary">Doc2Sail</h1>
-                    <p class="text-sm text-base-content/70">{{ 'document_admin.header.subtitle'|trans }}</p>
-                </div>
-            </div>
-            
-            <div class="flex gap-2">
-                <!-- Link to Regattas -->
-                <a href="{{ path('app_regatta') }}" class="btn btn-outline btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    {{ 'document_admin.back_to_regattas'|trans }}
-                </a>
-                
-                <!-- Install PWA Button -->
-                <button id="installBtn" class="btn btn-primary btn-sm hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    {{ 'document_admin.install_app'|trans }}
-                </button>
-            </div>
-        </div>
-        
-        <!-- Search Bar -->
-        <div class="form-control">
-            <input type="text" id="searchInput" placeholder="{{ 'document_admin.search.placeholder'|trans }}" class="input input-bordered w-full" />
-        </div>
-    </div>
+	{% include'_navbar.html.twig' %}
+	<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 px-4">
+		<div
+			class="max-w-md w-full">
+			<!-- Logo -->
+			<div class="text-center mb-8">
+				<img src="{{ asset('logo.svg') }}" alt="Doc2Sail Logo" class="w-32 h-32 mx-auto mb-4 animate-bounce-slow"/>
+				<h1 class="text-4xl font-bold text-primary mb-2">Doc2Sail</h1>
+				<p class="text-base-content/70">{{ "login.subtitle" | trans }}</p>
+			</div>
+			<!-- Flash Messages -->
+			{% for type, messages in app.flashes %}
+				{% for message in messages %}
+					<div class="alert alert-{{type == 'error'? 'error' : type == 'success' ? 'success' : 'info'}} mb-4 shadow-lg">
+						<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
+							{% if type == 'error' %}
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+							{% elseif type == 'success' %}
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+							{% else %}
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+							{% endif %}
+						</svg>
+						<span>{{ message }}</span>
+					</div>
+				{% endfor %}
+			{% endfor %}
 
-    <!-- Upload Zone -->
-    <div class="card bg-base-100 shadow-xl mb-8 border-2 border-primary/20">
-        <div class="card-body">
-            <h2 class="card-title text-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                {{ 'document_admin.add.title'|trans }}
-            </h2>
-            
-            <div id="dropZone" class="border-4 border-dashed border-base-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <p class="text-lg font-semibold mb-2">{{ 'document_admin.dropzone.drag_drop'|trans }}</p>
-                <p class="text-sm text-base-content/70 mb-4">{{ 'document_admin.dropzone.or_click'|trans }}</p>
-                <p class="text-xs text-base-content/50">{{ 'document_admin.dropzone.types'|trans }}</p>
-                <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt">
-            </div>
+			<!-- Formulaire de connexion -->
+			<div class="card bg-base-100 shadow-2xl border border-base-300">
+				<div class="card-body">
+					<h2 class="card-title text-2xl mb-4 text-base-content">
+						<span class="font-emoji">✨</span>
+						{{ "login.magic.title" | trans }}
+					</h2>
+					<p class="text-base-content/70 mb-4">
+						{{ "login.magic.description" | trans }}
+					</p>
 
-            <!-- Upload Form -->
-            <div id="uploadForm" class="hidden mt-4">
-                <div class="form-control mb-3">
-                    <label class="label">
-                        <span class="label-text font-semibold">{{ 'document_admin.form.name.label'|trans }}</span>
-                    </label>
-                    <input type="text" id="documentName" placeholder="{{ 'document_admin.form.name.placeholder'|trans }}" class="input input-bordered" required>
-                </div>
-                
-                <div class="form-control mb-3">
-                    <label class="label">
-                        <span class="label-text">{{ 'document_admin.form.description.label'|trans }}</span>
-                    </label>
-                    <textarea id="documentDescription" placeholder="{{ 'document_admin.form.description.placeholder'|trans }}" class="textarea textarea-bordered" rows="2"></textarea>
-                </div>
+					<form action="{{ path('app_login') }}" method="POST">
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">{{
+                                "login.email.label" | trans
+                            }}</span>
+							</label>
+							<input type="email" name="email" placeholder="{{ 'login.email.placeholder' | trans }}" class="input input-bordered input-lg w-full" required autofocus autocomplete="email"/>
+						</div>
 
-                <div class="flex gap-2">
-                    <button id="uploadBtn" class="btn btn-primary flex-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        {{ 'document_admin.upload.button'|trans }}
-                    </button>
-                    <button id="cancelBtn" class="btn btn-ghost">{{ 'document_admin.cancel.button'|trans }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Documents Grid -->
-    <div class="mb-4 flex justify-between items-center">
-        <h2 class="text-2xl font-bold">
-            {{ 'document_admin.my_documents'|trans }}
-            <span class="badge badge-primary" id="documentCount">{{ documents|length }}</span>
-        </h2>
-    </div>
-
-    <div id="documentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for document in documents %}
-            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow document-card" data-document-id="{{ document.id }}">
-                <div class="card-body">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex-1">
-                            <h3 class="card-title text-lg">{{ document.name }}</h3>
-                            {% if document.description %}
-                                <p class="text-sm text-base-content/70 mt-1">{{ document.description }}</p>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- File Type Icon -->
-                        <div class="avatar placeholder">
-                            <div class="bg-primary text-primary-content rounded-lg w-12 h-12">
-                                <span class="text-xl">
-                                    {% if 'pdf' in document.mimeType %}
-                                        📄
-                                    {% elseif 'image' in document.mimeType %}
-                                        🖼️
-                                    {% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
-                                        📝
-                                    {% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
-                                        📊
-                                    {% else %}
-                                        📁
-                                    {% endif %}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="divider my-2"></div>
-
-                    <div class="flex items-center justify-between text-xs text-base-content/70 mb-4">
-                        <span class="badge badge-outline">{{ document.formattedSize }}</span>
-                        <span>{{ document.uploadedAt|date('d/m/Y H:i') }}</span>
-                    </div>
-
-                    <!-- Admin Actions -->
-                    <div class="card-actions justify-end gap-2">
-                        <div class="dropdown dropdown-top dropdown-end flex-1">
-                            <label tabindex="0" class="btn btn-sm btn-outline w-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                </svg>
-                                {{ 'document_admin.actions'|trans }}
-                            </label>
-                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
-                                <li><a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                    {{ 'document_admin.action.view'|trans }}
-                                </a></li>
-                                <li><a href="{{ path('app_document_download', {id: document.id}) }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    {{ 'document_admin.action.download'|trans }}
-                                </a></li>
-                                <li><a class="text-error delete-btn" data-document-id="{{ document.id }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    {{ 'document_admin.action.delete'|trans }}
-                                </a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="col-span-full text-center py-16">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p class="text-xl text-base-content/50">{{ 'document_admin.empty.title'|trans }}</p>
-                <p class="text-sm text-base-content/40 mt-2">{{ 'document_admin.empty.subtitle'|trans }}</p>
-            </div>
-        {% endfor %}
-    </div>
+						<div class="form-control mt-4">
+							<label class="label">
+								<span class="label-text font-semibold">{{
+                                "login.display_name.label" | trans
+                            }}</span>
+							</label>
+							<input type="text" name="display_name" placeholder="{{ 'login.display_name.placeholder' | trans }}" class="input input-bordered w-full" autocomplete="name"/>
+							<label class="label">
+								<span class="label-text-alt text-base-content/60">
+									{{ "login.display_name.hint" | trans }}
+								</span>
+							</label>
+						</div>
+{# juste au-dessus du bouton #}
+<div class="form-control mt-4">
+  <label class="cursor-pointer label justify-start gap-3">
+    <input
+      type="checkbox"
+      name="remember_me"
+      id="remember_me"
+      value="1"
+      class="checkbox checkbox-primary"
+    />
+    <span class="label-text">
+      {{ "login.remember_me.label" | trans({
+        '%duration%': '1 jour'
+      }) }}
+      <span class="text-base-content/60 block text-xs">
+        {{ "login.remember_me.consent_note" | trans }}
+        <a href="{{ path('app_privacy') }}" class="link">
+          {{ "login.remember_me.privacy_link" | trans }}
+        </a>.
+      </span>
+    </span>
+  </label>
 </div>
 
-<!-- Toast Container -->
-<div id="toastContainer" class="toast toast-top toast-end z-50"></div>
+						<div class="form-control mt-6">
+							<button type="submit" class="btn btn-primary btn-lg w-full gap-2">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+								</svg>
+								{{ "login.button.send" | trans }}
+							</button>
+						</div>
+					</form>
 
-<!-- PWA Install Handler -->
-<script>
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
+					<a href="{{ path('app_home') }}" class="btn btn-ghost btn-block gap-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+						</svg>
+						{{ "login.back_home" | trans }}
+					</a>
+				</div>
+			</div>
 
-    // Écouter l'événement beforeinstallprompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('💾 beforeinstallprompt event fired');
-        // Empêcher l'affichage automatique
-        e.preventDefault();
-        // Stocker l'événement pour l'utiliser plus tard
-        deferredPrompt = e;
-        // Afficher le bouton d'installation
-        if (installBtn) {
-            installBtn.classList.remove('hidden');
-        }
-    });
-
-    // Gérer le clic sur le bouton d'installation
-    if (installBtn) {
-        installBtn.addEventListener('click', async () => {
-            console.log('🖱️ Install button clicked');
-            if (!deferredPrompt) {
-                console.warn('⚠️ deferredPrompt not available');
-                alert("{{ 'document_admin.alert.pwa_unavailable'|trans }}");
-                return;
-            }
-            
-            // Afficher le prompt d'installation
-            deferredPrompt.prompt();
-            
-            // Attendre la réponse de l'utilisateur
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`👤 User response: ${outcome}`);
-            
-            if (outcome === 'accepted') {
-                console.log('✅ PWA installed');
-            } else {
-                console.log('❌ PWA installation declined');
-            }
-            
-            // Réinitialiser deferredPrompt
-            deferredPrompt = null;
-            installBtn.classList.add('hidden');
-        });
-    }
-
-    // Vérifier si déjà installé
-    window.addEventListener('appinstalled', () => {
-        console.log('✅ PWA was installed');
-        if (installBtn) {
-            installBtn.classList.add('hidden');
-        }
-    });
-
-    // Pour les tests en HTTP, afficher un message dans la console
-    console.log('🔍 PWA Install Status:', {
-        serviceWorkerSupported: 'serviceWorker' in navigator,
-        protocol: window.location.protocol,
-        hostname: window.location.hostname
-    });
-</script>
+			<!-- Info RGPD -->
+			<div class="text-center mt-6 text-sm text-base-content/60">
+				<p class="flex items-center justify-center gap-2 mb-2">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-success" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+					</svg>
+					{{ "login.gdpr.title" | trans }}
+				</p>
+				<p class="text-xs max-w-md mx-auto">
+					<span class="font-emoji">✓</span>
+					{{ "login.gdpr.encrypted_email" | trans }}<br/>
+					<span class="font-emoji">✓</span>
+					{{ "login.gdpr.no_password" | trans }}<br/>
+					<span class="font-emoji">✓</span>
+					{{ "login.gdpr.links_ttl" | trans }}<br/>
+					<span class="font-emoji">✓</span>
+					{{ "login.gdpr.secure_session" | trans }}
+				</p>
+			</div>
+		</div>
+	</div>
 {% endblock %}

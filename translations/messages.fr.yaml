@@ -106,3 +106,4 @@ document_admin:
         subtitle: "Uploadez votre premier document ci-dessus"
     alert:
         pwa_unavailable: "L'installation PWA n'est pas disponible. Assurez-vous d'utiliser HTTPS ou ajoutez cette page aux favoris de votre navigateur."
+
