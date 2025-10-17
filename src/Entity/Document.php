@@ -177,7 +177,7 @@ class Document
 
 	public function getFormattedSize(): string
 	{
-		$units = ['B', 'KB', 'MB', 'GB'];
+		$units = ['B', 'K', 'M', 'G'];
 		$size = $this->size;
 		$unit = 0;
 
