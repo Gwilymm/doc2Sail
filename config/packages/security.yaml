@@ -25,6 +25,14 @@ security:
                 lifetime: 900
                 max_uses: 3
 
+            remember_me:
+                secret: '%env(APP_SECRET)%'
+                lifetime: 86400  # 1 jour (24h)
+                path: '/'
+                always_remember_me: false  # RGPD: jamais sans consentement explicite
+                # name: REMEMBERME
+                # token_provider: 'security.remember_me.token_provider.doctrine'
+
             logout:
                 path: app_logout
                 target: app_home
