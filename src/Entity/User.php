@@ -178,11 +178,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 	// ===== Méthodes UserInterface pour Symfony Security =====
 
-	public function getUserIdentifier(): string
+public function getUserIdentifier(): string
 {
-    // Identifiant stable et non-réversible
-    return hash_hmac('sha256', (string) $this->id, $_ENV['APP_SECRET']);
+    return (string) $this->id;
 }
+
 
 
 	public function getRoles(): array

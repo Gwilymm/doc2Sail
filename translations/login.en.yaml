@@ -1,22 +1,27 @@
 login:
-  title: "Login"
-  subtitle: "Sign in to access your account"
-  magic:
-    title: "Magic Login"
-    description: "Enter your email address and receive a secure login link — no password required."
-  email:
-    label: "Email address"
-    placeholder: "your@example.com"
-  display_name:
-    label: "Display name"
-    placeholder: "Ex: John Doe"
-    hint: "Used to personalize your interface (optional)"
-  button:
-    send: "Sign in"
-  back_home: "Back to home"
-  gdpr:
-    title: "Data Protection"
-    encrypted_email: "Your email address is encrypted and stored securely."
-    no_password: "No password is stored on our servers."
-    links_ttl: "Sent links automatically expire for your security."
-    secure_session: "Secure sessions protect access to your account."
+    title: "Login"
+    subtitle: "Sign in to access your account"
+    magic:
+        title: "Magic Login"
+        description: "Enter your email address and receive a secure login link — no password required."
+    email:
+        label: "Email address"
+        placeholder: "your@example.com"
+    display_name:
+        label: "Display name"
+        placeholder: "Ex: John Doe"
+        hint: "Used to personalize your interface (optional)"
+    button:
+        send: "Sign in"
+    back_home: "Back to home"
+    gdpr:
+        title: "Data Protection"
+        encrypted_email: "Your email address is encrypted and stored securely."
+        no_password: "No password is stored on our servers."
+        links_ttl: "Sent links automatically expire for your security."
+        secure_session: "Secure sessions protect access to your account."
+    remember_me:
+        label: "Remember me for %duration% (persistent cookie)"
+        consent_note: "This cookie is only set if you check the box."
+        consent_why: "It allows you to stay logged in automatically."
+        privacy_link: "Learn more about privacy"

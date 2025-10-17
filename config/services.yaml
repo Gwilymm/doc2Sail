@@ -30,17 +30,23 @@ services:
             $vapidPrivateKey: "%env(VAPID_PRIVATE_KEY)%"
             $vapidSubject: "%env(VAPID_SUBJECT)%"
 
-    # Configuration de la commande de test du Magic Link
-    App\Command\TestMagicLinkCommand:
-        arguments:
-            $mailerFrom: "%mailer_from%"
-
+    # Configuration de la commande de test du Magic Link / LoginLink handler
     Symfony\Component\Security\Http\LoginLink\LoginLinkHandler:
+        public: true
         arguments:
             $options:
+                route_name: "app_login_check"
                 lifetime: 900 # 15 minutes
                 max_uses: 3
                 signature_properties: ["id"]
+
+    # Alias the interface to the concrete LoginLinkHandler so autowiring works
+    Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface: '@Symfony\Component\Security\Http\LoginLink\LoginLinkHandler'
+
+    # Ensure the SignatureHasher type can be autowired (use the remember_me hasher)
+    Symfony\Component\Security\Core\Signature\SignatureHasher: "@security.authenticator.remember_me_signature_hasher.main"
+
+    # Configuration de la commande de test du Magic Link
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -33,6 +33,8 @@ class AuthController extends AbstractController
         LoginLinkHandlerInterface $loginLinkHandler,
         Request $request
     ): Response {
+	
+	
         // GET -> formulaire
         if (!$request->isMethod('POST')) {
             return $this->render('auth/login.html.twig');
@@ -42,13 +44,13 @@ class AuthController extends AbstractController
 
         // 1) Anti-abus: Rate-limit par couple (email|ip)
        // 1) Anti-abus: Rate-limit par couple (email|ip)
-$rawEmail = (string) $request->request->get('email', '');
-$email = trim(mb_strtolower($rawEmail));
-$key = sprintf('%s|%s', $email ?: 'empty', $request->getClientIp() ?? 'noip');
+		$rawEmail = (string) $request->request->get('email', '');
+		$email = trim(mb_strtolower($rawEmail));
+		$key = sprintf('%s|%s', $email ?: 'empty', $request->getClientIp() ?? 'noip');
 
-// ✅ Utilise la propriété correcte $magicLinkLimiter
-$limiter = $this->magicLinkLimiter->create($key);
-$limit = $limiter->consume(1);
+		// ✅ Utilise la propriété correcte $magicLinkLimiter
+		$limiter = $this->magicLinkLimiter->create($key);
+		$limit = $limiter->consume(1);
 
 if (!$limit->isAccepted()) {
     $retryAfter = $limit->getRetryAfter();

@@ -23,5 +23,6 @@ login:
 
     remember_me:
         label: "Se souvenir de moi pendant %duration% (cookie persistant)"
-        consent_note: "Ce cookie n'est déposé que si vous cochez la case. Il permet de rester connecté automatiquement."
+        consent_note: "Ce cookie n'est déposé que si vous cochez la case."
+        consent_why: "Il permet de rester connecté automatiquement."
         privacy_link: "En savoir plus sur la vie privée"
