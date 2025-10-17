@@ -102,7 +102,7 @@ export default class extends Controller {
 		// Limit set to 100MB
 		const MAX_SIZE = 100 * 1024 * 1024; // 100MB
 		console.log('Selected file size:', this.selectedFile.size);
-		cxonsole.log('Max allowed size:', MAX_SIZE);
+		console.log('Max allowed size:', MAX_SIZE);
 		if (this.selectedFile.size > MAX_SIZE) {
 			this.showToast('Fichier trop volumineux (max 100MB)', 'error');
 			return;
