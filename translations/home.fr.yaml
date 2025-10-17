@@ -9,7 +9,10 @@ home:
   features:
     title: "Pourquoi choisir Doc2Sail ?"
     simple: "Simple et rapide"
-    secure: "Sécurisé"
+    secure:
+      title: "Partage Sécurisé"
+      description: "Générez des liens uniques et sécurisés pour chaque régate. Partagez uniquement ce qui doit l'être avec votre équipage."
+      badge: "Crypté"
     pwa:
       title: "PWA Mobile"
       description: "Installez l'app sur votre téléphone ou tablette. Fonctionne même hors ligne pour un accès permanent à vos documents."
