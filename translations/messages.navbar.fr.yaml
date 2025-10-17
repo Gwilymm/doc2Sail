@@ -1,9 +1,0 @@
-# Traductions navbar français
-navbar:
-    home: "Accueil"
-    my_regattas: "Mes Régates"
-    login: "Connexion"
-    logout: "Déconnexion"
-    user: "Utilisateur"
-    navigation: "Navigation"
-    documents: "Documents"

@@ -1,0 +1,65 @@
+title: "Regatta Management"
+logout: "Logout"
+new_regatta: "New Regatta"
+documents_count: "document(s)"
+actions:
+  delete: "Delete"
+  manage: "Manage"
+modal:
+  create_title: "New Regatta"
+  cancel: "Cancel"
+  create: "Create"
+form:
+  name: "Name"
+  start_date: "Start Date"
+  end_date: "End Date"
+  description: "Description"
+confirm:
+  delete: "Are you sure you want to delete the regatta \"%name%\"?\n\n⚠️ All associated documents will also be deleted!"
+errors:
+  delete_failed: "Error during deletion"
+  create_failed: "Error during creation"
+no_regattas: "No regattas"
+create_first: "Create a regatta"
+documents:
+  invite_co_owner: "Invite a co-owner"
+  back_to_regattas: "Back to regattas"
+  share_url:
+    title: "Share URL"
+    copy: "Copy"
+  co_owners:
+    title: "Co-owners (%count%)"
+    default_name: "User"
+  upload:
+    title: "Add a document"
+    drag_drop: "Drag and drop your file here"
+    or_click: "or click to select"
+    supported_files: "PDF, Word, Excel, Images (max 100MB)"
+    form:
+      name: "Document name"
+      name_placeholder: "Document name"
+      category: "Category"
+      category_help: "Select or enter the document category"
+      description: "Description (optional)"
+      description_placeholder: "Document description"
+      upload: "Upload"
+      cancel: "Cancel"
+  my_documents: "My Documents"
+  filter:
+    title: "🔍 Filter by category"
+  document_count: "document(s)"
+  actions:
+    view: "View"
+    download: "Download"
+    delete: "Delete"
+  empty:
+    title: "No documents yet"
+    subtitle: "Upload your first document above"
+  invite_modal:
+    title: "🤝 Invite a co-owner"
+    description: "The co-owner will be able to view, add, modify and delete documents from this regatta."
+    email: "Email address"
+    email_placeholder: "example@email.com"
+    email_help: "An invitation email will be sent to this address"
+    cancel: "Cancel"
+    send: "Send invitation"
