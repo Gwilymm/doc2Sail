@@ -46,6 +46,6 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 ENV SERVER_NAME=:80
 
-RUN composer install --no-scripts
+RUN composer install 
 
 

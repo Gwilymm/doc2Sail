@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 
 class AuthController extends AbstractController
@@ -25,7 +25,7 @@ class AuthController extends AbstractController
         private MailerInterface $mailer,
         private ParameterBagInterface $params,
         #[Autowire(service: 'limiter.magic_link_request_by_email')]
-    	   private RateLimiterFactory $magicLinkLimiter
+        private RateLimiterFactoryInterface $magicLinkLimiter
     ) {}
 
     #[Route('/login', name: 'app_login')]
@@ -41,20 +41,22 @@ class AuthController extends AbstractController
         // POST -> demande d'envoi du magic link
 
         // 1) Anti-abus: Rate-limit par couple (email|ip)
-        $rawEmail = (string) $request->request->get('email', '');
-        $email = trim(mb_strtolower($rawEmail));
-        $key = sprintf('%s|%s', $email ?: 'empty', $request->getClientIp() ?? 'noip');
+       // 1) Anti-abus: Rate-limit par couple (email|ip)
+$rawEmail = (string) $request->request->get('email', '');
+$email = trim(mb_strtolower($rawEmail));
+$key = sprintf('%s|%s', $email ?: 'empty', $request->getClientIp() ?? 'noip');
 
-       $limiter = $this->magicLinkLimiter->create($key);
-        $limit = $limiter->consume(1); // coûte 1 jeton
+// ✅ Utilise la propriété correcte $magicLinkLimiter
+$limiter = $this->magicLinkLimiter->create($key);
+$limit = $limiter->consume(1);
 
-        if (!$limit->isAccepted()) {
-            // Temps d'attente conseillé (arrondi)
-            $retryAfter = $limit->getRetryAfter();
-            $waitSec = max(1, $retryAfter?->getTimestamp() - time());
-            $this->addFlash('error', sprintf('Trop de demandes. Réessayez dans ~%d secondes.', $waitSec));
-            return $this->redirectToRoute('app_login');
-        }
+if (!$limit->isAccepted()) {
+    $retryAfter = $limit->getRetryAfter();
+    $waitSec = max(1, $retryAfter?->getTimestamp() - time());
+    $this->addFlash('error', sprintf('Trop de demandes. Réessayez dans ~%d secondes.', $waitSec));
+    return $this->redirectToRoute('app_login');
+}
+
 
         // 2) Validation email (basique pour l’UX – on évite l’énumération)
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -109,6 +111,12 @@ class AuthController extends AbstractController
         }
 
         return $this->redirectToRoute('app_login');
+    }
+
+    #[Route('/privacy', name: 'app_privacy')]
+    public function privacy(): Response
+    {
+        return $this->render('privacy.html.twig');
     }
 
     #[Route('/login_check', name: 'app_login_check')]

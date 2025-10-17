@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+{% block title %}RGPD & Vie privée{% endblock %}
+{% block body %}
+    <div class="max-w-2xl mx-auto py-10 px-4">
+        <h1 class="text-3xl font-bold mb-6 text-primary">RGPD & Vie privée</h1>
+        <div class="prose max-w-none">
+            <h2>Protection de vos données personnelles</h2>
+            <p>
+                Doc2Sail respecte la vie privée de ses utilisateurs et applique le Règlement Général sur la Protection des Données (RGPD).
+            </p>
+            <ul>
+                <li><strong>Pas de mot de passe stocké</strong> : l’authentification se fait uniquement par lien magique envoyé par email.</li>
+                <li><strong>Email chiffré</strong> : votre adresse email est stockée de façon sécurisée et n’est jamais partagée.</li>
+                <li><strong>Consentement explicite</strong> : le cookie "Se souvenir de moi" n’est déposé que si vous cochez la case correspondante lors de la connexion.</li>
+                <li><strong>Durée limitée</strong> : le cookie de reconnexion automatique expire au bout de 1 jour.</li>
+                <li><strong>Suppression à la demande</strong> : vous pouvez demander la suppression de votre compte et de vos données à tout moment.</li>
+                <li><strong>Session sécurisée</strong> : la session est strictement nécessaire au fonctionnement du service et protégée par des paramètres de sécurité renforcés.</li>
+            </ul>
+            <h2>Contact</h2>
+            <p>
+                Pour toute question ou demande concernant vos données personnelles, contactez-nous à l’adresse : <a href="mailto:contact@doc2sail.com" class="link">contact@doc2sail.com</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}
