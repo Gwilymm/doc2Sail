@@ -3,57 +3,60 @@
 namespace App\Security;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
-use Symfony\Component\Security\Http\Authenticator\Passport\Badge\SelfValidatingBadge;
-use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
-use Symfony\Component\Security\Http\Authenticator\Passport\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Core\Exception\UserNotFoundException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class LoginLinkAuthenticator extends AbstractAuthenticator
 {
     public function __construct(
         private LoginLinkHandlerInterface $loginLinkHandler,
-        private UserProviderInterface $userProvider
+        private UrlGeneratorInterface $urlGenerator
     ) {}
 
     public function supports(Request $request): ?bool
     {
-        // Supporte la route de vérification du magic link
+        // Supporte la route de "vérification" du magic link
         return $request->attributes->get('_route') === 'app_login_check';
     }
 
-    public function authenticate(Request $request): Passport
+    public function authenticate(Request $request): SelfValidatingPassport
     {
-        // Récupère l'utilisateur à partir du login link
+        // Récupère / Consomme l'utilisateur depuis le lien de connexion
         $user = $this->loginLinkHandler->consumeLoginLink($request);
-        if (!$user) {
-            throw new UserNotFoundException('Utilisateur non trouvé ou lien invalide.');
-        }
-        $passport = new Passport(
-            new UserBadge($user->getUserIdentifier()),
-            new SelfValidatingBadge()
+
+        // Construction du passport sans mot de passe (SelfValidating)
+        $passport = new SelfValidatingPassport(
+            new UserBadge(
+                $user->getUserIdentifier(),
+                fn () => $user
+            )
         );
 
-        // RGPD: Ajoute le badge remember-me UNIQUEMENT si consentement explicite
+        // RGPD — Ajout remember_me UNIQUEMENT si consentement (checkbox)
         $consented = (bool) ($request->getSession()->remove('auth.remember_me.requested') ?? false);
         if ($consented) {
             $passport->addBadge(new RememberMeBadge());
         }
+
         return $passport;
     }
 
-    public function onAuthenticationSuccess(Request $request, $token, string $firewallName): ?\Symfony\Component\HttpFoundation\Response
+    public function onAuthenticationSuccess(Request $request, $token, string $firewallName): ?RedirectResponse
     {
-        // Redirige vers la page d'accueil après succès
-        return null;
+        // ✅ Redirection après connexion réussie
+        return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
 
-    public function onAuthenticationFailure(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $exception): ?\Symfony\Component\HttpFoundation\Response
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?RedirectResponse
     {
-        // Redirige vers la page de login en cas d'échec
-        return null;
+        // ❌ En cas d’échec (lien invalide / expiré)
+        $request->getSession()->getFlashBag()->add('error', 'Lien expiré ou invalide. Veuillez redemander un lien.');
+        return new RedirectResponse($this->urlGenerator->generate('app_login'));
     }
 }

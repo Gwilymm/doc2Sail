@@ -35,6 +35,13 @@ services:
         arguments:
             $mailerFrom: "%mailer_from%"
 
+    Symfony\Component\Security\Http\LoginLink\LoginLinkHandler:
+        arguments:
+            $options:
+                lifetime: 900 # 15 minutes
+                max_uses: 3
+                signature_properties: ["id"]
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
