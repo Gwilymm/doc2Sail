@@ -20,3 +20,8 @@ login:
         no_password: "Aucun mot de passe n'est stocké sur nos serveurs."
         links_ttl: "Les liens envoyés expirent automatiquement pour votre sécurité."
         secure_session: "Des sessions sécurisées protègent l'accès à votre compte."
+
+    remember_me:
+        label: "Se souvenir de moi pendant %duration% (cookie persistant)"
+        consent_note: "Ce cookie n'est déposé que si vous cochez la case. Il permet de rester connecté automatiquement."
+        privacy_link: "En savoir plus sur la vie privée"
