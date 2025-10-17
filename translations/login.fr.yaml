@@ -1,7 +1,22 @@
 login:
-  title: "Connexion"
-  subtitle: "Connectez-vous pour accéder à votre espace"
-  username: "Nom d'utilisateur"
-  email: "Email"
-  password: "Mot de passe"
-  submit: "Se connecter"
+    title: "Connexion"
+    subtitle: "Connectez-vous pour accéder à votre espace"
+    magic:
+        title: "Connexion magique"
+        description: "Entrez votre adresse e-mail et recevez un lien de connexion sécurisé — aucun mot de passe requis."
+    email:
+        label: "Adresse e-mail"
+        placeholder: "votre@exemple.com"
+    display_name:
+        label: "Nom affiché"
+        placeholder: "Ex : Jean Dupont"
+        hint: "Utilisé pour personnaliser votre interface (optionnel)"
+    button:
+        send: "Se connecter"
+    back_home: "Retour à l'accueil"
+    gdpr:
+        title: "Protection des données"
+        encrypted_email: "Votre adresse e-mail est chiffrée et stockée de façon sécurisée."
+        no_password: "Aucun mot de passe n'est stocké sur nos serveurs."
+        links_ttl: "Les liens envoyés expirent automatiquement pour votre sécurité."
+        secure_session: "Des sessions sécurisées protègent l'accès à votre compte."
