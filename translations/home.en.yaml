@@ -1,0 +1,49 @@
+home:
+  title: "Doc2Sail - Document Management for Sailing Regattas"
+  hero:
+    title: "Doc2Sail"
+    subtitle: "The modern solution to manage your regatta documents"
+    description: "Centralize, organize and share all your sailing documents with ease. Accessible everywhere, even offline."
+    button_manage: "Manage my regattas"
+    button_view: "View documents"
+  features:
+    title: "Why choose Doc2Sail?"
+    simple: "Simple and fast"
+    secure: "Secure"
+    pwa:
+      title: "Mobile PWA"
+      description: "Install the app on your phone or tablet. Works even offline for permanent access to your documents."
+      badge: "Offline"
+    organize:
+      title: "Simple Organization"
+      description: "One regatta = one folder. Drag & drop upload, instant search, automatic document categorization."
+      badge: "Intuitive"
+  sailing:
+    title: "Designed by sailors, for sailors"
+    races:
+      title: "Races"
+      description: "Sailing instructions, schedules, GPS tracks"
+    rules:
+      title: "Regulations"
+      description: "Notice of race, class rules, general regulations"
+    results:
+      title: "Results"
+      description: "Rankings, times, penalties, protests"
+  howto:
+    title: "How does it work?"
+    step1:
+      title: "Create your regatta"
+      description: "Add the name, dates and description. A dedicated folder is automatically created."
+    step2:
+      title: "Upload your documents"
+      description: "Drag and drop your PDFs, images, spreadsheets directly from your computer or phone."
+    step3:
+      title: "Share the secure URL"
+      description: "Copy the unique link and share it with your crew. They will have read-only access to documents."
+  cta:
+    title: "Ready to set sail?"
+    description: "Start organizing your regatta documents now. Simple, fast and free."
+    button: "Create my first regatta"
+  footer:
+    tagline: "Document management for sailing regattas"
+    copyright: "Launched by BHN Corp."

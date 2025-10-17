@@ -1,36 +1,41 @@
 document_admin:
-    title: "Administration - Doc2Sail"
-    header:
-        subtitle: "Administration des documents"
-    back_to_regattas: "Retour aux régates"
-    install_app: "Installer l'app"
-    search:
-        placeholder: "🔍 Rechercher un document..."
-    add:
-        title: "Ajouter un document"
-    dropzone:
-        drag_drop: "Glissez-déposez votre fichier ici"
-        or_click: "ou cliquez pour sélectionner"
+  title: "Administration des documents"
+  header:
+    subtitle: "Administration des documents"
+  back_to_regattas: "Retour aux régates"
+  install_app: "Installer l'app"
+  search:
+    placeholder: "🔍 Rechercher un document..."
+  add:
+    title: "Ajouter un document"
+  dropzone:
+    instruction: "Glissez-déposez vos fichiers ici ou cliquez pour sélectionner"
+    drag_drop: "Glissez-déposez votre fichier ici"
+    or_click: "ou cliquez pour sélectionner"
     types: "PDF, Word, Excel, Images (max 100MB)"
-    form:
-        name:
-            label: "Nom du document *"
-            placeholder: "Nom du document"
-        description:
-            label: "Description (optionnelle)"
-            placeholder: "Description du document"
-    upload:
-        button: "Uploader"
-    cancel:
-        button: "Annuler"
-    my_documents: "Mes Documents"
-    actions: "Actions"
-    action:
-        view: "Consulter"
-        download: "Télécharger"
-        delete: "Supprimer"
-    empty:
-        title: "Aucun document pour le moment"
-        subtitle: "Uploadez votre premier document ci-dessus"
-    alert:
-        pwa_unavailable: "L'installation PWA n'est pas disponible. Assurez-vous d'utiliser HTTPS ou ajoutez cette page aux favoris de votre navigateur."
+    size: "(max 100MB)"
+  uploaded: "Fichier téléchargé"
+  error:
+    too_large: "Fichier trop volumineux (max 100MB)"
+  form:
+    name:
+      label: "Nom du document *"
+      placeholder: "Nom du document"
+    description:
+      label: "Description (optionnelle)"
+      placeholder: "Description du document"
+  upload:
+    button: "Uploader"
+  cancel:
+    button: "Annuler"
+  my_documents: "Mes Documents"
+  actions: "Actions"
+  action:
+    view: "Consulter"
+    download: "Télécharger"
+    delete: "Supprimer"
+  empty:
+    title: "Aucun document pour le moment"
+    subtitle: "Uploadez votre premier document ci-dessus"
+  alert:
+    pwa_unavailable: "L'installation PWA n'est pas disponible. Assurez-vous d'utiliser HTTPS ou ajoutez cette page aux favoris de votre navigateur."

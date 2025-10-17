@@ -1,0 +1,8 @@
+navbar:
+  home: "Home"
+  my_regattas: "My Regattas"
+  login: "Login"
+  logout: "Logout"
+  user: "User"
+  navigation: "Navigation"
+  documents: "Documents"

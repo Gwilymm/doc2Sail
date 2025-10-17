@@ -1,8 +1,10 @@
 {% extends 'base.html.twig' %}
+{% trans_default_domain 'login' %}
 
 {% block title %}{{ 'login.title'|trans }}{% endblock %}
 
 {% block body %}
+{% trans_default_domain 'login' %}
 {% include '_navbar.html.twig' %}
 
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 px-4">
