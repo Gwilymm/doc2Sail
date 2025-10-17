@@ -13,78 +13,115 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+
 
 class AuthController extends AbstractController
 {
-	public function __construct(
-		private EntityManagerInterface $entityManager,
-		private UserRepository $userRepository,
-		private MailerInterface $mailer,
-		private ParameterBagInterface $params
-	) {}
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private UserRepository $userRepository,
+        private MailerInterface $mailer,
+        private ParameterBagInterface $params,
+        #[Autowire(service: 'limiter.magic_link_request_by_email')]
+    	   private RateLimiterFactory $magicLinkLimiter
+    ) {}
 
-	#[Route('/login', name: 'app_login')]
-	public function login(
-		LoginLinkHandlerInterface $loginLinkHandler,
-		Request $request
-	): Response {
-		// Si POST, générer et envoyer le magic link
-		if ($request->isMethod('POST')) {
-			$email = trim(strtolower($request->request->get('email', '')));
-			$displayName = trim($request->request->get('display_name', ''));
+    #[Route('/login', name: 'app_login')]
+    public function login(
+        LoginLinkHandlerInterface $loginLinkHandler,
+        Request $request
+    ): Response {
+        // GET -> formulaire
+        if (!$request->isMethod('POST')) {
+            return $this->render('auth/login.html.twig');
+        }
 
-			if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-				$this->addFlash('error', 'Adresse email invalide.');
-				return $this->redirectToRoute('app_login');
-			}
+        // POST -> demande d'envoi du magic link
 
-			// Trouver ou créer l'utilisateur
-			$user = $this->userRepository->findOrCreateByEmail($email, $displayName ?: null);
+        // 1) Anti-abus: Rate-limit par couple (email|ip)
+        $rawEmail = (string) $request->request->get('email', '');
+        $email = trim(mb_strtolower($rawEmail));
+        $key = sprintf('%s|%s', $email ?: 'empty', $request->getClientIp() ?? 'noip');
 
-			// Générer le login link avec Symfony
-			$loginLinkDetails = $loginLinkHandler->createLoginLink($user);
-			$loginUrl = $loginLinkDetails->getUrl();
+       $limiter = $this->magicLinkLimiter->create($key);
+        $limit = $limiter->consume(1); // coûte 1 jeton
 
-			// Envoyer l'email
-			$emailMessage = (new Email())
-				->from($this->params->get('mailer_from'))
-				->to($email)
-				->subject('🔐 Votre lien de connexion Doc2Sail')
-				->html($this->renderView('auth/magic_link_email.html.twig', [
-					'loginUrl' => $loginUrl,
-					'expiresAt' => new \DateTimeImmutable('+15 minutes'),
-					'displayName' => $user->getDisplayName()
-				]));
+        if (!$limit->isAccepted()) {
+            // Temps d'attente conseillé (arrondi)
+            $retryAfter = $limit->getRetryAfter();
+            $waitSec = max(1, $retryAfter?->getTimestamp() - time());
+            $this->addFlash('error', sprintf('Trop de demandes. Réessayez dans ~%d secondes.', $waitSec));
+            return $this->redirectToRoute('app_login');
+        }
 
-			try {
-				$this->mailer->send($emailMessage);
-				$this->addFlash('success', '📧 Magic link envoyé ! Vérifiez votre boîte mail.');
-			} catch (\Exception $e) {
-				$this->addFlash('info', sprintf(
-					'⚠️ Email non configuré (dev mode). Utilisez ce lien : <a href="%s" class="link link-primary">%s</a>',
-					$loginUrl,
-					$loginUrl
-				));
-			}
+        // 2) Validation email (basique pour l’UX – on évite l’énumération)
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // On reste neutre : même message final que si succès pour éviter l'énumération.
+            $this->addFlash('success', '📧 Si un compte existe, un lien a été envoyé. Vérifiez votre boîte mail.');
+            return $this->redirectToRoute('app_login');
+        }
 
-			return $this->redirectToRoute('app_login');
-		}
+        // 3) Consentement remember-me (checkbox NON pré-cochée côté Twig)
+        //    On stocke le choix dans la session, qui sera lu dans le LoginLinkAuthenticator après le clic.
+        $remember = (bool) $request->request->get('remember_me', false);
+        $request->getSession()->set('auth.remember_me.requested', $remember);
 
-		// Si GET, afficher le formulaire
-		return $this->render('auth/login.html.twig');
-	}
+        // (Optionnel) journaliser la preuve de consentement de manière minimale
+        // $this->logger->info('remember_me_consent', [
+        //     'email' => hash('sha256', $email), // minimisation
+        //     'remember' => $remember,
+        //     'ts' => time(),
+        // ]);
 
-	#[Route('/login_check', name: 'app_login_check')]
-	public function check(): never
-	{
-		// Cette méthode est interceptée par Symfony Security (login_link)
-		throw new \LogicException('This code should never be reached');
-	}
+        // 4) Trouver ou créer l'utilisateur (si tu veux éviter la création auto, change le repo)
+        $displayName = trim((string) $request->request->get('display_name', ''));
+        $user = $this->userRepository->findOrCreateByEmail($email, $displayName ?: null);
 
-	#[Route('/logout', name: 'app_logout')]
-	public function logout(): never
-	{
-		// Cette méthode est interceptée par Symfony Security
-		throw new \LogicException('This code should never be reached');
-	}
+        // 5) Générer le login link selon la config security.yaml (lifetime/max_uses…)
+        $loginLinkDetails = $loginLinkHandler->createLoginLink($user);
+        $loginUrl = $loginLinkDetails->getUrl();
+        $expiresAt = $loginLinkDetails->getExpiresAt(); // source de vérité
+
+        // 6) Envoyer l’email (ou afficher le lien en dev)
+        $emailMessage = (new Email())
+            ->from($this->params->get('mailer_from'))
+            ->to($email)
+            ->subject('🔐 Votre lien de connexion Doc2Sail')
+            ->html($this->renderView('auth/magic_link_email.html.twig', [
+                'loginUrl'    => $loginUrl,
+                'expiresAt'   => $expiresAt, // <-- on utilise la vraie expiration
+                'displayName' => $user->getDisplayName(),
+            ]));
+
+        try {
+            $this->mailer->send($emailMessage);
+            // Message neutre (pas d’info de présence compte) — conforme anti-énumération
+            $this->addFlash('success', '📧 Si un compte existe, un lien a été envoyé. Vérifiez votre boîte mail.');
+        } catch (\Throwable $e) {
+            // En dev, on peut exposer le lien pour tests
+            $this->addFlash('info', sprintf(
+                '⚠️ Email non configuré (dev). Utilisez ce lien : <a href="%s" class="link link-primary" rel="nofollow noopener">%s</a>',
+                htmlspecialchars($loginUrl, ENT_QUOTES),
+                htmlspecialchars($loginUrl, ENT_QUOTES)
+            ));
+        }
+
+        return $this->redirectToRoute('app_login');
+    }
+
+    #[Route('/login_check', name: 'app_login_check')]
+    public function check(): never
+    {
+        // Intercepté par Security (login_link)
+        throw new \LogicException('This code should never be reached');
+    }
+
+    #[Route('/logout', name: 'app_logout')]
+    public function logout(): never
+    {
+        // Intercepté par Security
+        throw new \LogicException('This code should never be reached');
+    }
 }
