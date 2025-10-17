@@ -19,17 +19,13 @@ security:
             provider: app_user_provider
             entry_point: App\Security\LoginFormAuthenticator
 
-            login_link:
-                check_route: app_login_check
-                signature_properties: [id]
-                lifetime: 900
-                max_uses: 3
-
+            custom_authenticators:
+                - App\Security\LoginLinkAuthenticator
             remember_me:
-                secret: '%env(APP_SECRET)%'
-                lifetime: 86400  # 1 jour (24h)
-                path: '/'
-                always_remember_me: false  # RGPD: jamais sans consentement explicite
+                secret: "%env(APP_SECRET)%"
+                lifetime: 86400 # 1 jour (24h)
+                path: "/"
+                always_remember_me: false # RGPD: jamais sans consentement explicite
                 # name: REMEMBERME
                 # token_provider: 'security.remember_me.token_provider.doctrine'
 
