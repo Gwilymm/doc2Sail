@@ -60,3 +60,49 @@ language:
     french: "Français"
     english: "English"
     select: "Langue"
+
+navbar:
+    home: "Accueil"
+    my_regattas: "Mes Régates"
+    login: "Connexion"
+    logout: "Déconnexion"
+    user: "Utilisateur"
+    navigation: "Navigation"
+    documents: "Documents"
+
+document_admin:
+    title: "Administration - Doc2Sail"
+    header:
+        subtitle: "Administration des documents"
+    back_to_regattas: "Retour aux régates"
+    install_app: "Installer l'app"
+    search:
+        placeholder: "🔍 Rechercher un document..."
+    add:
+        title: "Ajouter un document"
+    dropzone:
+        drag_drop: "Glissez-déposez votre fichier ici"
+        or_click: "ou cliquez pour sélectionner"
+    types: "PDF, Word, Excel, Images (max 100MB)"
+    form:
+        name:
+            label: "Nom du document *"
+            placeholder: "Nom du document"
+        description:
+            label: "Description (optionnelle)"
+            placeholder: "Description du document"
+    upload:
+        button: "Uploader"
+    cancel:
+        button: "Annuler"
+    my_documents: "Mes Documents"
+    actions: "Actions"
+    action:
+        view: "Consulter"
+        download: "Télécharger"
+        delete: "Supprimer"
+    empty:
+        title: "Aucun document pour le moment"
+        subtitle: "Uploadez votre premier document ci-dessus"
+    alert:
+        pwa_unavailable: "L'installation PWA n'est pas disponible. Assurez-vous d'utiliser HTTPS ou ajoutez cette page aux favoris de votre navigateur."

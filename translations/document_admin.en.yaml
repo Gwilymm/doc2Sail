@@ -1,36 +1,41 @@
 document_admin:
-    title: "Administration - Doc2Sail"
-    header:
-        subtitle: "Document administration"
-    back_to_regattas: "Back to regattas"
-    install_app: "Install app"
-    search:
-        placeholder: "🔍 Search a document..."
-    add:
-        title: "Add a document"
-    dropzone:
-        drag_drop: "Drag & drop your file here"
-        or_click: "or click to select"
+  title: "Document administration"
+  header:
+    subtitle: "Document administration"
+  back_to_regattas: "Back to regattas"
+  install_app: "Install app"
+  search:
+    placeholder: "🔍 Search a document..."
+  add:
+    title: "Add a document"
+  dropzone:
+    instruction: "Drag and drop files here or click to select"
+    drag_drop: "Drag & drop your file here"
+    or_click: "or click to select"
     types: "PDF, Word, Excel, Images (max 100MB)"
-    form:
-        name:
-            label: "Document name *"
-            placeholder: "Document name"
-        description:
-            label: "Description (optional)"
-            placeholder: "Document description"
-    upload:
-        button: "Upload"
-    cancel:
-        button: "Cancel"
-    my_documents: "My Documents"
-    actions: "Actions"
-    action:
-        view: "View"
-        download: "Download"
-        delete: "Delete"
-    empty:
-        title: "No documents yet"
-        subtitle: "Upload your first document above"
-    alert:
-        pwa_unavailable: "PWA install is not available. Ensure HTTPS or add this page to bookmarks."
+    size: "(max 100MB)"
+  uploaded: "File uploaded"
+  error:
+    too_large: "File too large (max 100MB)"
+  form:
+    name:
+      label: "Document name *"
+      placeholder: "Document name"
+    description:
+      label: "Description (optional)"
+      placeholder: "Document description"
+  upload:
+    button: "Upload"
+  cancel:
+    button: "Cancel"
+  my_documents: "My Documents"
+  actions: "Actions"
+  action:
+    view: "View"
+    download: "Download"
+    delete: "Delete"
+  empty:
+    title: "No documents yet"
+    subtitle: "Upload your first document above"
+  alert:
+    pwa_unavailable: "PWA install is not available. Ensure HTTPS or add this page to bookmarks."

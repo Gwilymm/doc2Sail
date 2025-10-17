@@ -1,0 +1,7 @@
+login:
+  title: "Connexion"
+  subtitle: "Connectez-vous pour accéder à votre espace"
+  username: "Nom d'utilisateur"
+  email: "Email"
+  password: "Mot de passe"
+  submit: "Se connecter"
