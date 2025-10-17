@@ -7,10 +7,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User implements UserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 	#[ORM\Id]
 	#[ORM\GeneratedValue]
@@ -178,10 +179,11 @@ class User implements UserInterface
 	// ===== Méthodes UserInterface pour Symfony Security =====
 
 	public function getUserIdentifier(): string
-	{
-		// L'ID est l'identifiant unique de l'utilisateur
-		return (string) $this->id;
-	}
+{
+    // Identifiant stable et non-réversible
+    return hash_hmac('sha256', (string) $this->id, $_ENV['APP_SECRET']);
+}
+
 
 	public function getRoles(): array
 	{
@@ -202,4 +204,15 @@ class User implements UserInterface
 	{
 		// Rien à effacer car on n'utilise pas de mot de passe en clair
 	}
+
+	/**
+	 * Pour compatibilité : certaines parties (PropertyAccess, form etc.)
+	 * peuvent tenter d'accéder à la propriété "password". Nous n'utilisons
+	 * pas de mot de passe (authentification par magic link), donc on retourne null.
+	 */
+	public function getPassword(): ?string
+	{
+		return null;
+	}
+	
 }

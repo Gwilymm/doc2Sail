@@ -23,7 +23,6 @@ services:
             - "host.docker.internal:host-gateway"
         volumes:
             # Seulement les volumes nécessaires en production
-            - app-var:/app/var
             - app-uploads:/app/public/uploads
         environment:
             APP_ENV: prod
@@ -63,7 +62,7 @@ services:
             MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_SECRET}
             MERCURE_EXTRA_DIRECTIVES: |
                 anonymous
-                cors_origins https://doc2sail.platypus-home.noho.st http://localhost:8000
+                cors_origins https://doc2sail.com  http://localhost:8000
         volumes:
             - mercure-data:/data
             - mercure-config:/config
@@ -79,8 +78,6 @@ services:
     ###< Mercure Hub ###
 
 volumes:
-    app-var:
-        driver: local
     app-uploads:
         driver: local
     mercure-data:
