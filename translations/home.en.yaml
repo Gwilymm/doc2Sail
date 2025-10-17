@@ -9,7 +9,10 @@ home:
   features:
     title: "Why choose Doc2Sail?"
     simple: "Simple and fast"
-    secure: "Secure"
+    secure:
+      title: "Secure Sharing"
+      description: "Generate unique and secure links for each regatta. Share only what needs to be shared with your crew."
+      badge: "Encrypted"
     pwa:
       title: "Mobile PWA"
       description: "Install the app on your phone or tablet. Works even offline for permanent access to your documents."
