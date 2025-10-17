@@ -40,4 +40,4 @@ services:
 
     App\Controller\AuthController:
         arguments:
-            $magicLinkRequestByEmailLimiter: "@limiter.magic_link_request_by_email"
+            $magicLinkLimiter: "@limiter.magic_link_request_by_email"
