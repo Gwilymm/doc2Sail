@@ -5,6 +5,13 @@
 }
 
 .font-emoji {
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
-        sans-serif;
+    /* Use common color emoji fonts and sensible fallbacks */
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji", "EmojiOne Mozilla", "Twemoji Mozilla", sans-serif;
+    font-style: normal;
+    line-height: 1;
+    display: inline-block;
+    /* Prevent font smoothing issues on some chromium builds */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }

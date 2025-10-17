@@ -22,12 +22,12 @@
 			{% for type, messages in app.flashes %}
 				{% for message in messages %}
 					<div class="alert alert-{{
-							                type == 'error'
-							                    ? 'error'
-							                    : type == 'success'
-							                    ? 'success'
-							                    : 'info'
-							            }} mb-4 shadow-lg">
+														                type == 'error'
+														                    ? 'error'
+														                    : type == 'success'
+														                    ? 'success'
+														                    : 'info'
+														            }} mb-4 shadow-lg">
 						<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
 							{% if type == 'error' %}
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -46,7 +46,7 @@
 			<div class="card bg-base-100 shadow-2xl border border-base-300">
 				<div class="card-body">
 					<h2 class="card-title text-2xl mb-4 text-base-content">
-						✨
+						<span class="font-emoji">✨</span>
 						{{ "login.magic.title" | trans }}
 					</h2>
 					<p class="text-base-content/70 mb-4">
@@ -105,13 +105,13 @@
 					{{ "login.gdpr.title" | trans }}
 				</p>
 				<p class="text-xs max-w-md mx-auto">
-					✓
+					<span class="font-emoji">✓</span>
 					{{ "login.gdpr.encrypted_email" | trans }}<br/>
-					✓
+					<span class="font-emoji">✓</span>
 					{{ "login.gdpr.no_password" | trans }}<br/>
-					✓
+					<span class="font-emoji">✓</span>
 					{{ "login.gdpr.links_ttl" | trans }}<br/>
-					✓
+					<span class="font-emoji">✓</span>
 					{{ "login.gdpr.secure_session" | trans }}
 				</p>
 			</div>
@@ -123,12 +123,15 @@
 		{
 			0,
 			100%
-			{transform:translateY(0)}
+			{transform:translateY(0)
+			}
 			50%
-			{transform:translateY(-20px)}
+			{transform:translateY(-20px)
+			}
 		}
 
 		.animate-bounce-slow
-		{animation:bounce-slow 3s ease-in-out infinite}
+		{animation:bounce-slow 3s ease-in-out infinite
+		}
 	</style>
 {% endblock %}

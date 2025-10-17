@@ -94,7 +94,9 @@
 					<!-- Feature 1 -->
 					<div class="card bg-base-100 shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-base-300">
 						<div class="card-body items-center text-center">
-							<div class="text-6xl mb-4 animate-bounce">📱</div>
+							<div class="text-6xl mb-4 animate-bounce">
+								<span class="font-emoji">📱</span>
+							</div>
 							<h3 class="card-title text-2xl mb-3">{{ 'home.features.pwa.title'|trans }}</h3>
 							<p class="text-base-content/70">
 								{{ 'home.features.pwa.description'|trans }}
@@ -106,7 +108,9 @@
 					<!-- Feature 2 -->
 					<div class="card bg-base-100 shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 border border-base-300">
 						<div class="card-body items-center text-center">
-							<div class="text-6xl mb-4 animate-bounce font-emoji" style="animation-delay: 0.1s">🔐</div>
+							<div class="text-6xl mb-4 animate-bounce font-emoji" style="animation-delay: 0.1s">
+								<span class="font-emoji">🔐</span>
+							</div>
 							<h3 class="card-title text-2xl mb-3">{{ 'home.features.secure.title'|trans }}</h3>
 							<p class="text-base-content/70">
 								{{ 'home.features.secure.description'|trans }}
@@ -230,41 +234,52 @@
 		@keyframes fade-in
 		{
 			from
-			{opacity:0}
+			{opacity:0
+			}
 			to
-			{opacity:1}
+			{opacity:1
+			}
 		}
 
 		@keyframes slide-up
 		{
 			from
-			{opacity:0;transform:translateY(30px)}
+			{opacity:0;transform:translateY(30px)
+			}
 			to
-			{opacity:1;transform:translateY(0)}
+			{opacity:1;transform:translateY(0)
+			}
 		}
 
 		@keyframes bounce-slow
 		{
 			0,
 			100%
-			{transform:translateY(0)}
+			{transform:translateY(0)
+			}
 			50%
-			{transform:translateY(-20px)}
+			{transform:translateY(-20px)
+			}
 		}
 
 		.animate-fade-in
-		{animation:fade-in 1s ease-out}
+		{animation:fade-in 1s ease-out
+		}
 
 		.animate-slide-up
-		{animation:slide-up 0.8s ease-out 0.2s both}
+		{animation:slide-up 0.8s ease-out 0.2s both
+		}
 
 		.animate-slide-up-delayed
-		{animation:slide-up 0.8s ease-out 0.4s both}
+		{animation:slide-up 0.8s ease-out 0.4s both
+		}
 
 		.animate-slide-up-more-delayed
-		{animation:slide-up 0.8s ease-out 0.6s both}
+		{animation:slide-up 0.8s ease-out 0.6s both
+		}
 
 		.animate-bounce-slow
-		{animation:bounce-slow 3s ease-in-out infinite}
+		{animation:bounce-slow 3s ease-in-out infinite
+		}
 	</style>
 {% endblock %}
