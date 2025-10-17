@@ -93,32 +93,47 @@ title%}
 
                     {# juste au-dessus du bouton #}
                     <div class="form-control mt-4 mb-2">
+                        {# Make the label a wrapping flex container so long text
+                        can wrap next to the checkbox #}
                         <label
-                            class="cursor-pointer label justify-start gap-3 items-start"
+                            class="cursor-pointer label justify-start gap-3 items-start flex flex-wrap"
                         >
                             <input
                                 type="checkbox"
                                 name="remember_me"
                                 id="remember_me"
                                 value="1"
-                                class="checkbox checkbox-primary mt-1"
+                                class="checkbox checkbox-primary mt-1 flex-none"
                             />
-                            <span class="label-text leading-tight">
+                            {# Allow the text to shrink and wrap inside the flex
+                            row (#min-w-0#) and take remaining space (#flex-1#)
+                            #}
+                            <span
+                                class="label-text leading-tight max-w-md flex-1 min-w-0"
+                            >
                                 {{ "login.remember_me.label" | trans({'%duration%': '1 jour'}) }}
                                 <span
-                                    class="text-base-content/60 block text-xs mt-1 max-w-md"
+                                    class="text-base-content/60 block text-xs mt-1 break-words"
                                 >
                                     {{
                                         "login.remember_me.consent_note" | trans
                                     }}
-                                    <a
+                                    <p>
+                                        {{
+                                            "login.remember_me.consent_why"
+                                                | trans
+                                        }}
+                                    </p>
+                                    <p
                                         href="{{ path('app_privacy') }}"
                                         class="link"
-                                        >{{
+                                    >
+                                        {{
                                             "login.remember_me.privacy_link"
                                                 | trans
-                                        }}</a
-                                    >.
+                                        }}
+                                    </p>
+                                    .
                                 </span>
                             </span>
                         </label>

@@ -17,24 +17,22 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            entry_point: App\Security\LoginFormAuthenticator
 
             custom_authenticators:
                 - App\Security\LoginLinkAuthenticator
+
             remember_me:
                 secret: "%env(APP_SECRET)%"
                 lifetime: 86400 # 1 jour (24h)
                 path: "/"
-                always_remember_me: false # RGPD: jamais sans consentement explicite
-                # name: REMEMBERME
-                # token_provider: 'security.remember_me.token_provider.doctrine'
+                always_remember_me: true # RGPD: seulement avec consentement
 
             logout:
                 path: app_logout
                 target: app_home
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+        # Easy way to control access for large sections of your site
+        # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/login_check, roles: PUBLIC_ACCESS }

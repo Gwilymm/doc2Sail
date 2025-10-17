@@ -11,8 +11,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
-class LoginLinkAuthenticator extends AbstractAuthenticator
+class LoginLinkAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
     public function __construct(
         private LoginLinkHandlerInterface $loginLinkHandler,
@@ -59,4 +60,9 @@ class LoginLinkAuthenticator extends AbstractAuthenticator
         $request->getSession()->getFlashBag()->add('error', 'Lien expiré ou invalide. Veuillez redemander un lien.');
         return new RedirectResponse($this->urlGenerator->generate('app_login'));
     }
+    public function start(Request $request, AuthenticationException $authException = null): RedirectResponse
+{
+    return new RedirectResponse($this->urlGenerator->generate('app_login'));
+}
+
 }
