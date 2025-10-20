@@ -64,3 +64,8 @@ regatta:
             email_help: "Un email d'invitation sera envoyé à cette adresse"
             cancel: "Annuler"
             send: "Envoyer l'invitation"
+        qr_code:
+            title: "QR Code de partage"
+            print: "Imprimer"
+            download: "Télécharger"
+            share_via: "Partager via"

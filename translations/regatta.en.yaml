@@ -64,3 +64,8 @@ regatta:
             email_help: "An invitation email will be sent to this address"
             cancel: "Cancel"
             send: "Send invitation"
+        qr_code:
+            title: "Share QR Code"
+            print: "Print"
+            download: "Download"
+            share_via: "Share via"

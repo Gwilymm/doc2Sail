@@ -1,12 +1,16 @@
 @import "tailwindcss";
 @source not "../../public";
 @plugin "daisyui" {
-    themes: light --default, dark --prefersdark, cupcake;
+    themes:
+        light --default,
+        dark --prefersdark,
+        cupcake;
 }
 
 .font-emoji {
     /* Use common color emoji fonts and sensible fallbacks */
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    font-family:
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji", "EmojiOne Mozilla", "Twemoji Mozilla", sans-serif;
     font-style: normal;
     line-height: 1;
@@ -17,7 +21,8 @@
 }
 
 @keyframes bounce-slow {
-    0%, 100% {
+    0%,
+    100% {
         transform: translateY(0);
     }
     50% {
