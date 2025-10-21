@@ -175,7 +175,8 @@ export default class extends Controller {
         if (regattaDates) messageParts.push(`📅 ${regattaDates}`);
         messageParts.push('');
         messageParts.push('👉 Rejoins la régate ici :');
-        messageParts.push(`\`${url}\``);
+        const cleanUrl = url.replace(/^https?:\/\//, '');
+        messageParts.push(`\`${cleanUrl}\``);
 
         const fullText = messageParts.join('\n');
         const encodedText = encodeURIComponent(fullText);
