@@ -145,6 +145,13 @@ class QRCodeController extends AbstractController
 
         $qrCodeDataUri = $result->getDataUri();
 
+        $regattaName = null;
+        $regattaDates = null;
+        if (isset($regatta) && $regatta) {
+            $regattaName = $regatta->getName();
+            $regattaDates = sprintf('%s - %s', $regatta->getStartDate()?->format('d/m/Y'), $regatta->getEndDate()?->format('d/m/Y'));
+        }
+
         return $this->render('qrcode/modal.html.twig', [
             'qr_code_data_uri' => $qrCodeDataUri,
             'url' => $url,
@@ -153,6 +160,8 @@ class QRCodeController extends AbstractController
             'route_missing' => $routeMissing,
             'missing_route' => $missingRoute,
             'error_message' => $errorMessage,
+            'regatta_name' => $regattaName,
+            'regatta_dates' => $regattaDates,
         ]);
     }
 

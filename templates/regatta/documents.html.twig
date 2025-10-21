@@ -1,485 +1,637 @@
 {% extends 'base.html.twig' %}
 {% trans_default_domain 'regatta' %}
 
-{% block title %}Doc2Sail - {{ regatta.name }}{% endblock %}
 
+{% block title %}Doc2Sail -
+	{{ regatta.name }}
+{% endblock %}
 {% block body %}
-{% include '_navbar.html.twig' %}
+	{% include '_navbar.html.twig' %}
 
-<div class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document" data-document-regatta-id-value="{{ regatta.id }}" data-document-default-category-value="{{ defaultCategory }}">
-    <!-- Header -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <span class="text-5xl">⛵</span>
-                <div>
-                    <h1 class="text-4xl font-bold text-primary">{{ regatta.name }}</h1>
-                    <p class="text-sm text-base-content/70">{{ regatta.startDate|date('d/m/Y') }} - {{ regatta.endDate|date('d/m/Y') }}</p>
-                </div>
-            </div>
+	<div
+		class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document" data-document-regatta-id-value="{{ regatta.id }}" data-document-default-category-value="{{ defaultCategory }}">
+		<!-- Header -->
+		<div class="mb-8">
+			<div class="flex items-center justify-between mb-4">
+				<div class="flex items-center gap-3">
+					<span class="text-5xl">⛵</span>
+					<div>
+						<h1 class="text-4xl font-bold text-primary">{{ regatta.name }}</h1>
+						<p class="text-sm text-base-content/70">{{ regatta.startDate|date('d/m/Y') }}
+							-
+							{{ regatta.endDate|date('d/m/Y') }}</p>
+					</div>
+				</div>
 
-            <!-- Desktop buttons - hidden on mobile -->
-            <div class="hidden md:flex gap-2">
-                <button onclick="inviteCoOwnerModal.showModal()" class="btn btn-accent btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                    </svg>
-                    {{ 'regatta.documents.invite_co_owner'|trans }}
-                </button>
-                <button onclick="loadQRCodeModal('regatta', '{{ regatta.id }}')" class="btn btn-primary btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                    </svg>
-                    Code QR
-                </button>
-                <a href="{{ path('app_regatta') }}" class="btn btn-outline btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    {{ 'regatta.documents.back_to_regattas'|trans }}
-                </a>
-            </div>
-        </div>
+				<!-- Desktop buttons - hidden on mobile -->
+				<div class="hidden md:flex gap-2">
+					<button onclick="inviteCoOwnerModal.showModal()" class="btn btn-accent btn-sm">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+						</svg>
+						{{ 'regatta.documents.invite_co_owner'|trans }}
+					</button>
+					<button onclick="loadQRCodeModal('regatta', '{{ regatta.id }}')" class="btn btn-primary btn-sm">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+						</svg>
+						{{'regatta.documents.qr_code.share'|trans }}
+					</button>
+					<a href="{{ path('app_regatta') }}" class="btn btn-outline btn-sm">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+						</svg>
+						{{ 'regatta.documents.back_to_regattas'|trans }}
+					</a>
+				</div>
+			</div>
 
-        <!-- Category Filter -->
+			<!-- Category Filter -->
 
-    </div>
+		</div>
 
-    <!-- Public URL Share -->
-    <div class="alert alert-info mb-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <div class="flex-1">
-            <h3 class="font-bold">{{ 'regatta.documents.share_url.title'|trans }}</h3>
-            <div class="text-xs flex items-center gap-2 mt-1">
-                <input type="text" id="publicUrl" readonly value="{{ url('app_regatta_public', {token: regatta.accessToken}) }}" class="input input-sm input-bordered flex-1 font-mono text-xs" />
-                <button onclick="copyPublicUrl()" class="btn btn-sm btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    {{ 'regatta.documents.share_url.copy'|trans }}
-                </button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Co-owners Section -->
-    {% if regatta.coOwners|length > 0 %}
-    <div class="alert mb-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-        <div class="flex-1">
-            <h3 class="font-bold">{{ 'regatta.documents.co_owners.title'|trans({'%count%': regatta.coOwners|length}) }}</h3>
-            <div class="text-xs mt-1 flex flex-wrap gap-2">
-                {% for coOwner in regatta.coOwners %}
-                    <span class="badge badge-primary">{{ coOwner.displayName ?? 'regatta.documents.co_owners.default_name'|trans }}</span>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
+		<!-- Co-owners Section -->
+		{% if regatta.coOwners|length > 0 %}
+			<div class="alert mb-8">
+				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+				<div class="flex-1">
+					<h3 class="font-bold">{{ 'regatta.documents.co_owners.title'|trans({'%count%': regatta.coOwners|length}) }}</h3>
+					<div class="text-xs mt-1 flex flex-wrap gap-2">
+						{% for coOwner in regatta.coOwners %}
+							<span class="badge badge-primary">{{ coOwner.displayName ?? 'regatta.documents.co_owners.default_name'|trans }}</span>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		{% endif %}
 
-    <!-- Upload Zone -->
-    <div class="card bg-base-100 shadow-xl mb-8 border-2 border-primary/20">
-        <div class="card-body">
-            <h2 class="card-title text-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                {{ 'regatta.documents.upload.title'|trans }}
-            </h2>
+		<!-- Upload Zone -->
+		<div class="card bg-base-100 shadow-xl mb-8 border-2 border-primary/20">
+			<div class="card-body">
+				<h2 class="card-title text-primary">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+					</svg>
+					{{ 'regatta.documents.upload.title'|trans }}
+				</h2>
 
-            <div id="dropZone" class="border-4 border-dashed border-base-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <p class="text-lg font-semibold mb-2">{{ 'regatta.documents.upload.drag_drop'|trans }}</p>
-                <p class="text-sm text-base-content/70 mb-4">{{ 'regatta.documents.upload.or_click'|trans }}</p>
-                <p class="text-xs text-base-content/50">{{ 'regatta.documents.upload.supported_files'|trans }}</p>
-                <input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt">
-            </div>
+				<div id="dropZone" class="border-4 border-dashed border-base-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-base-content/50" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+					</svg>
+					<p class="text-lg font-semibold mb-2">{{ 'regatta.documents.upload.drag_drop'|trans }}</p>
+					<p class="text-sm text-base-content/70 mb-4">{{ 'regatta.documents.upload.or_click'|trans }}</p>
+					<p class="text-xs text-base-content/50">{{ 'regatta.documents.upload.supported_files'|trans }}</p>
+					<input type="file" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt">
+				</div>
 
-            <!-- Upload Form -->
-            <div id="uploadForm" class="hidden mt-4">
-                <div class="form-control mb-3">
-                    <label class="label">
-                        <span class="label-text font-semibold">{{ 'regatta.documents.upload.form.name'|trans }} *</span>
-                    </label>
-                    <input type="text" id="documentName" placeholder="{{ 'regatta.documents.upload.form.name_placeholder'|trans }}" class="input input-bordered" required>
-                </div>
+				<!-- Upload Form -->
+				<div id="uploadForm" class="hidden mt-4">
+					<div class="form-control mb-3">
+						<label class="label">
+							<span class="label-text font-semibold">{{ 'regatta.documents.upload.form.name'|trans }}
+								*</span>
+						</label>
+						<input type="text" id="documentName" placeholder="{{ 'regatta.documents.upload.form.name_placeholder'|trans }}" class="input input-bordered" required>
+					</div>
 
-                <div class="form-control mb-3">
-                    <label class="label">
-                        <span class="label-text font-semibold">{{ 'regatta.documents.upload.form.category'|trans }} *</span>
-                    </label>
-                    <input type="text" id="documentCategory" class="input input-bordered" list="documentCategoriesList" value="{{ defaultCategory }}" required>
-                    <datalist id="documentCategoriesList">
-                        {% for category in documentCategories %}
-                            <option value="{{ category }}"></option>
-                        {% endfor %}
-                    </datalist>
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">{{ 'regatta.documents.upload.form.category_help'|trans }}</span>
-                    </label>
-                </div>
+					<div class="form-control mb-3">
+						<label class="label">
+							<span class="label-text font-semibold">{{ 'regatta.documents.upload.form.category'|trans }}
+								*</span>
+						</label>
+						<input type="text" id="documentCategory" class="input input-bordered" list="documentCategoriesList" value="{{ defaultCategory }}" required>
+						<datalist id="documentCategoriesList">
+							{% for category in documentCategories %}
+								<option value="{{ category }}"></option>
+							{% endfor %}
+						</datalist>
+						<label class="label">
+							<span class="label-text-alt text-base-content/60">{{ 'regatta.documents.upload.form.category_help'|trans }}</span>
+						</label>
+					</div>
 
-                <div class="form-control mb-3">
-                    <label class="label">
-                        <span class="label-text">{{ 'regatta.documents.upload.form.description'|trans }}</span>
-                    </label>
-                    <textarea id="documentDescription" placeholder="{{ 'regatta.documents.upload.form.description_placeholder'|trans }}" class="textarea textarea-bordered" rows="2"></textarea>
-                </div>
+					<div class="form-control mb-3">
+						<label class="label">
+							<span class="label-text">{{ 'regatta.documents.upload.form.description'|trans }}</span>
+						</label>
+						<textarea id="documentDescription" placeholder="{{ 'regatta.documents.upload.form.description_placeholder'|trans }}" class="textarea textarea-bordered" rows="2"></textarea>
+					</div>
 
-                <div class="flex gap-2">
-                    <button id="uploadBtn" class="btn btn-primary flex-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        {{ 'regatta.documents.upload.form.upload'|trans }}
-                    </button>
-                    <button id="cancelBtn" class="btn btn-ghost">{{ 'regatta.documents.upload.form.cancel'|trans }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
+					<div class="flex gap-2">
+						<button id="uploadBtn" class="btn btn-primary flex-1">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+							</svg>
+							{{ 'regatta.documents.upload.form.upload'|trans }}
+						</button>
+						<button id="cancelBtn" class="btn btn-ghost">{{ 'regatta.documents.upload.form.cancel'|trans }}</button>
+					</div>
+				</div>
+			</div>
+		</div>
 
-    <!-- Documents Grid -->
-    <div class="mb-4 flex justify-between items-center">
-        <h2 class="text-2xl font-bold">
-            {{ 'regatta.documents.my_documents'|trans }}
-            <span class="badge badge-primary" id="documentCount">{{ documentsCount }}</span>
-        </h2>
-    </div>
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4">
-                <h3 class="text-sm font-semibold mb-3">{{ 'regatta.documents.filter.title'|trans }}</h3>
-                <div id="categoryFilters" class="flex flex-wrap gap-2">
-                    {% for category in documentsByCategory|keys %}
-                        <label class="cursor-pointer">
-                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" onchange="filterCategories()">
-                            <span class="text-sm">{{ category }}</span>
-                        </label>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
+		<!-- Documents Grid -->
+		<div class="mb-4 flex justify-between items-center">
+			<h2 class="text-2xl font-bold">
+				{{ 'regatta.documents.my_documents'|trans }}
+				<span class="badge badge-primary" id="documentCount">{{ documentsCount }}</span>
+			</h2>
+		</div>
+		<div class="card bg-base-100 shadow-sm">
+			<div class="card-body p-4">
+				<h3 class="text-sm font-semibold mb-3">{{ 'regatta.documents.filter.title'|trans }}</h3>
+				<div id="categoryFilters" class="flex flex-wrap gap-2">
+					{% for category in documentsByCategory|keys %}
+						<label class="cursor-pointer">
+							<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" onchange="filterCategories()">
+							<span class="text-sm">{{ category }}</span>
+						</label>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
 
-    <div id="documentsGrid" class="space-y-8">
-        {% for sectionTitle, categoriesInSection in categorySections %}
-            <div class="section-group">
-                <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
-                    {% if sectionTitle == 'Documents de course' %}
-                        🏆 {{ sectionTitle }}
-                    {% else %}
-                        📋 {{ sectionTitle }}
-                    {% endif %}
-                </h2>
+		<div id="documentsGrid" class="space-y-8">
+			{% for sectionTitle, categoriesInSection in categorySections %}
+				<div class="section-group">
+					<h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+						{% if sectionTitle == 'Documents de course' %}
+							🏆
+							{{ sectionTitle }}
+						{% else %}
+							📋
+							{{ sectionTitle }}
+						{% endif %}
+					</h2>
 
-                {% for category, documents in categoriesInSection %}
-                    <div class="space-y-3 category-section mb-8" data-category="{{ category }}">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xl font-semibold">{{ category }}</h3>
-                            <span class="badge badge-outline">{{ documents|length }} {{ 'regatta.documents.document_count'|trans({'%count%': documents|length}) }}</span>
-                        </div>
-                        <div class="space-y-2">
-                            {% for document in documents %}
-                                <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow document-card" data-document-id="{{ document.id }}">
-                                    <div class="card-body p-4">
-                                        <div class="flex items-center gap-4">
-                                            <!-- Icône du fichier -->
-                                            <div class="avatar placeholder flex-shrink-0">
-                                                <div class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
-                                                    <span class="text-2xl">
-                                                        {% if 'pdf' in document.mimeType %}
-                                                            📄
-                                                        {% elseif 'image' in document.mimeType %}
-                                                            🖼️
-                                                        {% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
-                                                            📝
-                                                        {% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
-                                                            📊
-                                                        {% else %}
-                                                            📁
-                                                        {% endif %}
-                                                    </span>
-                                                </div>
-                                            </div>
+					{% for category, documents in categoriesInSection %}
+						<div class="space-y-3 category-section mb-8" data-category="{{ category }}">
+							<div class="flex items-center justify-between mb-3">
+								<h3 class="text-xl font-semibold">{{ category }}</h3>
+								<span class="badge badge-outline">{{ documents|length }}
+									{{ 'regatta.documents.document_count'|trans({'%count%': documents|length}) }}</span>
+							</div>
+							<div class="space-y-2">
+								{% for document in documents %}
+									<div class="card bg-base-100 shadow hover:shadow-lg transition-shadow document-card" data-document-id="{{ document.id }}">
+										<div class="card-body p-4">
+											<div
+												class="flex items-center gap-4">
+												<!-- Icône du fichier -->
+												<div class="avatar placeholder flex-shrink-0">
+													<div class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
+														<span class="text-2xl">
+															{% if 'pdf' in document.mimeType %}
+																📄
+															{% elseif 'image' in document.mimeType %}
+																🖼️
+															{% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
+																📝
+															{% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
+																📊
+															{% else %}
+																📁
+															{% endif %}
+														</span>
+													</div>
+												</div>
 
-                                            <!-- Informations du document -->
-                                            <div class="flex-1 min-w-0">
-                                                <div class="flex items-center gap-2 mb-1">
-                                                    <span class="badge badge-primary badge-sm">{{ document.category }}</span>
-                                                    <h3 class="font-semibold text-base truncate">{{ document.name }}</h3>
-                                                </div>
-                                                <div class="flex items-center gap-3 text-xs text-base-content/70">
-                                                    <span class="badge badge-outline badge-sm">{{ document.formattedSize }}</span>
-                                                    <span>{{ document.uploadedAt|date('d/m/Y H:i') }}</span>
-                                                    {% if document.description %}
-                                                        <span class="truncate hidden sm:inline">{{ document.description }}</span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
+												<!-- Informations du document -->
+												<div class="flex-1 min-w-0">
+													<div class="flex items-center gap-2 mb-1">
+														<span class="badge badge-primary badge-sm">{{ document.category }}</span>
+														<h3 class="font-semibold text-base truncate">{{ document.name }}</h3>
+													</div>
+													<div class="flex items-center gap-3 text-xs text-base-content/70">
+														<span class="badge badge-outline badge-sm">{{ document.formattedSize }}</span>
+														<span>{{ document.uploadedAt|date('d/m/Y H:i') }}</span>
+														{% if document.description %}
+															<span class="truncate hidden sm:inline">{{ document.description }}</span>
+														{% endif %}
+													</div>
+												</div>
 
-                                            <!-- Actions -->
-                                            <div class="flex-shrink-0">
-                                                <div class="dropdown dropdown-end">
-                                                    <label tabindex="0" class="btn btn-sm btn-ghost btn-circle">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                                        </svg>
-                                                    </label>
-                                                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
-                                                        <li><a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                            </svg>
-                                                            {{ 'regatta.documents.actions.view'|trans }}
-                                                        </a></li>
-                                                        <li><a href="{{ path('app_document_download', {id: document.id}) }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                            </svg>
-                                                            {{ 'regatta.documents.actions.download'|trans }}
-                                                        </a></li>
-                                                        <li><a class="text-error delete-btn" data-document-id="{{ document.id }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                            {{ 'regatta.documents.actions.delete'|trans }}
-                                                        </a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endfor %}
-        {% endfor %}
-    </div>
+												<!-- Actions -->
+												<div class="flex-shrink-0">
+													<div class="dropdown dropdown-end">
+														<label tabindex="0" class="btn btn-sm btn-ghost btn-circle">
+															<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+																<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+															</svg>
+														</label>
+														<ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
+															<li>
+																<a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank">
+																	<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+																		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+																		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+																	</svg>
+																	{{ 'regatta.documents.actions.view'|trans }}
+																</a>
+															</li>
+															<li>
+																<a href="{{ path('app_document_download', {id: document.id}) }}">
+																	<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+																		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+																	</svg>
+																	{{ 'regatta.documents.actions.download'|trans }}
+																</a>
+															</li>
+															<li>
+																<a class="text-error delete-btn" data-document-id="{{ document.id }}">
+																	<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+																		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+																	</svg>
+																	{{ 'regatta.documents.actions.delete'|trans }}
+																</a>
+															</li>
+														</ul>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								{% endfor %}
+							</div>
+						</div>
+					{% endfor %}
+				{% endfor %}
+			</div>
 
-        <div id="documentsEmptyState" class="text-center py-16 {% if documentsCount > 0 %}hidden{% endif %}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p class="text-xl text-base-content/50">{{ 'regatta.documents.empty.title'|trans }}</p>
-            <p class="text-sm text-base-content/40 mt-2">{{ 'regatta.documents.empty.subtitle'|trans }}</p>
-        </div>
-    </div>
-</div>
+			<div id="documentsEmptyState" class="text-center py-16 {% if documentsCount > 0 %}hidden{% endif %}">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+				</svg>
+				<p class="text-xl text-base-content/50">{{ 'regatta.documents.empty.title'|trans }}</p>
+				<p class="text-sm text-base-content/40 mt-2">{{ 'regatta.documents.empty.subtitle'|trans }}</p>
+			</div>
+		</div>
+	</div>
 
-<!-- FAB (Floating Action Button) for Inviting Co-Owner - Visible only on mobile -->
-<div class="md:hidden">
-    <button onclick="inviteCoOwnerModal.showModal()" class="btn btn-lg btn-circle btn-accent shadow-xl fixed bottom-6 right-6 z-50">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-        </svg>
-    </button>
-</div>
+	<!-- FAB (Floating Action Button) for mobile: QR + Invite (stacked) -->
+	<div class="fixed bottom-6 right-6 z-50" data-controller="fab" data-fab-regatta-id-value="{{ regatta.id }}">
 
-<!-- Modal Invite Co-Owner -->
-<dialog id="inviteCoOwnerModal" class="modal">
-    <div class="modal-box">
-        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="inviteCoOwnerModal.close()">✕</button>
-        <h3 class="font-bold text-lg mb-4">{{ 'regatta.documents.invite_modal.title'|trans }}</h3>
-        <p class="text-sm text-base-content/70 mb-4">
-            {{ 'regatta.documents.invite_modal.description'|trans }}
-        </p>
-        <form onsubmit="event.preventDefault(); inviteCoOwner();">
-            <div class="form-control mb-4">
-                <label class="label">
-                    <span class="label-text">{{ 'regatta.documents.invite_modal.email'|trans }} *</span>
-                </label>
-                <input
-                    type="email"
-                    id="inviteEmail"
-                    name="email"
-                    class="input input-bordered"
-                    placeholder="{{ 'regatta.documents.invite_modal.email_placeholder'|trans }}"
-                    required
-                />
-                <label class="label">
-                    <span class="label-text-alt">{{ 'regatta.documents.invite_modal.email_help'|trans }}</span>
-                </label>
-            </div>
-            <div class="modal-action">
-                <button type="button" class="btn" onclick="inviteCoOwnerModal.close()">{{ 'regatta.documents.invite_modal.cancel'|trans }}</button>
-                <button type="submit" class="btn btn-accent">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    {{ 'regatta.documents.invite_modal.send'|trans }}
-                </button>
-            </div>
-        </form>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-        <button type="submit">close</button>
-    </form>
-</dialog>
+		<div
+			class="fab fab-open fab-direction-up items-end">
 
-<!-- Toast Container -->
-<div id="toast-container" class="toast toast-top toast-end"></div>
+			<!-- bouton principal -->
+			<div tabindex="0" role="button" class="btn btn-lg btn-circle btn-success shadow-xl transform transition-transform duration-300
+																																																																																																				                fab-main hover:rotate-45 focus:rotate-45 active:rotate-45">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke="currentColor" stroke-width="3" class="w-6 h-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+				</svg>
+			</div>
 
-<!-- Conteneur pour la modal QR Code -->
-<div id="qrCodeModalContainer"></div>
+			<!-- option Partager -->
+			<div class="flex items-center gap-2">
+				<span class="bg-base-100 px-3 py-1 rounded-lg shadow shadow-primary/50 text-sm">Partager</span>
+				<button class="relative btn btn-lg btn-circle btn-secondary overflow-hidden group" data-action="click->fab#sharePublic">
+					<span class="absolute inset-0 bg-white opacity-0 group-active:opacity-30 transition-opacity duration-200 rounded-full"></span>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewbox="0 0 24 24" class="w-6 h-6 text-black relative z-10">
+						<path d="M8.137 11.631a.908.908 0 0 1-.17.038A3.016 3.016 0 0 1 8 12a2.962 2.962 0 0 1-.033.328.949.949 0 0 1 .173.042l8.76 4.115a.991.991 0 0 1 .242.18A2.969 2.969 0 0 1 19 16a3.037 3.037 0 1 1-2.911 2.306c-.014-.006-.029 0-.044-.01l-8.756-4.115a.953.953 0 0 1-.134-.1 3 3 0 1 1 0-4.162 1 1 0 0 1 .133-.1L16.045 5.7c.014-.007.029 0 .044-.011A2.93 2.93 0 0 1 16 5a3 3 0 1 1 3 3 2.969 2.969 0 0 1-1.862-.665 1.03 1.03 0 0 1-.242.18z"/>
+					</svg>
+				</button>
+			</div>
 
-<!-- PWA Install Handler -->
-<script>
-    /* let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
 
-    // Écouter l'événement beforeinstallprompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('💾 beforeinstallprompt event fired');
-        // Empêcher l'affichage automatique
-        e.preventDefault();
-        // Stocker l'événement pour l'utiliser plus tard
-        deferredPrompt = e;
-        // Afficher le bouton d'installation
-        if (installBtn) {
-            installBtn.classList.remove('hidden');
-        }
-    });
+			<!-- option Inviter -->
+			<div class="flex items-center gap-2">
+				<span class="bg-base-100 px-3 py-1 rounded-lg shadow shadow-primary/50 text-sm">
+					Inviter
+				</span>
+				<button
+					class="relative btn btn-lg btn-circle btn-accent overflow-hidden group" data-action="click->fab#invite">
+					<!-- effet tactile -->
+					<span class="absolute inset-0 bg-white opacity-0 group-active:opacity-30 transition-opacity duration-200 rounded-full"></span>
 
-    // Gérer le clic sur le bouton d'installation
-    if (installBtn) {
-        installBtn.addEventListener('click', async () => {
-            console.log('🖱️ Install button clicked');
-            if (!deferredPrompt) {
-                console.warn('⚠️ deferredPrompt not available');
-                alert('L\'installation PWA n\'est pas disponible. Assurez-vous d\'utiliser HTTPS ou ajoutez cette page aux favoris de votre navigateur.');
-                return;
-            }
+					<!-- icône utilisateur + -->
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 relative z-10">
+						<path d="M12 14c3.866 0 7 1.343 7 3v3H5v-3c0-1.657 3.134-3 7-3zm0-2a4 4 0 100-8 4 4 0 000 8zm8-4h3m-1.5-1.5V10"/>
+					</svg>
+				</button>
+			</div>
 
-            // Afficher le prompt d'installation
-            deferredPrompt.prompt();
 
-            // Attendre la réponse de l'utilisateur
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`👤 User response: ${outcome}`);
+		</div>
+	</div>
 
-            if (outcome === 'accepted') {
-                console.log('✅ PWA installed');
-            } else {
-                console.log('❌ PWA installation declined');
-            }
 
-            // Réinitialiser deferredPrompt
-            deferredPrompt = null;
-            installBtn.classList.add('hidden');
-        });
-    }
+	<!-- Modal Invite Co-Owner -->
+	<dialog id="inviteCoOwnerModal" class="modal">
+		<div class="modal-box">
+			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="inviteCoOwnerModal.close()">✕</button>
+			<h3 class="font-bold text-lg mb-4">{{ 'regatta.documents.invite_modal.title'|trans }}</h3>
+			<p class="text-sm text-base-content/70 mb-4">
+				{{ 'regatta.documents.invite_modal.description'|trans }}
+			</p>
+			<form onsubmit="event.preventDefault(); inviteCoOwner();">
+				<div class="form-control mb-4">
+					<label class="label">
+						<span class="label-text">{{ 'regatta.documents.invite_modal.email'|trans }}
+							*</span>
+					</label>
+					<input type="email" id="inviteEmail" name="email" class="input input-bordered" placeholder="{{ 'regatta.documents.invite_modal.email_placeholder'|trans }}" required/>
+					<label class="label">
+						<span class="label-text-alt">{{ 'regatta.documents.invite_modal.email_help'|trans }}</span>
+					</label>
+				</div>
+				<div class="modal-action">
+					<button type="button" class="btn" onclick="inviteCoOwnerModal.close()">{{ 'regatta.documents.invite_modal.cancel'|trans }}</button>
+					<button type="submit" class="btn btn-accent">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+						</svg>
+						{{ 'regatta.documents.invite_modal.send'|trans }}
+					</button>
+				</div>
+			</form>
+		</div>
+		<form method="dialog" class="modal-backdrop">
+			<button type="submit">close</button>
+		</form>
+	</dialog>
 
-    // Vérifier si déjà installé
-    window.addEventListener('appinstalled', () => {
-        console.log('✅ PWA was installed');
-        if (installBtn) {
-            installBtn.classList.add('hidden');
-        }
-    });
+	<!-- Toast Container -->
+	<div id="toast-container" class="toast toast-top toast-end"></div>
 
-    // Pour les tests en HTTP, afficher un message dans la console
-    console.log('🔍 PWA Install Status:', {
-        serviceWorkerSupported: 'serviceWorker' in navigator,
-        protocol: window.location.protocol,
-        hostname: window.location.hostname
-    }); */
+	<!-- Conteneur pour la modal QR Code -->
+	<div id="qrCodeModalContainer"></div>
 
-    // Copy public URL
-    function copyPublicUrl() {
-        const input = document.getElementById('publicUrl');
-        input.select();
-        document.execCommand('copy');
+	<!-- PWA Install Handler -->
+	<script>
 
-        // Show toast
-        const toast = document.createElement('div');
-        toast.className = 'alert alert-success';
-        toast.innerHTML = '<span>URL copiée dans le presse-papier!</span>';
-        document.getElementById('toastContainer').appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
+		// Copy public URL
+function copyPublicUrl()
+{
 
-    // Category Filter
-    function filterCategories() {
-        const checkboxes = document.querySelectorAll('#categoryFilters input[type="checkbox"]');
-        const selectedCategories = Array.from(checkboxes)
-            .filter(cb => cb.checked)
-            .map(cb => cb.value);
 
-        // Si aucune checkbox n'est cochée, tout masquer
-        const showAll = selectedCategories.length === 0;
 
-        document.querySelectorAll('.category-section').forEach(section => {
-            const category = section.getAttribute('data-category');
-            if (showAll) {
-                section.style.display = 'block';
-            } else {
-                section.style.display = selectedCategories.includes(category) ? 'block' : 'none';
-            }
-        });
-    }
 
-    // Initialiser : tout masquer par défaut
-    document.addEventListener('DOMContentLoaded', () => {
-        filterCategories();
-    });
 
-    // Invite co-owner
-    function loadQRCodeModal(type, id) {
-        const url = id ? `/qrcode/modal/${type}/${id}` : `/qrcode/modal/${type}`;
+const input = document.getElementById( 'publicUrl' );
+input.select();
+document.execCommand( 'copy' );
 
-        fetch(url)
-            .then(response => response.text())
-            .then(html => {
-                // Supprimer l'ancienne modal si elle existe
-                const container = document.getElementById('qrCodeModalContainer');
-                container.innerHTML = html;
+// Show toast
+const toast = document.createElement( 'div' );
+toast.className = 'alert alert-success';
+toast.innerHTML = '<span>URL copiée dans le presse-papier!</span>';
+document.getElementById( 'toastContainer' ).appendChild( toast );
+setTimeout( () => toast.remove(), 3000 );
 
-                // Ouvrir la modal DaisyUI
-                const modal = document.getElementById('qrCodeModal');
-                if (modal) {
-                    modal.showModal();
-                }
-            })
-            .catch(error => {
-                console.error('Erreur lors du chargement du QR code:', error);
-                showToast('Impossible de charger le QR code', 'error');
-            });
-    }
 
-    async function inviteCoOwner() {
-        const email = document.getElementById('inviteEmail').value;
 
-        if (!email || !email.includes('@')) {
-            showToast('Veuillez entrer une adresse email valide', 'error');
-            return;
-        }
 
-        try {
-            const response = await fetch('/regatta/{{ regatta.id }}/invite', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email })
-            });
 
-            const result = await response.json();
+}
 
-            if (result.success) {
-                showToast(result.message, 'success');
-                inviteCoOwnerModal.close();
-                document.getElementById('inviteEmail').value = '';
-            } else {
-                showToast(result.error || 'Erreur lors de l\'envoi de l\'invitation', 'error');
-                if (result.debug_url) {
-                    console.log('Debug URL:', result.debug_url);
-                }
-            }
-        } catch (error) {
-            showToast('Erreur lors de l\'envoi de l\'invitation', 'error');
-            console.error(error);
-        }
-    }
-</script>
+// Category Filter
+function filterCategories()
+{
+
+
+
+
+
+const checkboxes = document.querySelectorAll( '#categoryFilters input[type="checkbox"]' );
+const selectedCategories = Array.from( checkboxes ).filter( cb => cb.checked ).map( cb => cb.value );
+
+// Si aucune checkbox n'est cochée, tout masquer
+const showAll = selectedCategories.length === 0;
+
+document.querySelectorAll( '.category-section' ).forEach( section => {
+
+
+
+
+
+const category = section.getAttribute( 'data-category' );
+if ( showAll )
+{
+
+
+
+
+
+section.style.display = 'block';
+
+
+
+
+
+}
+else
+{
+
+
+
+
+
+section.style.display = selectedCategories.includes( category ) ? 'block' : 'none';
+
+
+
+
+
+}
+
+} );
+
+
+
+
+
+}
+
+// Initialiser : tout masquer par défaut
+document.addEventListener( 'DOMContentLoaded', () => {
+
+
+
+
+
+filterCategories();
+
+
+
+
+
+} );
+
+// Invite co-owner
+function loadQRCodeModal( type, id )
+{
+
+
+
+
+
+const url = id ? `/qrcode/modal/${ type }/${ id }` : `/qrcode/modal/${ type }`;
+
+fetch( url ).then( response => response.text() ).then( html => { // Supprimer l'ancienne modal si elle existe
+const container = document.getElementById( 'qrCodeModalContainer' );
+container.innerHTML = html;
+
+// Ouvrir la modal DaisyUI
+const modal = document.getElementById( 'qrCodeModal' );
+if ( modal )
+{
+
+
+
+
+
+modal.showModal();
+
+
+
+
+
+} } ).catch( error => {
+
+
+
+
+
+console.error( 'Erreur lors du chargement du QR code:', error );
+showToast( 'Impossible de charger le QR code', 'error' );
+
+
+
+
+
+} );
+
+
+
+
+
+}
+
+async function inviteCoOwner()
+{
+
+
+
+
+
+const email = document.getElementById( 'inviteEmail' ).value;
+
+if ( ! email || ! email.includes( '@' ) )
+{
+
+
+
+
+
+showToast( 'Veuillez entrer une adresse email valide', 'error' );
+return;
+
+
+
+
+
+}
+
+try
+{
+
+
+
+
+
+const response = await fetch( '/regatta/                                              {{ regatta.id }}/invite',
+{
+
+
+
+
+
+method: 'POST',
+headers: {
+
+
+
+
+
+'Content-Type': 'application/json'
+
+
+
+
+
+},
+body: JSON.stringify(
+{ email: email }
+)
+
+
+
+
+
+} );
+
+const result = await response.json();
+
+if ( result.success )
+{
+
+
+
+
+
+showToast( result.message, 'success' );
+inviteCoOwnerModal.close();
+document.getElementById( 'inviteEmail' ).value = '';
+
+
+
+
+
+}
+else
+{
+
+
+
+
+
+showToast( result.error || 'Erreur lors de l\'envoi de l\'invitation', 'error' );
+if ( result.debug_url )
+{
+
+
+
+
+
+console.log( 'Debug URL:', result.debug_url );
+
+
+
+
+
+}
+
+}
+
+} catch ( error )
+{
+
+
+
+
+
+showToast( 'Erreur lors de l\'envoi de l\'invitation', 'error' );
+console.error( error );
+
+
+
+
+
+}
+
+}
+	</script>
 {% endblock %}
