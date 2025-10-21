@@ -17,7 +17,7 @@
                     <p class="text-sm text-base-content/70">{{ regatta.startDate|date('d/m/Y') }} - {{ regatta.endDate|date('d/m/Y') }}</p>
                 </div>
             </div>
-            
+
             <!-- Desktop buttons - hidden on mobile -->
             <div class="hidden md:flex gap-2">
                 <button onclick="inviteCoOwnerModal.showModal()" class="btn btn-accent btn-sm">
@@ -25,6 +25,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
                     {{ 'regatta.documents.invite_co_owner'|trans }}
+                </button>
+                <button onclick="loadQRCodeModal('regatta', '{{ regatta.id }}')" class="btn btn-primary btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                    Code QR
                 </button>
                 <a href="{{ path('app_regatta') }}" class="btn btn-outline btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -34,9 +40,9 @@
                 </a>
             </div>
         </div>
-        
+
         <!-- Category Filter -->
-      
+
     </div>
 
     <!-- Public URL Share -->
@@ -80,7 +86,7 @@
                 </svg>
                 {{ 'regatta.documents.upload.title'|trans }}
             </h2>
-            
+
             <div id="dropZone" class="border-4 border-dashed border-base-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -99,7 +105,7 @@
                     </label>
                     <input type="text" id="documentName" placeholder="{{ 'regatta.documents.upload.form.name_placeholder'|trans }}" class="input input-bordered" required>
                 </div>
-                
+
                 <div class="form-control mb-3">
                     <label class="label">
                         <span class="label-text font-semibold">{{ 'regatta.documents.upload.form.category'|trans }} *</span>
@@ -166,7 +172,7 @@
                         📋 {{ sectionTitle }}
                     {% endif %}
                 </h2>
-                
+
                 {% for category, documents in categoriesInSection %}
                     <div class="space-y-3 category-section mb-8" data-category="{{ category }}">
                         <div class="flex items-center justify-between mb-3">
@@ -285,13 +291,13 @@
                 <label class="label">
                     <span class="label-text">{{ 'regatta.documents.invite_modal.email'|trans }} *</span>
                 </label>
-                <input 
-                    type="email" 
-                    id="inviteEmail" 
-                    name="email" 
-                    class="input input-bordered" 
+                <input
+                    type="email"
+                    id="inviteEmail"
+                    name="email"
+                    class="input input-bordered"
                     placeholder="{{ 'regatta.documents.invite_modal.email_placeholder'|trans }}"
-                    required 
+                    required
                 />
                 <label class="label">
                     <span class="label-text-alt">{{ 'regatta.documents.invite_modal.email_help'|trans }}</span>
@@ -314,7 +320,10 @@
 </dialog>
 
 <!-- Toast Container -->
-<div id="toastContainer" class="toast toast-top toast-end z-50"></div>
+<div id="toast-container" class="toast toast-top toast-end"></div>
+
+<!-- Conteneur pour la modal QR Code -->
+<div id="qrCodeModalContainer"></div>
 
 <!-- PWA Install Handler -->
 <script>
@@ -343,20 +352,20 @@
                 alert('L\'installation PWA n\'est pas disponible. Assurez-vous d\'utiliser HTTPS ou ajoutez cette page aux favoris de votre navigateur.');
                 return;
             }
-            
+
             // Afficher le prompt d'installation
             deferredPrompt.prompt();
-            
+
             // Attendre la réponse de l'utilisateur
             const { outcome } = await deferredPrompt.userChoice;
             console.log(`👤 User response: ${outcome}`);
-            
+
             if (outcome === 'accepted') {
                 console.log('✅ PWA installed');
             } else {
                 console.log('❌ PWA installation declined');
             }
-            
+
             // Réinitialiser deferredPrompt
             deferredPrompt = null;
             installBtn.classList.add('hidden');
@@ -383,7 +392,7 @@
         const input = document.getElementById('publicUrl');
         input.select();
         document.execCommand('copy');
-        
+
         // Show toast
         const toast = document.createElement('div');
         toast.className = 'alert alert-success';
@@ -398,10 +407,10 @@
         const selectedCategories = Array.from(checkboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.value);
-        
+
         // Si aucune checkbox n'est cochée, tout masquer
         const showAll = selectedCategories.length === 0;
-        
+
         document.querySelectorAll('.category-section').forEach(section => {
             const category = section.getAttribute('data-category');
             if (showAll) {
@@ -418,9 +427,31 @@
     });
 
     // Invite co-owner
+    function loadQRCodeModal(type, id) {
+        const url = id ? `/qrcode/modal/${type}/${id}` : `/qrcode/modal/${type}`;
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                // Supprimer l'ancienne modal si elle existe
+                const container = document.getElementById('qrCodeModalContainer');
+                container.innerHTML = html;
+
+                // Ouvrir la modal DaisyUI
+                const modal = document.getElementById('qrCodeModal');
+                if (modal) {
+                    modal.showModal();
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors du chargement du QR code:', error);
+                showToast('Impossible de charger le QR code', 'error');
+            });
+    }
+
     async function inviteCoOwner() {
         const email = document.getElementById('inviteEmail').value;
-        
+
         if (!email || !email.includes('@')) {
             showToast('Veuillez entrer une adresse email valide', 'error');
             return;
@@ -432,9 +463,9 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email })
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 showToast(result.message, 'success');
                 inviteCoOwnerModal.close();
