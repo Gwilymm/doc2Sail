@@ -8,12 +8,17 @@ export default class extends Controller {
         if (!navigator.share && this.hasShareButtonTarget) {
             this.shareButtonTarget.style.display = "none";
         }
+        // small lock to prevent duplicate event handling (click + touchend/pointerup)
+        this._actionLock = false;
     }
 
     /**
      * Copier l'URL dans le presse-papiers
      */
     async copyUrl(event) {
+        if (this._actionLock) return;
+        this._actionLock = true;
+        setTimeout(() => (this._actionLock = false), 600);
         event.preventDefault();
 
         try {
@@ -55,6 +60,9 @@ export default class extends Controller {
      * Imprimer le QR code
      */
     print(event) {
+        if (this._actionLock) return;
+        this._actionLock = true;
+        setTimeout(() => (this._actionLock = false), 600);
         event.preventDefault();
         try {
             const dataUri = this.qrImageTarget.src;
@@ -122,6 +130,9 @@ export default class extends Controller {
      * Télécharger le QR code en tant qu'image
      */
     async download(event) {
+        if (this._actionLock) return;
+        this._actionLock = true;
+        setTimeout(() => (this._actionLock = false), 600);
         event.preventDefault();
 
         try {
@@ -145,23 +156,77 @@ export default class extends Controller {
     /**
      * Partager via WhatsApp
      */
-    shareWhatsApp(event) {
+    async shareWhatsApp(event) {
+        if (this._actionLock) return;
+        this._actionLock = true;
+        setTimeout(() => (this._actionLock = false), 600);
         event.preventDefault();
-
         const url = this.urlInputTarget.value;
-        const text = encodeURIComponent("Découvrez ce contenu : " + url);
 
-        // Use deep link on mobile apps, web API for desktop
-        const ua = navigator.userAgent || "";
+        // Build an improved message using regatta metadata if present
+        const regattaName = this.element.dataset.regattaName || '';
+        const regattaDates = this.element.dataset.regattaDates || '';
+        const messageParts = [];
+        if (regattaName) messageParts.push(regattaName);
+        if (regattaDates) messageParts.push(regattaDates);
+        if (messageParts.length) messageParts.push('');
+        messageParts.push(url);
+        const fullText = messageParts.join(' - ');
+
+        // On desktop, open a blank popup synchronously to avoid popup blockers
+        const ua = navigator.userAgent || '';
         const isMobile = /android|iphone|ipad|ipod/i.test(ua);
-        const mobileLink = `whatsapp://send?text=${text}`;
-        const webLink = `https://api.whatsapp.com/send?text=${text}`;
-        const shareUrl = isMobile ? mobileLink : webLink;
+        let popup = null;
+        if (!isMobile) {
+            try {
+                popup = window.open('', '_blank', 'noopener,noreferrer');
+            } catch (e) {
+                popup = null;
+            }
+        }
 
-        const win = window.open(shareUrl, "_blank", "noopener,noreferrer");
-        if (!win) {
-            // Fallback: navigate in same tab (may open app or web)
-            window.location.href = shareUrl;
+        // Prefer native Web Share with files if supported
+        try {
+            const dataUri = this.qrImageTarget.src;
+            const blob = await this.dataURItoBlob(dataUri);
+            const file = new File([ blob ], 'qrcode.png', { type: 'image/png' });
+
+            const shareData = {
+                title: regattaName || 'QR Code - Doc2Sail',
+                text: fullText,
+                url: url,
+                files: [ file ]
+            };
+
+            if (navigator.canShare && navigator.canShare({ files: [ file ] }) && navigator.share) {
+                await navigator.share(shareData);
+                this.showToast('Partagé avec succès', 'success');
+                if (popup) popup.close();
+                return;
+            }
+        } catch (err) {
+            // ignore and fallback to web link
+            console.debug('Native share not available or failed', err);
+        }
+
+        // Fallback: web link with encoded text (desktop and mobile web)
+        const text = encodeURIComponent(fullText);
+        const webLink = `https://api.whatsapp.com/send?text=${text}`;
+        if (popup) {
+            try {
+                popup.location.href = webLink;
+            } catch (e) {
+                // If cannot set location (blocked), fallback to opening a new tab
+                const win = window.open(webLink, '_blank', 'noopener,noreferrer');
+                if (!win) {
+                    this.showToast("Pop-up bloquée. Autorisez les pop-ups pour ouvrir WhatsApp", 'warning');
+                }
+            }
+        } else {
+            const win = window.open(webLink, '_blank', 'noopener,noreferrer');
+            if (!win) {
+                this.showToast("Pop-up bloquée. Autorisez les pop-ups pour ouvrir WhatsApp", 'warning');
+            }
         }
     }
 
@@ -169,6 +234,9 @@ export default class extends Controller {
      * Partager par email
      */
     shareEmail(event) {
+        if (this._actionLock) return;
+        this._actionLock = true;
+        setTimeout(() => (this._actionLock = false), 600);
         event.preventDefault();
 
         const url = this.urlInputTarget.value;
@@ -188,6 +256,9 @@ export default class extends Controller {
      * Partager via l'API native de partage (Web Share API)
      */
     async shareNative(event) {
+        if (this._actionLock) return;
+        this._actionLock = true;
+        setTimeout(() => (this._actionLock = false), 600);
         event.preventDefault();
 
         if (!navigator.share) {

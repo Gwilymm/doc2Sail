@@ -69,3 +69,4 @@ regatta:
             print: "Imprimer"
             download: "Télécharger"
             share_via: "Partager via"
+            share: "Partager"
