@@ -157,78 +157,82 @@ export default class extends Controller {
      * Partager via WhatsApp
      */
     async shareWhatsApp(event) {
+        event.preventDefault();
         if (this._actionLock) return;
         this._actionLock = true;
-        setTimeout(() => (this._actionLock = false), 600);
-        event.preventDefault();
-        const url = this.urlInputTarget.value;
+        setTimeout(() => (this._actionLock = false), 1000);
 
-        // Build an improved message using regatta metadata if present
-        const regattaName = this.element.dataset.regattaName || '';
-        const regattaDates = this.element.dataset.regattaDates || '';
+        const url = this.urlInputTarget?.value || window.location.href;
+
+        const regattaName = (this.element.dataset.regattaName || '').trim();
+        const regattaDates = (this.element.dataset.regattaDates || '').trim();
+        const regattaLocation = (this.element.dataset.regattaLocation || '').trim();
+
+        // 🧠 Message enrichi
         const messageParts = [];
-        if (regattaName) messageParts.push(regattaName);
-        if (regattaDates) messageParts.push(regattaDates);
-        if (messageParts.length) messageParts.push('');
-        messageParts.push(url);
-        const fullText = messageParts.join(' - ');
+        if (regattaName) messageParts.push(`🏁 *${regattaName}*`);
+        if (regattaLocation) messageParts.push(`📍 ${regattaLocation}`);
+        if (regattaDates) messageParts.push(`📅 ${regattaDates}`);
+        messageParts.push('');
+        messageParts.push('👉 Rejoins la régate ici :');
+        messageParts.push(`\`${url}\``);
 
-        // On desktop, open a blank popup synchronously to avoid popup blockers
-        const ua = navigator.userAgent || '';
-        const isMobile = /android|iphone|ipad|ipod/i.test(ua);
-        let popup = null;
-        if (!isMobile) {
+        const fullText = messageParts.join('\n');
+        const encodedText = encodeURIComponent(fullText);
+        const webLink = `https://api.whatsapp.com/send?text=${encodedText}`;
+
+        // Détection mobile
+        const ua = navigator.userAgent.toLowerCase();
+        const isMobile = /android|iphone|ipad|ipod/.test(ua);
+
+        // 🟢 Cas mobile → partage natif (texte + QR)
+        if (isMobile && navigator.share) {
             try {
-                popup = window.open('', '_blank', 'noopener,noreferrer');
-            } catch (e) {
-                popup = null;
+                const dataUri = this.qrImageTarget?.src;
+                if (dataUri) {
+                    const blob = await this.dataURItoBlob(dataUri);
+                    const file = new File([ blob ], 'qrcode.png', { type: 'image/png' });
+
+                    const shareData = {
+                        title: regattaName || 'Doc2Sail',
+                        text: fullText,
+                        files: [ file ]
+                    };
+
+                    // Vérifie si le navigateur supporte le partage mixte
+                    if (navigator.canShare?.(shareData)) {
+                        await navigator.share(shareData);
+                        this.showToast('✅ Partagé avec succès', 'success');
+                        return;
+                    }
+                }
+
+                // Si image non disponible, partage texte seul
+                await navigator.share({ title: regattaName || 'Doc2Sail', text: fullText, url: url });
+                this.showToast('✅ Partagé avec succès', 'success');
+                return;
+
+            } catch (err) {
+                console.debug('Échec du partage natif, fallback WhatsApp Web', err);
             }
         }
 
-        // Prefer native Web Share with files if supported
+        // 💻 Cas desktop → ouverture WhatsApp Web avec texte et lien
         try {
-            const dataUri = this.qrImageTarget.src;
-            const blob = await this.dataURItoBlob(dataUri);
-            const file = new File([ blob ], 'qrcode.png', { type: 'image/png' });
-
-            const shareData = {
-                title: regattaName || 'QR Code - Doc2Sail',
-                text: fullText,
-                url: url,
-                files: [ file ]
-            };
-
-            if (navigator.canShare && navigator.canShare({ files: [ file ] }) && navigator.share) {
-                await navigator.share(shareData);
-                this.showToast('Partagé avec succès', 'success');
-                if (popup) popup.close();
-                return;
+            const popup = window.open(webLink, '_blank', 'noopener,noreferrer');
+            if (!popup) {
+                this.showToast("⚠️ Pop-up bloquée. Autorisez les pop-ups pour WhatsApp", 'warning');
+            } else {
+                this.showToast('💬 Ouverture de WhatsApp Web...', 'info');
             }
         } catch (err) {
-            // ignore and fallback to web link
-            console.debug('Native share not available or failed', err);
-        }
-
-        // Fallback: web link with encoded text (desktop and mobile web)
-        const text = encodeURIComponent(fullText);
-        const webLink = `https://api.whatsapp.com/send?text=${text}`;
-        if (popup) {
-            try {
-                popup.location.href = webLink;
-            } catch (e) {
-                // If cannot set location (blocked), fallback to opening a new tab
-                const win = window.open(webLink, '_blank', 'noopener,noreferrer');
-                if (!win) {
-                    this.showToast("Pop-up bloquée. Autorisez les pop-ups pour ouvrir WhatsApp", 'warning');
-                }
-            }
-        } else {
-            const win = window.open(webLink, '_blank', 'noopener,noreferrer');
-            if (!win) {
-                this.showToast("Pop-up bloquée. Autorisez les pop-ups pour ouvrir WhatsApp", 'warning');
-            }
+            console.error('Erreur partage WhatsApp', err);
+            this.showToast('⚠️ Impossible de partager sur WhatsApp', 'error');
         }
     }
+
+
+
 
     /**
      * Partager par email
