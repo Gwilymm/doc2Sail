@@ -3,6 +3,9 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+    # rendre le préfixe de locale optionnel en fournissant une valeur par défaut
     prefix: /{_locale}
+    defaults:
+        _locale: "fr"
     requirements:
         _locale: en|fr
