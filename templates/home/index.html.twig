@@ -6,43 +6,43 @@
 {% endblock %}
 
 {% block body %}
+	{% include '_navbar.html.twig' %}
 
 
-	<div
-		class="min-h-screen bg-base-100">
+	<div class="min-h-screen bg-base-100">
 		<!-- Language Selector - Fixed Top Right -->
-		<div class="fixed top-4 right-4 z-50">
-			<div class="dropdown dropdown-end">
-				<label tabindex="0" class="btn btn-sm btn-ghost gap-2 bg-base-100 shadow-lg">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-					</svg>
-					{{ app.request.locale|upper }}
-				</label>
-				<ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-2">
-					<li>
-						<a href="{{ path('app_change_language', {locale: 'fr'}) }}" class="{% if app.request.locale == 'fr' %}active{% endif %}">
-							🇫🇷 FR
-						</a>
-					</li>
-					<li>
-						<a href="{{ path('app_change_language', {locale: 'en'}) }}" class="{% if app.request.locale == 'en' %}active{% endif %}">
-							🇬🇧 EN
-						</a>
-					</li>
-				</ul>
-			</div>
-		</div>
+
 
 		<!-- Hero Section avec animation -->
-		<div
-			class="hero min-h-screen relative overflow-hidden bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
-			<!-- Animated background waves -->
-			<div class="absolute inset-0 opacity-10">
-				<svg class="absolute bottom-0 w-full" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 1440 320">
-					<path fill="currentColor" class="text-primary" fill-opacity="0.3" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,197.3C1248,203,1344,149,1392,122.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" class="animate-pulse"></path>
+			<div
+			class="hero min-h-screen relative overflow-hidden bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5"> <!-- Animated background waves -->
+			<div class="absolute inset-0 overflow-hidden opacity-30">
+				<svg class="absolute bottom-0 w-[200%] animate-wave text-primary" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 1440 320">
+					<path fill="currentColor" fill-opacity="0.2" d="M0,160L80,186.7C160,213,320,267,480,272C640,277,800,235,960,224C1120,213,1280,235,1360,245.3L1440,256L1440,320L0,320Z"/>
+				</svg>
+				<svg class="absolute bottom-0 w-[200%] animate-wave-slow text-primary" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 1440 320">
+					<path fill="currentColor" fill-opacity="0.4" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,197.3C1248,203,1344,149,1392,122.7L1440,96L1440,320L0,320Z"/>
 				</svg>
 			</div>
+
+			<style>
+				@keyframes waveMove
+				{
+					0%
+					{transform:translateX(0)
+					}
+					100%
+					{transform:translateX(-50%)
+					}
+				}
+				.animate-wave
+				{animation:waveMove 10s linear infinite
+				}
+				.animate-wave-slow
+				{animation:waveMove 20s linear infinite
+				}
+			</style>
+
 
 			<div class="hero-content text-center z-10 px-4">
 				<div class="max-w-4xl">
@@ -224,6 +224,8 @@
 				</div>
 			</div>
 		</div>
+
+		{% include "pricing/_pricing.html.twig" %}
 
 		<!-- CTA Section -->
 		<div class="bg-base-200 py-20">

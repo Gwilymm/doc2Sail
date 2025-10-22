@@ -1,0 +1,203 @@
+<section class="bg-base-200 dark:bg-base-200 text-base-content">
+	<div class="max-w-7xl mx-auto px-6 py-24 text-center" data-controller="pricing-toggle">
+		<h2 class="text-5xl font-bold text-primary mb-4">Plans & Tarifs Doc2Sail</h2>
+		<p class="text-lg text-base-content/70 max-w-2xl mx-auto">
+			Gérez, partagez et sécurisez vos documents de régate – du club local à la fédération internationale.
+		</p>
+
+		<!-- Toggle mensuel / annuel -->
+		<div class="mt-8 flex justify-center">
+			<div class="join bg-base-300 p-1 rounded-full">
+				<input data-action="change->pricing-toggle#toggle" data-pricing-toggle-target="toggle" type="radio" name="billing" aria-label="Mensuel" class="join-item btn btn-sm" checked/>
+				<input data-action="change->pricing-toggle#toggle" data-pricing-toggle-target="toggle" type="radio" name="billing" aria-label="Annuel (-20%)" class="join-item btn btn-sm"/>
+			</div>
+		</div>
+
+		<!-- Cartes -->
+		<div
+			class="mt-16 grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
+			<!-- Freemium -->
+			<div class="card bg-base-100 shadow-md border border-base-300 h-full">
+				<div class="card-body flex flex-col h-full">
+					<div class="mb-2 min-h-20">
+						<h3 class="text-xl font-semibold text-primary">Gratuit</h3>
+						<p class="text-base-content/70">Pour les petites régates souhaitant tester la solution.</p>
+					</div>
+					<div class="mt-6 flex items-end justify-center gap-2">
+						<span class="text-4xl font-bold text-primary" data-pricing-toggle-target="price" data-monthly="0€" data-annual="0€">0€</span>
+						<span class="text-sm text-base-content/70" data-pricing-toggle-target="period">/mois</span>
+					</div>
+					<ul class="mt-6 space-y-2 text-left text-base-content/80 flex-1">
+						<li>✅ 1 régate active</li>
+						<li>✅ 3 documents max</li>
+						<li>✅ 50 consultations/mois</li>
+						<li>✅ Notifications push</li>
+						<li>❌ Personnalisation</li>
+						<li>❌ Support prioritaire</li>
+					</ul>
+					<button class="btn btn-outline btn-primary mt-6 w-full">Essayer</button>
+				</div>
+			</div>
+
+			<!-- Club -->
+			<div class="card bg-base-100 shadow-lg border border-primary/30 h-full">
+				<div class="card-body flex flex-col h-full">
+					<div class="mb-2 min-h-20">
+						<h3 class="text-xl font-semibold text-primary">Club</h3>
+						<p class="text-base-content/70">Pour les clubs organisant plusieurs régates par an.</p>
+					</div>
+					<div class="mt-6 flex items-end justify-center gap-2">
+						<span class="text-4xl font-bold text-primary" data-pricing-toggle-target="price" data-monthly="39€" data-annual="299€">39€</span>
+						<span class="text-sm text-base-content/70" data-pricing-toggle-target="period">/mois</span>
+					</div>
+					<ul class="mt-6 space-y-2 text-left text-base-content/80 flex-1">
+						<li>✅ 10 régates actives</li>
+						<li>✅ Documents illimités</li>
+						<li>✅ 5 co-organisateurs</li>
+						<li>✅ Personnalisation logo</li>
+						<li>✅ Statistiques de base</li>
+						<li>✅ Support email 24h</li>
+						<li>🏷️ Branding discret</li>
+					</ul>
+					<button class="btn btn-primary mt-6 w-full">Souscrire</button>
+				</div>
+			</div>
+
+			<!-- Professionnel -->
+			<div class="card bg-primary text-primary-content shadow-xl scale-105 border border-primary h-full">
+				<div class="card-body flex flex-col h-full">
+					<div class="mb-2 min-h-20">
+						<h3 class="text-xl font-semibold">Professionnel</h3>
+						<p>Pour les comités et organisateurs professionnels exigeants.</p>
+					</div>
+					<div class="mt-6 flex items-end justify-center gap-2">
+						<span class="text-4xl font-bold" data-pricing-toggle-target="price" data-monthly="149€" data-annual="1 390€">149€</span>
+						<span class="text-sm opacity-80" data-pricing-toggle-target="period">/mois</span>
+					</div>
+
+					<ul class="mt-6 space-y-2 text-left flex-1">
+						<li>✅ 50 régates actives</li>
+						<li>✅ White-label complet</li>
+						<li>✅ Domaine personnalisé inclus</li>
+						<li>✅ Analytics avancés</li>
+						<li>✅ Support prioritaire (12h ouvrées)</li>
+					</ul>
+					<button class="btn btn-neutral mt-6 w-full">Choisir</button>
+				</div>
+			</div>
+
+			<!-- Entreprise -->
+			<div class="card bg-base-100 shadow-md border border-base-300 h-full">
+				<div class="card-body flex flex-col h-full">
+					<div class="mb-2 min-h-20">
+						<h3 class="text-xl font-semibold text-primary">Entreprise</h3>
+						<p class="text-base-content/70">Pour les fédérations et ligues gérant plusieurs régates.</p>
+					</div>
+					<div class="mt-6 flex items-end justify-center gap-2">
+						<span class="text-4xl font-bold text-primary">Sur devis</span>
+					</div>
+					<ul class="mt-6 space-y-2 text-left text-base-content/80 flex-1">
+						<li>✅ Régates illimitées</li>
+						<li>✅ Instance dédiée</li>
+						<li>✅ SLA 99.9%</li>
+						<li>✅ Account manager dédié</li>
+						<li>✅ Formation équipes</li>
+						<li>✅ Support 24/7</li>
+						<li>✅ SSO / Sécurité RGPD+</li>
+					</ul>
+					<button class="btn btn-outline btn-primary mt-6 w-full">Contacter</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Tableau comparatif -->
+	<div class="bg-base-300 dark:bg-base-300 py-16">
+		<div class="max-w-7xl mx-auto px-6">
+			<h3 class="text-2xl font-semibold text-center mb-10 text-base-content">Comparaison des fonctionnalités</h3>
+			<div class="overflow-x-auto">
+				<table class="table w-full border border-base-200 rounded-xl">
+					<thead class="bg-base-100">
+						<tr>
+							<th class="text-left">Fonctionnalité</th>
+							<th class="text-center text-primary">Gratuit</th>
+							<th class="text-center text-primary">Club</th>
+							<th class="text-center text-primary">Pro</th>
+							<th class="text-center text-primary">Entreprise</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-base-200">
+						<tr>
+							<td>Régates actives</td>
+							<td class="text-center">1</td>
+							<td class="text-center">10</td>
+							<td class="text-center">50</td>
+							<td class="text-center">Illimité</td>
+						</tr>
+						<tr>
+							<td>Documents illimités</td>
+							<td class="text-center">❌</td>
+							<td class="text-center">✅</td>
+							<td class="text-center">✅</td>
+							<td class="text-center">✅</td>
+						</tr>
+						<tr>
+							<td>Co-organisateurs</td>
+							<td class="text-center">1</td>
+							<td class="text-center">5</td>
+							<td class="text-center">Illimité</td>
+							<td class="text-center">Illimité</td>
+						</tr>
+						<tr>
+							<td>White-label / logo</td>
+							<td class="text-center">❌</td>
+							<td class="text-center">✅</td>
+							<td class="text-center">✅</td>
+							<td class="text-center">✅</td>
+						</tr>
+						<tr>
+							<td>Statistiques & analytics</td>
+							<td class="text-center">❌</td>
+							<td class="text-center">Base</td>
+							<td class="text-center">Avancé</td>
+							<td class="text-center">Complet</td>
+						</tr>
+						<tr>
+							<td>API & intégrations</td>
+							<td class="text-center">❌</td>
+							<td class="text-center">❌</td>
+							<td class="text-center">✅</td>
+							<td class="text-center">✅</td>
+						</tr>
+						<tr>
+							<td>Archivage long terme</td>
+							<td class="text-center">❌</td>
+							<td class="text-center">5 ans</td>
+							<td class="text-center">Illimité</td>
+							<td class="text-center">Illimité + Backup</td>
+						</tr>
+						<tr>
+							<td>Support</td>
+							<td class="text-center">Communautaire</td>
+							<td class="text-center">Email 24h</td>
+							<td class="text-center">Prioritaire</td>
+							<td class="text-center">24/7 dédié</td>
+						</tr>
+						<tr>
+							<td>SSO / Sécurité RGPD+</td>
+							<td class="text-center">❌</td>
+							<td class="text-center">❌</td>
+							<td class="text-center">✅</td>
+							<td class="text-center">✅</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div class="text-center text-sm text-base-content/70 py-10">
+		Tous les plans incluent un hébergement sécurisé 🇪🇺, chiffrement AES-256 et mode offline.<br>
+		Annulez ou modifiez votre plan à tout moment.
+	</div>
+</section>
