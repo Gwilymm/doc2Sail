@@ -13,19 +13,37 @@ class LanguageController extends AbstractController
 	public function changeLanguage(string $locale, Request $request): Response
 	{
 		// Vérifier que la locale est valide
-		if (!in_array($locale, ['fr', 'en'])) {
+		$available = ['fr', 'en'];
+		if (!in_array($locale, $available, true)) {
 			$locale = 'fr';
 		}
 
 		// Stocker la locale dans la session
 		$request->getSession()->set('_locale', $locale);
 
-		// Rediriger vers la page précédente ou la page d'accueil
+		// Essayer de reconstruire l'URL précédente avec la nouvelle locale
 		$referer = $request->headers->get('referer');
 		if ($referer) {
-			return $this->redirect($referer);
+			$parts = parse_url($referer);
+			$path = $parts['path'] ?? '/';
+			$query = $parts['query'] ?? '';
+			$fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
+
+			// Remplacer le premier segment s'il est une locale connue, sinon préfixer
+			$segments = explode('/', ltrim($path, '/'));
+			if (isset($segments[0]) && in_array($segments[0], $available, true)) {
+				$segments[0] = $locale;
+				$newPath = '/' . implode('/', $segments);
+			} else {
+				// Préfixe la route sans locale
+				$newPath = '/' . rtrim($locale, '/') . ($path === '/' ? '/' : $path);
+			}
+
+			$newUrl = $newPath . ($query ? '?' . $query : '') . $fragment;
+			return $this->redirect($newUrl);
 		}
 
-		return $this->redirectToRoute('app_home');
+		// Fallback vers la home locale
+		return $this->redirectToRoute('app_home', ['_locale' => $locale]);
 	}
 }
