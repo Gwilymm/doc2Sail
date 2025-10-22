@@ -4,25 +4,40 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 		<title>
-			{% block title %}{{ 'base.title'|trans }}
+			{% block title %}
+				{{ 'base.title'|trans }}
 			{% endblock %}
 		</title>
 
-	<!-- PWA Meta Tags -->
-	<meta name="description" content="{{ 'base.description'|trans({}, 'base') }}">
-		<meta name="theme-color" content="#0284c7">
-		<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-		<link
-		rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
+		<!-- Description + thème -->
+		<meta name="description" content="{{ 'base.description'|trans({}, 'base') }}">
+		<meta
+		name="theme-color" content="#0284c7">
 
-		<!-- Apple Touch Icon -->
+		<!-- Favicons -->
+		<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+		<link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
 		<link rel="apple-touch-icon" href="{{ asset('icon-192.png') }}">
 		<meta name="mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta
+		name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		{# =========================
+						   🔗 META-TAGS POUR LE PARTAGE
+						   ========================= #}
+		<meta property="og:type" content="website">
+		<meta property="og:locale" content="fr_FR">
+		<meta property="og:url" content="{{ app.request.uri }}">
+		<meta property="og:site_name" content="Doc2Sail">
+
+		<meta property="og:title" content="{% block og_title %}{{ 'base.title'|trans }}{% endblock %}">
+		<meta property="og:description" content="{% block og_description %}{{ 'base.description'|trans({}, 'base') }}{% endblock %}">
+		<meta property="og:image" content="{{ app.request.schemeAndHttpHost ~ asset('icon-192.png') }}">
+
 
 		{% block stylesheets %}
-			<!-- Manifest (peut être surchargé dans les templates enfants) -->
 			<link rel="manifest" href="{{ asset('manifest.json') }}">
 			{{ encore_entry_link_tags('app') }}
 		{% endblock %}
@@ -33,8 +48,7 @@
 
 		<!-- Theme Controller Script -->
 		<script>
-			// Load theme from localStorage on page load
-( function ()
+			( function ()
 {
 
 
@@ -47,19 +61,21 @@ document.documentElement.setAttribute( 'data-theme', theme );
 } )();
 		</script>
 	</head>
+
 	<body class="bg-base-200 min-h-screen"> {% block body %}{% endblock %}
 
 		<!-- Service Worker Registration -->
 		<script>
-			// Register service worker even in HTTP for testing (disabled by default in production)
-if ( 'serviceWorker' in navigator )
+			if ( 'serviceWorker' in navigator )
 {
 
 
 
-window.addEventListener( 'load', () => { // Ne pas enregistrer /sw.js sur les pages publiques (elles ont leur propre SW)
-const isPublicPage = window.location.pathname.startsWith( '/r/' );
+window.addEventListener( 'load', () => {
 
+
+
+const isPublicPage = window.location.pathname.startsWith( '/r/' );
 if ( isPublicPage )
 {
 
@@ -71,38 +87,17 @@ return;
 
 
 }
-
-// Forcer la mise à jour du Service Worker
-navigator.serviceWorker.getRegistrations().then( registrations => {
-
-
-
-registrations.forEach( reg => {
-
-
-
-reg.update(); // Force la mise à jour
-
-
-
-} );
-
-
-
-} );
-
+navigator.serviceWorker.getRegistrations().then( regs => regs.forEach( reg => reg.update() ) );
 navigator.serviceWorker.register( '/sw.js' ).then( reg => {
 
 
 
 console.log( '✅ Service Worker enregistré', reg );
-// Force l'affichage du prompt d'installation
-window.addEventListener( 'beforeinstallprompt', ( e ) => {
+window.addEventListener( 'beforeinstallprompt', e => {
 
 
 
 console.log( '💾 PWA peut être installée' );
-// Stocker l'événement pour l'utiliser plus tard
 window.deferredPrompt = e;
 
 

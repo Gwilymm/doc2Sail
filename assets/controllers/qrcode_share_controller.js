@@ -1,13 +1,21 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = [ "qrImage", "qrContainer", "urlInput", "shareButton" ];
+    static targets = [ "qrImage", "qrContainer", "urlInput", "shareButton", "shareWhatsAppButton", "shareEmailButton" ];
 
     connect() {
         // Masquer le bouton de partage natif si l'API n'est pas disponible
         if (!navigator.share && this.hasShareButtonTarget) {
             this.shareButtonTarget.style.display = "none";
+
         }
+        //masquer le bouton WhatsApp et email si l'API de partage natif est disponible
+        if (navigator.share && this.hasShareWhatsAppButtonTarget) {
+            this.shareWhatsAppButtonTarget.style.display = "none";
+            this.shareEmailButtonTarget.style.display = "none";
+        }
+
+
         // small lock to prevent duplicate event handling (click + touchend/pointerup)
         this._actionLock = false;
     }
@@ -167,7 +175,9 @@ export default class extends Controller {
         const regattaName = (this.element.dataset.regattaName || '').trim();
         const regattaDates = (this.element.dataset.regattaDates || '').trim();
         const regattaLocation = (this.element.dataset.regattaLocation || '').trim();
-
+        const dataUri = this.qrImageTarget.src;
+        const blob = await this.dataURItoBlob(dataUri);
+        const file = new File([ blob ], "qrcode.png", { type: "image/png" });
         // 🧠 Message enrichi
         const messageParts = [];
         if (regattaName) messageParts.push(`🏁 *${regattaName}*`);
@@ -178,6 +188,7 @@ export default class extends Controller {
         const cleanUrl = url.replace(/^https?:\/\//, '');
         messageParts.push(`\`${cleanUrl}\``);
 
+
         const fullText = messageParts.join('\n');
         const encodedText = encodeURIComponent(fullText);
         const webLink = `https://api.whatsapp.com/send?text=${encodedText}`;
@@ -186,37 +197,6 @@ export default class extends Controller {
         const ua = navigator.userAgent.toLowerCase();
         const isMobile = /android|iphone|ipad|ipod/.test(ua);
 
-        // 🟢 Cas mobile → partage natif (texte + QR)
-        if (isMobile && navigator.share) {
-            try {
-                const dataUri = this.qrImageTarget?.src;
-                if (dataUri) {
-                    const blob = await this.dataURItoBlob(dataUri);
-                    const file = new File([ blob ], 'qrcode.png', { type: 'image/png' });
-
-                    const shareData = {
-                        title: regattaName || 'Doc2Sail',
-                        text: fullText,
-                        files: [ file ]
-                    };
-
-                    // Vérifie si le navigateur supporte le partage mixte
-                    if (navigator.canShare?.(shareData)) {
-                        await navigator.share(shareData);
-                        this.showToast('✅ Partagé avec succès', 'success');
-                        return;
-                    }
-                }
-
-                // Si image non disponible, partage texte seul
-                await navigator.share({ title: regattaName || 'Doc2Sail', text: fullText, url: url });
-                this.showToast('✅ Partagé avec succès', 'success');
-                return;
-
-            } catch (err) {
-                console.debug('Échec du partage natif, fallback WhatsApp Web', err);
-            }
-        }
 
         // 💻 Cas desktop → ouverture WhatsApp Web avec texte et lien
         try {
@@ -246,6 +226,7 @@ export default class extends Controller {
 
         const url = this.urlInputTarget.value;
         const subject = encodeURIComponent("Partage de QR code - Doc2Sail");
+        const attachment = this.qrImageTarget.src;
         const body = encodeURIComponent(
             `Bonjour,\n\n` +
             `Je partage avec vous ce lien :\n${url}\n\n` +
@@ -276,30 +257,18 @@ export default class extends Controller {
 
         try {
             // Convertir le data URI en Blob pour le partage
-            const dataUri = this.qrImageTarget.src;
-            const blob = await this.dataURItoBlob(dataUri);
-            const file = new File([ blob ], "qrcode.png", { type: "image/png" });
 
-            const shareData = {
+
+            await navigator.share({
+
                 title: "QR Code - Doc2Sail",
-                text: "Scannez ce QR code pour accéder au contenu",
+                text: "Découvrez les documents :\n",
                 url: this.urlInputTarget.value,
-                files: [ file ],
-            };
+            });
+            this.showToast("Contenu partagé avec succès", "success");
 
-            // Vérifier si le partage de fichiers est supporté
-            if (navigator.canShare && navigator.canShare(shareData)) {
-                await navigator.share(shareData);
-                this.showToast("Contenu partagé avec succès", "success");
-            } else {
-                // Fallback sans fichier
-                await navigator.share({
-                    title: "QR Code - Doc2Sail",
-                    text: "Découvrez ce contenu",
-                    url: this.urlInputTarget.value,
-                });
-                this.showToast("Lien partagé avec succès", "success");
-            }
+            this.showToast("Lien partagé avec succès", "success");
+
         } catch (err) {
             // L'utilisateur a annulé le partage
             if (err.name !== "AbortError") {
