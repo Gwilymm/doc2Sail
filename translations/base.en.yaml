@@ -1,3 +1,9 @@
 base:
-  title: "Doc2Sail - Document management for regattas"
-  description: "PWA application to manage your sailing regatta documents"
+    title: "Doc2Sail - Document management for regattas"
+    description: "PWA application to manage your sailing regatta documents"
+    footer:
+        company: "Doc2Sail"
+        copyright: "© Doc2Sail %year% — All rights reserved"
+        privacy: "Privacy policy"
+        contact: "Contact"
+        launched_by: "Launched by BHN corp."

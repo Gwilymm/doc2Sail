@@ -1,3 +1,9 @@
 base:
-  title: "Doc2Sail - Gestion Documents de Régate"
-  description: "Application PWA pour gérer vos documents de régate de voile"
+    title: "Doc2Sail - Gestion Documents de Régate"
+    description: "Application PWA pour gérer vos documents de régate de voile"
+    footer:
+        company: "Doc2Sail"
+        copyright: "© Doc2Sail %year% — Tous droits réservés"
+        privacy: "Politique de confidentialité"
+        contact: "Contact"
+        launched_by: "Mise à l'eau par la BHN corp."

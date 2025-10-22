@@ -45,16 +45,17 @@
 			</label>
 			<ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-40 mt-2 border border-base-300">
 				<li>
-					<a href="{{ path('app_change_language', { locale: 'fr' }) }}" class="{% if app.request.locale == 'fr' %}active{% endif %}">
+					<a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': 'fr'})) }}" class="{% if app.request.locale == 'fr' %}active{% endif %}">
 						🇫🇷 FR
 					</a>
 				</li>
 				<li>
-					<a href="{{ path('app_change_language', { locale: 'en' }) }}" class="{% if app.request.locale == 'en' %}active{% endif %}">
+					<a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': 'en'})) }}" class="{% if app.request.locale == 'en' %}active{% endif %}">
 						🇬🇧 EN
 					</a>
 				</li>
 			</ul>
+
 		</div>
 
 		<!-- Theme Selector -->

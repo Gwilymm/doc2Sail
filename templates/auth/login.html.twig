@@ -1,221 +1,138 @@
-{% extends 'base.html.twig' %} {% trans_default_domain 'login' %} {% block
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'login' %}
+{% block
 title%}
-{{ "login.title" | trans }}
-{% endblock %} {% block body %} {% include'_navbar.html.twig' %}
-<div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 px-4"
->
-    <div class="max-w-md w-full">
-        <!-- Logo -->
-        <div class="text-center mb-8">
-            <img
-                src="{{ asset('logo.svg') }}"
-                alt="Doc2Sail Logo"
-                class="w-32 h-32 mx-auto mb-4 animate-bounce-slow"
-            />
-            <h1 class="text-4xl font-bold text-primary mb-2">Doc2Sail</h1>
-            <p class="text-base-content/70">{{ "login.subtitle" | trans }}</p>
-        </div>
-        <!-- Flash Messages -->
-        {% for type, messages in app.flashes %} {% for message in messages %}
-        <div
-            class="alert alert-{{
-                type == 'error'
-                    ? 'error'
-                    : type == 'success'
-                    ? 'success'
-                    : 'info'
-            }} mb-4 shadow-lg"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="stroke-current shrink-0 h-6 w-6"
-                fill="none"
-                viewbox="0 0 24 24"
-            >
-                {% if type == 'error' %}
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-                {% elseif type == 'success' %}
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-                {% else %}
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-                {% endif %}
-            </svg>
-            <span>{{ message }}</span>
-        </div>
-        {% endfor %} {% endfor %}
+	{{ "login.title" | trans }}
+{% endblock %}
+{% block body %}
+	{% include'_navbar.html.twig' %}
+	<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-100 to-primary/10 px-4">
+		<div
+			class="max-w-md w-full">
+			<!-- Logo -->
+			<div class="text-center mb-8">
+				<img src="{{ asset('logo.svg') }}" alt="Doc2Sail Logo" class="w-32 h-32 mx-auto mb-4 animate-bounce-slow"/>
+				<h1 class="text-4xl font-bold text-primary mb-2">Doc2Sail</h1>
+				<p class="text-base-content/70">{{ "login.subtitle" | trans }}</p>
+			</div>
+			<!-- Flash Messages -->
+			{% for type, messages in app.flashes %}
+				{% for message in messages %}
+					<div class="alert alert-{{
+							                type == 'error'
+							                    ? 'error'
+							                    : type == 'success'
+							                    ? 'success'
+							                    : 'info'
+							            }} mb-4 shadow-lg">
+						<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
+							{% if type == 'error' %}
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+							{% elseif type == 'success' %}
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+							{% else %}
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+							{% endif %}
+						</svg>
+						<span>{{ message }}</span>
+					</div>
+				{% endfor %}
+			{% endfor %}
 
-        <!-- Formulaire de connexion -->
-        <div class="card bg-base-100 shadow-2xl border border-base-300">
-            <div class="card-body">
-                <h2 class="card-title text-2xl mb-4 text-base-content">
-                    <span class="font-emoji">✨</span>
-                    {{ "login.magic.title" | trans }}
-                </h2>
-                <p class="text-base-content/70 mb-4">
-                    {{ "login.magic.description" | trans }}
-                </p>
+			<!-- Formulaire de connexion -->
+			<div class="card bg-base-100 shadow-2xl border border-base-300">
+				<div class="card-body">
+					<h2 class="card-title text-2xl mb-4 text-base-content">
+						<span class="font-emoji">✨</span>
+						{{ "login.magic.title" | trans }}
+					</h2>
+					<p class="text-base-content/70 mb-4">
+						{{ "login.magic.description" | trans }}
+					</p>
 
-                <form action="{{ path('app_login') }}" method="POST">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold">{{
+					<form action="{{ path('app_login') }}" method="POST">
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">{{
                                 "login.email.label" | trans
                             }}</span>
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="{{
-                                'login.email.placeholder' | trans
-                            }}"
-                            class="input input-bordered input-lg w-full"
-                            required
-                            autofocus
-                            autocomplete="email"
-                        />
-                    </div>
+							</label>
+							<input type="email" name="email" placeholder="{{ 'login.email.placeholder' | trans }}" class="input input-bordered input-lg w-full" required autofocus autocomplete="email"/>
+						</div>
 
-                    {# juste au-dessus du bouton #}
-                    <div class="form-control mt-4 mb-2">
-                        {# Make the label a wrapping flex container so long text
-                        can wrap next to the checkbox #}
-                        <label
-                            class="cursor-pointer label justify-start gap-3 items-start flex flex-wrap"
-                        >
-                            <input
-                                type="checkbox"
-                                name="remember_me"
-                                id="remember_me"
-                                value="1"
-                                class="checkbox checkbox-primary mt-1 flex-none"
-                            />
-                            {# Allow the text to shrink and wrap inside the flex
-                            row (#min-w-0#) and take remaining space (#flex-1#)
-                            #}
-                            <span
-                                class="label-text leading-tight max-w-md flex-1 min-w-0"
-                            >
-                                {{ "login.remember_me.label" | trans({'%duration%': '1 jour'}) }}
-                                <span
-                                    class="text-base-content/60 block text-xs mt-1 break-words"
-                                >
-                                    {{
+						{# juste au-dessus du bouton #}
+						<div
+							class="form-control mt-4 mb-2">
+							{# Make the label a wrapping flex container so long text
+							                        can wrap next to the checkbox #}
+							<label class="cursor-pointer label justify-start gap-3 items-start flex flex-wrap">
+								<input
+								type="checkbox" name="remember_me" id="remember_me" value="1" class="checkbox checkbox-primary mt-1 flex-none"/>
+								{# Allow the text to shrink and wrap inside the flex
+								                            row (#min-w-0#) and take remaining space (#flex-1#)
+								                            #}
+								<span class="label-text leading-tight max-w-md flex-1 min-w-0">
+									{{ "login.remember_me.label" | trans({'%duration%': '1 jour'}) }}
+									<span class="text-base-content/60 block text-xs mt-1 break-words">
+										{{
                                         "login.remember_me.consent_note" | trans
                                     }}
-                                    <p>
-                                        {{
+										<p>
+											{{
                                             "login.remember_me.consent_why"
                                                 | trans
                                         }}
-                                    </p>
-                                    <p
-                                        href="{{ path('app_privacy') }}"
-                                        class="link"
-                                    >
-                                        {{
+										</p>
+										<p href="{{ path('app_privacy') }}" class="link">
+											{{
                                             "login.remember_me.privacy_link"
                                                 | trans
                                         }}
-                                    </p>
-                                    .
-                                </span>
-                            </span>
-                        </label>
-                    </div>
+										</p>
+										.
+									</span>
+								</span>
+							</label>
+						</div>
 
-                    <div class="form-control mt-6">
-                        <button
-                            type="submit"
-                            class="btn btn-primary btn-lg w-full gap-2"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6"
-                                fill="none"
-                                viewbox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                />
-                            </svg>
-                            {{ "login.button.send" | trans }}
-                        </button>
-                    </div>
-                </form>
+						<div class="form-control mt-6">
+							<button type="submit" class="btn btn-primary btn-lg w-full gap-2">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+								</svg>
+								{{ "login.button.send" | trans }}
+							</button>
+						</div>
+					</form>
 
-                <a
-                    href="{{ path('app_home') }}"
-                    class="btn btn-ghost btn-block gap-2"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5"
-                        fill="none"
-                        viewbox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                        />
-                    </svg>
-                    {{ "login.back_home" | trans }}
-                </a>
-            </div>
-        </div>
+					<a href="{{ path('app_home') }}" class="btn btn-ghost btn-block gap-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+						</svg>
+						{{ "login.back_home" | trans }}
+					</a>
+				</div>
+			</div>
 
-        <!-- Info RGPD -->
-        <div class="text-center mt-6 text-sm text-base-content/60">
-            <p class="flex items-center justify-center gap-2 mb-2">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 text-success"
-                    fill="none"
-                    viewbox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                    />
-                </svg>
-                {{ "login.gdpr.title" | trans }}
-            </p>
-            <p class="text-xs max-w-md mx-auto">
-                <span class="font-emoji">✓</span>
-                {{ "login.gdpr.encrypted_email" | trans }}<br />
-                <span class="font-emoji">✓</span>
-                {{ "login.gdpr.no_password" | trans }}<br />
-                <span class="font-emoji">✓</span>
-                {{ "login.gdpr.links_ttl" | trans }}<br />
-                <span class="font-emoji">✓</span>
-                {{ "login.gdpr.secure_session" | trans }}
-            </p>
-        </div>
-    </div>
-</div>
+			<!-- Info RGPD -->
+			<div class="text-center mt-6 text-sm text-base-content/60">
+				<p class="flex items-center justify-center gap-2 mb-2">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-success" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+					</svg>
+					{{ "login.gdpr.title" | trans }}
+				</p>
+				<p class="text-xs max-w-md mx-auto">
+					<span class="font-emoji">✓</span>
+					{{ "login.gdpr.encrypted_email" | trans }}<br/>
+					<span class="font-emoji">✓</span>
+					{{ "login.gdpr.no_password" | trans }}<br/>
+					<span class="font-emoji">✓</span>
+					{{ "login.gdpr.links_ttl" | trans }}<br/>
+					<span class="font-emoji">✓</span>
+					{{ "login.gdpr.secure_session" | trans }}
+				</p>
+			</div>
+		</div>
+	</div>
 {% endblock %}
