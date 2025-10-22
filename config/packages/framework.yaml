@@ -1,27 +1,32 @@
 # config/packages/framework.yaml
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
-  secret: '%env(APP_SECRET)%'
+    secret: "%env(APP_SECRET)%"
+    default_locale: "fr"
+    translator:
+        default_path: "%kernel.project_dir%/translations"
+        fallbacks:
+            - fr
 
-  # La session ne démarre que si tu la lis/écris (comportement par défaut)
-  session:
-    # Durée d'inactivité maximale côté serveur avant GC (ici 4h)
-    gc_maxlifetime: 14400
+    # La session ne démarre que si tu la lis/écris (comportement par défaut)
+    session:
+        # Durée d'inactivité maximale côté serveur avant GC (ici 4h)
+        gc_maxlifetime: 14400
 
-    # Le cookie de session expire à la fermeture du navigateur (recommandé avec remember-me)
-    cookie_lifetime: 0
+        # Le cookie de session expire à la fermeture du navigateur (recommandé avec remember-me)
+        cookie_lifetime: 0
 
-    # Sécurité du cookie
-    cookie_secure: auto     # 'auto' => Secure si HTTPS
-    cookie_samesite: lax
-    cookie_httponly: true
-    # cookie_name: APPSESSID  # (optionnel) nom de cookie custom
+        # Sécurité du cookie
+        cookie_secure: auto # 'auto' => Secure si HTTPS
+        cookie_samesite: lax
+        cookie_httponly: true
+        # cookie_name: APPSESSID  # (optionnel) nom de cookie custom
 
-  # esi: true
-  # fragments: true
+        # esi: true
+        # fragments: true
 
 when@test:
-  framework:
-    test: true
-    session:
-      storage_factory_id: session.storage.factory.mock_file
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

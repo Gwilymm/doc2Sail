@@ -25,8 +25,8 @@
 		name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 		{# =========================
-						   🔗 META-TAGS POUR LE PARTAGE
-						   ========================= #}
+												   🔗 META-TAGS POUR LE PARTAGE
+												   ========================= #}
 		<meta property="og:type" content="website">
 		<meta property="og:locale" content="fr_FR">
 		<meta property="og:url" content="{{ app.request.uri }}">
@@ -53,16 +53,40 @@
 
 
 
+
+
 const theme = localStorage.getItem( 'theme' ) || 'light';
 document.documentElement.setAttribute( 'data-theme', theme );
 
 
 
+
+
 } )();
 		</script>
+		<script type="application/ld+json">
+			{
+									  "@context": "https://schema.org",
+									  "@type": "SoftwareApplication",
+									  "name": "Doc2Sail",
+									  "applicationCategory": "WebApplication",
+									  "operatingSystem": "Any",
+									  "description": "Application PWA française pour gérer et partager vos documents de régate de voile.",
+									  "url": "https://doc2sail.com/",
+									  "image": "https://doc2sail.com/icon-192.png",
+									  "author": {
+									    "@type": "Organization",
+									    "name": "Doc2Sail"
+									  }
+									}
+		</script>
+
 	</head>
 
 	<body class="bg-base-200 min-h-screen"> {% block body %}{% endblock %}
+
+		{# Footer partial included on every page #}
+
 
 		<!-- Service Worker Registration -->
 		<script>
@@ -71,7 +95,11 @@ document.documentElement.setAttribute( 'data-theme', theme );
 
 
 
+
+
 window.addEventListener( 'load', () => {
+
+
 
 
 
@@ -81,8 +109,12 @@ if ( isPublicPage )
 
 
 
+
+
 console.log( '📍 Page publique détectée, SW spécifique sera chargé' );
 return;
+
+
 
 
 
@@ -92,8 +124,12 @@ navigator.serviceWorker.register( '/sw.js' ).then( reg => {
 
 
 
+
+
 console.log( '✅ Service Worker enregistré', reg );
 window.addEventListener( 'beforeinstallprompt', e => {
+
+
 
 
 
@@ -102,7 +138,11 @@ window.deferredPrompt = e;
 
 
 
+
+
 } );
+
+
 
 
 
@@ -110,7 +150,11 @@ window.deferredPrompt = e;
 
 
 
+
+
 } );
+
+
 
 
 
@@ -120,11 +164,16 @@ else
 
 
 
+
+
 console.log( '❌ Service Worker non supporté par ce navigateur' );
+
+
 
 
 
 }
 		</script>
 	</body>
+	{% include 'partials/footer.html.twig' %}
 </html>
