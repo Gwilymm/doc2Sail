@@ -52,7 +52,10 @@
     // Fonction pour charger la modal QR code (si elle n'existe pas déjà)
     if (typeof loadQRCodeModal !== 'function') {
         function loadQRCodeModal(type, id) {
-            const url = id ? `/qrcode/modal/${type}/${id}` : `/qrcode/modal/${type}`;
+            // Build URL with current locale prefix because routes are registered under /{_locale} (see config/routes.yaml)
+            const locale = document.documentElement.lang || 'fr';
+            const path = id ? `/qrcode/modal/${type}/${id}` : `/qrcode/modal/${type}`;
+            const url = `/${locale}${path}`;
 
             fetch(url)
                 .then(response => {

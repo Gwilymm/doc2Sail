@@ -464,10 +464,10 @@ function loadQRCodeModal( type, id )
 {
 
 
+	 const locale = document.documentElement.lang || 'fr';
+	 const path = id ? `/qrcode/modal/${ type }/${ id }` : `/qrcode/modal/${ type }`;
+	 const url = `/${locale}${path}`;
 
-
-
-const url = id ? `/qrcode/modal/${ type }/${ id }` : `/qrcode/modal/${ type }`;
 
 fetch( url ).then( response => response.text() ).then( html => { // Supprimer l'ancienne modal si elle existe
 const container = document.getElementById( 'qrCodeModalContainer' );

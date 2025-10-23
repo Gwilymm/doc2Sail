@@ -7,3 +7,8 @@ base:
         privacy: "Privacy policy"
         contact: "Contact"
         launched_by: "Launched by BHN corp."
+
+    error404:
+        title: "404 — Not found"
+        message: "Sorry, we couldn't find what you're looking for. The boat seems to have hit an iceberg."
+        home: "Home"

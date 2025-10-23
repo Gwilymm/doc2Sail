@@ -7,3 +7,8 @@ base:
         privacy: "Politique de confidentialité"
         contact: "Contact"
         launched_by: "Mise à l'eau par la BHN corp."
+
+    error404:
+        title: "404 — Page introuvable"
+        message: "Désolé, nous n'avons pas trouvé ce que vous cherchez. Le bateau semble avoir heurté un iceberg."
+        home: "Accueil"
