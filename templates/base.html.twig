@@ -83,10 +83,13 @@ document.documentElement.setAttribute( 'data-theme', theme );
 
 	</head>
 
-	<body class="bg-base-200 min-h-screen"> {% block body %}{% endblock %}
+	<body class="bg-base-200 min-h-screen flex flex-col">
+		<main class="flex-1">
+			{% block body %}{% endblock %}
+		</main>
 
-		{# Footer partial included on every page #}
-
+		{# Footer partial included on every page (sticky bottom via flex layout) #}
+		{% include 'partials/footer.html.twig' %}
 
 		<!-- Service Worker Registration -->
 		<script>
@@ -175,5 +178,4 @@ console.log( '❌ Service Worker non supporté par ce navigateur' );
 }
 		</script>
 	</body>
-	{% include 'partials/footer.html.twig' %}
 </html>
