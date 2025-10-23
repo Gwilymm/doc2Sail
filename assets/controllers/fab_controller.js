@@ -32,7 +32,8 @@ export default class extends Controller {
 		if (typeof loadQRCodeModal === "function") {
 			loadQRCodeModal("regatta", id);
 		} else {
-			window.open(`/qrcode/image/regatta/${id}`, "_blank", "noopener,noreferrer");
+			const locale = document.documentElement.lang || 'fr';
+			window.open(`/${locale}/qrcode/image/regatta/${id}`, "_blank", "noopener,noreferrer");
 		}
 	}
 
@@ -47,7 +48,8 @@ export default class extends Controller {
 		if (typeof loadQRCodeModal === "function") {
 			loadQRCodeModal("regatta", id);
 		} else {
-			window.open(`/qrcode/image/regatta/${id}`, "_blank", "noopener,noreferrer");
+			const locale = document.documentElement.lang || 'fr';
+			window.open(`/${locale}/qrcode/image/regatta/${id}`, "_blank", "noopener,noreferrer");
 		}
 	}
 
