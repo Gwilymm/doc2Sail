@@ -77,6 +77,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, subject, message, _csrf_token: document.getElementById('contact_csrf').value })
                 });
+
+			 console.log('Response received:', res);
                 const json = await res.json();
                 if (json.success) {
                     status.textContent = json.message || '{{ 'base.contact.success'|trans }}';
