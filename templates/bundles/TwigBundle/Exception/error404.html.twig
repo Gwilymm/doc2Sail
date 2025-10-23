@@ -14,6 +14,11 @@
             .wave.w1{animation:swim 9s linear infinite}
             .wave.w2{animation:swim 12s linear infinite}
             .smoke{opacity:0.85;animation:float 3s linear infinite}
+            /* 404 page specific tweaks */
+            .error-card { background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95)); }
+            .media-frame { background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.02)); border-radius: 12px; overflow: hidden; }
+            .media-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.06)); }
+            .caption-muted { color: rgba(31,41,55,0.6); }
         </style>
 {% endblock %}
 
@@ -21,61 +26,39 @@
     {% include '_navbar.html.twig' %}
 
     <main class="mx-auto max-w-4xl px-6 py-12">
-        <div class="card bg-base-200 p-8 rounded-lg shadow-lg">
+        <div class="card bg-base-200 p-8 rounded-lg shadow-lg error-card">
             <h1 class="text-4xl font-bold mb-2">{{ 'base.error404.title'|trans }}</h1>
             <p class="lead text-base-content/80 mb-6">{{ 'base.error404.message'|trans }}</p>
 
-            <div class="scene relative h-80 overflow-hidden rounded-md bg-gradient-to-b from-base-300/30 to-base-300/10">
-                <div class="sea absolute left-0 right-0 bottom-0 h-1/2 bg-gradient-to-b from-primary to-primary-dark opacity-90"></div>
-                <div class="wave w1 absolute left-[-50%] right-[-50%] bottom-[30%] h-28 opacity-90 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06)_0,rgba(255,255,255,0.02)_20%,transparent_40%)]"></div>
-                <div class="wave w2 absolute left-[-50%] right-[-50%] bottom-[28%] h-28 opacity-70 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06)_0,rgba(255,255,255,0.02)_20%,transparent_40%)]"></div>
-
-                <div class="ship-wrap absolute left-1/2 top-2/5 w-3/4 max-w-[420px] -translate-x-1/2 -translate-y-1/10 pointer-events-none">
-                    <!-- SVG bateau simple -->
-                    <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-full block">
-                        <defs>
-                            <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
-                                <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
-                                <stop offset="100%" stop-color="#cbd5e1" stop-opacity="0.9"/>
-                            </linearGradient>
-                        </defs>
-                        <g transform="translate(0,30)">
-                            <!-- hull -->
-                            <g class="ship">
-                                <path d="M120 220 L680 220 L600 280 L200 280 Z" fill="#f4c06b" stroke="#b8862a" stroke-width="4"/>
-                                <!-- cabin -->
-                                <rect x="360" y="160" width="120" height="60" rx="8" fill="#d97706" stroke="#b45309" stroke-width="3"/>
-                                <!-- mast -->
-                                <rect x="400" y="70" width="6" height="110" fill="#6b7280"/>
-                                <polygon points="406,80 520,140 406,140" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>
-                            </g>
-
-                            <!-- waterline / splash: animated to mimic sinking -->
-                            <g>
-                                <ellipse cx="400" cy="280" rx="320" ry="18" fill="rgba(255,255,255,0.03)" />
-                            </g>
-
-                            <!-- small smoke / bubbles to show distress -->
-                            <g class="smoke" transform="translate(520,140)">
-                                <circle r="8" fill="#d1fae5" opacity="0.9">
-                                    <animate attributeName="r" values="2;8;2" dur="2.4s" repeatCount="indefinite"/>
-                                    <animate attributeName="cy" values="0;-32;-60" dur="2.4s" repeatCount="indefinite"/>
-                                    <animate attributeName="opacity" values="0.9;0.6;0" dur="2.4s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle r="6" fill="#bfdbfe" opacity="0.8" transform="translate(-18,6)">
-                                    <animate attributeName="r" values="2;6;2" dur="2.2s" repeatCount="indefinite"/>
-                                    <animate attributeName="cy" values="6;-22;-46" dur="2.2s" repeatCount="indefinite"/>
-                                    <animate attributeName="opacity" values="0.8;0.5;0" dur="2.2s" repeatCount="indefinite"/>
-                                </circle>
-                            </g>
-                        </g>
-                    </svg>
+            <div class="scene relative h-64 sm:h-80 md:h-96 lg:h-[520px] overflow-hidden rounded-md bg-gradient-to-b from-base-300/30 to-base-300/10">
+        
+                <div class="ship-wrap absolute inset-0 pointer-events-none flex items-center justify-center">
+                    {# Use the GIF from public/404.gif instead of the inline SVG. Responsive sizing + object-fit for good integration #}
+                    <div class="w-11/12 md:w-4/5 lg:w-4/5 xl:w-3/4 max-w-[1400px]">
+                        <div class="media-frame shadow-lg relative">
+                            <div class="media-overlay" aria-hidden="true"></div>
+                            <picture>
+                                <source type="image/avif" srcset="{{ asset('404.avif') }}">
+                                <source type="image/webp" srcset="{{ asset('404.webp') }}">
+                                <img src="{{ asset('404.gif') }}" alt="404" class="w-full h-auto max-h-[340px] sm:max-h-[420px] md:max-h-[600px] lg:max-h-[720px] object-cover object-center block mx-auto" loading="lazy" decoding="async" />
+                            </picture>
+                        </div>
+                        <div class="mt-4 px-4 text-center">
+                            <p class="font-medium">{{ 'base.error404.suggestion'|trans({'%home%': path('app_home')}) }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-                <div class="caption mt-6 text-base-content/80">
-                    <div>{{ 'base.error404.message'|trans }}</div>
-                    <a class="btn btn-accent mt-3" href="/">{{ 'base.error404.home'|trans }}</a>
+                <div class="caption mt-6 text-base-content/80 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="caption-text">
+                        <p class="caption-muted mb-3">{{ 'base.error404.more_info'|trans }}</p>
+                        <div class="flex gap-3">
+                            <a class="btn btn-accent" href="{{ path('app_home') }}">{{ 'base.error404.home'|trans }}</a>
+                            <a class="btn btn-ghost" href="{{ path('app_contact') }}">{{ 'base.error404.contact'|trans }}</a>
+                        </div>
+                    </div>
+                    <div class="text-sm caption-muted">{{ 'base.error404.help_line'|trans }}</div>
                 </div>
         </div>
     </main>
