@@ -32,27 +32,27 @@ class ContactController extends AbstractController
 
 			// CSRF check
 			if (! $csrfManager->isTokenValid(new CsrfToken('contact_form', $csrf))) {
-				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_invalid_csrf')], Response::HTTP_BAD_REQUEST);
+				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_invalid_csrf', [], 'base')], Response::HTTP_BAD_REQUEST);
 			}
 
 			// Strict validation & sanitization
 			if (! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_invalid_email')], Response::HTTP_BAD_REQUEST);
+				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_invalid_email', [], 'base')], Response::HTTP_BAD_REQUEST);
 			}
 
 			if (! $message || mb_strlen($message) < 5) {
-				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_short_message')], Response::HTTP_BAD_REQUEST);
+				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_short_message', [], 'base')], Response::HTTP_BAD_REQUEST);
 			}
 
 			// enforce length limits (user requested limits)
 			if ($name && mb_strlen($name) > 100) {
-				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_name_too_long')], Response::HTTP_BAD_REQUEST);
+				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_name_too_long', [], 'base')], Response::HTTP_BAD_REQUEST);
 			}
 			if ($subject && mb_strlen($subject) > 150) {
-				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_subject_too_long')], Response::HTTP_BAD_REQUEST);
+				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_subject_too_long', [], 'base')], Response::HTTP_BAD_REQUEST);
 			}
 			if (mb_strlen($message) > 2000) {
-				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_message_too_long')], Response::HTTP_BAD_REQUEST);
+				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_message_too_long', [], 'base')], Response::HTTP_BAD_REQUEST);
 			}
 
 			// truncate persisted fields conservatively to prevent DB issues
@@ -78,8 +78,8 @@ class ContactController extends AbstractController
 			$safeMessage = nl2br(htmlspecialchars($message));
 			$now = (new \DateTime())->format('Y-m-d H:i');
 
-			$emailHeader = $translator->trans('base.contact.email_header');
-			$replyLine = $translator->trans('base.contact.email_reply_line');
+			$emailHeader = $translator->trans('base.contact.email_header', [], 'base');
+			$replyLine = $translator->trans('base.contact.email_reply_line', [], 'base');
 
 			$html = <<<HTML
 						<html>
@@ -128,10 +128,10 @@ class ContactController extends AbstractController
 				$mailer->send($emailMessage);
 			} catch (TransportExceptionInterface $e) {
 				$logger->error('Contact form: failed to send email', ['exception' => $e, 'siteEmail' => $siteEmail]);
-				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_generic')], Response::HTTP_INTERNAL_SERVER_ERROR);
+				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_generic', [], 'base')], Response::HTTP_INTERNAL_SERVER_ERROR);
 			}
 
-			return new JsonResponse(['success' => true, 'message' => 'Thank you — we received your message.']);
+			return new JsonResponse(['success' => true, 'message' => $translator->trans('base.contact.success', [], 'base')]);
 		}
 
 		return $this->render('contact/contact.html.twig');
