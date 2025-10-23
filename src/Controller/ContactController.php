@@ -14,12 +14,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Psr\Log\LoggerInterface;
 use App\Entity\ContactMessage;
 
 class ContactController extends AbstractController
 {
 	#[Route('/contact', name: 'app_contact')]
-	public function contact(Request $request, MailerInterface $mailer, ManagerRegistry $doctrine, CsrfTokenManagerInterface $csrfManager, TranslatorInterface $translator): Response
+	public function contact(Request $request, MailerInterface $mailer, ManagerRegistry $doctrine, CsrfTokenManagerInterface $csrfManager, TranslatorInterface $translator, LoggerInterface $logger): Response
 	{
 		if ($request->isMethod('POST')) {
 			$data = json_decode($request->getContent(), true);
@@ -112,9 +113,12 @@ class ContactController extends AbstractController
 
 			$text = sprintf("Contact form submission\nDate: %s\nFrom: %s <%s>\n\n%s", $now, $name ?: 'No name', $email, $message);
 
+			// Respect provider rules: use the configured MAILER_FROM as From and recipient.
+			$siteEmail = getenv('MAILER_FROM') ?: 'contact@doc2sail.com';
+
 			$emailMessage = (new Email())
-				->from($email)
-				->to('contact@doc2sail.com')
+				->from($siteEmail)
+				->to($siteEmail)
 				->replyTo($email)
 				->subject(sprintf('Contact form: %s', $subject ?: ($name ?: 'No name')))
 				->html($html)
@@ -123,7 +127,8 @@ class ContactController extends AbstractController
 			try {
 				$mailer->send($emailMessage);
 			} catch (TransportExceptionInterface $e) {
-				return new JsonResponse(['success' => false, 'error' => 'Unable to send email.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+				$logger->error('Contact form: failed to send email', ['exception' => $e, 'siteEmail' => $siteEmail]);
+				return new JsonResponse(['success' => false, 'error' => $translator->trans('base.contact.error_generic')], Response::HTTP_INTERNAL_SERVER_ERROR);
 			}
 
 			return new JsonResponse(['success' => true, 'message' => 'Thank you — we received your message.']);
