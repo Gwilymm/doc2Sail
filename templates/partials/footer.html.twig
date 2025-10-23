@@ -11,7 +11,7 @@
 			<div>{{ 'base.footer.copyright'|trans({'%year%': "now"|date('Y')}) }}</div>
 			<div class="mt-1">
 				<a href="/privacy" class="mr-4 link link-hover">{{ 'base.footer.privacy'|trans }}</a>
-				<a href="/contact" class="link link-hover">{{ 'base.footer.contact'|trans }}</a>
+				<a href="{{ path('app_contact') }}" class="link link-hover">{{ 'base.footer.contact'|trans }}</a>
 			</div>
 		</div>
 

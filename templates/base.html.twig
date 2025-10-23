@@ -20,6 +20,11 @@
 		<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 		<link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
 		<link rel="apple-touch-icon" href="{{ asset('icon-192.png') }}">
+		<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
+		<link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
+		<link rel="shortcut icon" href="{{ asset('favicon.png') }}">
+		<link rel="icon" href="{{ asset('icon-512.png') }}" type="image/png" sizes="512x512">
+
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta
 		name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -80,6 +85,16 @@ document.documentElement.setAttribute( 'data-theme', theme );
 									  }
 									}
 		</script>
+		<script type="application/ld+json">
+			{
+			"@context": "https://schema.org",
+			"@type": "Organization",
+			"name": "Doc2Sail",
+			"url": "https://doc2sail.com",
+			"logo": "https://doc2sail.com/favicon.png"
+			}
+		</script>
+
 
 	</head>
 
