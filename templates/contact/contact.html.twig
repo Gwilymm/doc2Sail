@@ -1,94 +1,54 @@
 {% extends 'base.html.twig' %}
 {% trans_default_domain 'base' %}
 
-{% block title %}{{ 'base.contact.title'|trans }}{% endblock %}
+{% block title %}
+	{{ 'base.contact.title'|trans }}
+{% endblock %}
 
 {% block body %}
-    {% include '_navbar.html.twig' %}
+	{% include '_navbar.html.twig' %}
 
-    <main class="mx-auto max-w-4xl px-6 py-12">
-        <div class="card bg-base-200 p-8 rounded-lg shadow-lg">
-            <h1 class="text-2xl font-bold mb-2">{{ 'base.contact.title'|trans }}</h1>
-            <p class="text-base-content/80 mb-6">{{ 'base.contact.intro'|trans }}</p>
+	<main class="mx-auto max-w-4xl px-6 py-12">
+		<div class="card bg-base-200 p-8 rounded-lg shadow-lg">
+			<h1 class="text-2xl font-bold mb-2">{{ 'base.contact.title'|trans }}</h1>
+			<p class="text-base-content/80 mb-6">{{ 'base.contact.intro'|trans }}</p>
 
-            <form id="contactForm" class="space-y-4" onsubmit="event.preventDefault(); submitContact();">
-                {# CSRF token for protection against cross-site request forgery #}
-                <input type="hidden" id="contact_csrf" name="_csrf_token" value="{{ csrf_token('contact_form') }}">
-                <div>
-                    <label class="label"><span class="label-text">{{ 'base.contact.name'|trans }}</span></label>
-                    <input type="text" id="name" class="input input-bordered w-full" maxlength="100" placeholder="{{ 'base.contact.name_placeholder'|trans }}">
-                </div>
-                <div>
-                    <label class="label"><span class="label-text">{{ 'base.contact.email'|trans }}</span></label>
-                    <input type="email" id="email" class="input input-bordered w-full" maxlength="254" placeholder="{{ 'base.contact.email_placeholder'|trans }}">
-                </div>
-                <div>
-                    <label class="label"><span class="label-text">{{ 'base.contact.subject'|trans }}</span></label>
-                    <input type="text" id="subject" class="input input-bordered w-full" maxlength="150" placeholder="{{ 'base.contact.subject_placeholder'|trans }}">
-                </div>
-                <div>
-                    <label class="label"><span class="label-text">{{ 'base.contact.message'|trans }}</span></label>
-                    <textarea id="message" class="textarea textarea-bordered w-full" rows="6" maxlength="2000" placeholder="{{ 'base.contact.message_placeholder'|trans }}"></textarea>
-                    <div class="text-xs text-base-content/50 mt-1" id="messageCounter">0/2000</div>
-                </div>
+			<form id="contactForm" class="space-y-4" data-controller="contact-form" data-contact-form-max-message-length-value="2000" data-contact-form-post-url-value="{{ path('app_contact') }}" data-contact-form-csrf-token-value="{{ csrf_token('contact_form') }}" data-contact-form-trans-success-value="{{ 'base.contact.success'|trans }}" data-contact-form-trans-error-generic-value="{{ 'base.contact.error_generic'|trans }}" data-contact-form-trans-error-network-value="{{ 'base.contact.error_network'|trans }}" data-contact-form-trans-error-invalid-email-value="{{ 'base.contact.error_invalid_email'|trans }}" data-contact-form-trans-error-name-too-long-value="{{ 'base.contact.error_name_too_long'|trans }}" data-contact-form-trans-error-subject-too-long-value="{{ 'base.contact.error_subject_too_long'|trans }}" data-contact-form-trans-error-short-message-value="{{ 'base.contact.error_short_message'|trans }}" data-contact-form-trans-error-message-too-long-value="{{ 'base.contact.error_message_too_long'|trans }}" data-action="submit->contact-form#submit">
+				<input type="hidden" id="contact_csrf" name="_csrf_token" data-contact-form-target="csrf" value="{{ csrf_token('contact_form') }}">
+				<div>
+					<label class="label">
+						<span class="label-text">{{ 'base.contact.name'|trans }}</span>
+					</label>
+					<input type="text" id="name" class="input input-bordered w-full" maxlength="100" placeholder="{{ 'base.contact.name_placeholder'|trans }}" data-contact-form-target="name">
+				</div>
+				<div>
+					<label class="label">
+						<span class="label-text">{{ 'base.contact.email'|trans }}</span>
+					</label>
+					<input type="email" id="email" class="input input-bordered w-full" maxlength="254" placeholder="{{ 'base.contact.email_placeholder'|trans }}" data-contact-form-target="email">
+				</div>
+				<div>
+					<label class="label">
+						<span class="label-text">{{ 'base.contact.subject'|trans }}</span>
+					</label>
+					<input type="text" id="subject" class="input input-bordered w-full" maxlength="150" placeholder="{{ 'base.contact.subject_placeholder'|trans }}" data-contact-form-target="subject">
+				</div>
+				<div>
+					<label class="label">
+						<span class="label-text">{{ 'base.contact.message'|trans }}</span>
+					</label>
+					<textarea id="message" class="textarea textarea-bordered w-full" rows="6" maxlength="2000" placeholder="{{ 'base.contact.message_placeholder'|trans }}" data-contact-form-target="message" data-action="input->contact-form#updateCounter"></textarea>
+					<div class="text-xs text-base-content/50 mt-1" id="messageCounter" data-contact-form-target="messageCounter">0/2000</div>
+				</div>
 
-                <div class="flex items-center gap-3">
-                    <button type="submit" class="btn btn-accent">{{ 'base.contact.send'|trans }}</button>
-                    <div id="contactStatus" class="text-sm text-base-content/70"></div>
-                </div>
-            </form>
-        </div>
-    </main>
+				<div class="flex items-center gap-3">
+					<button id="contactSubmit" type="submit" class="btn btn-accent">{{ 'base.contact.send'|trans }}</button>
+					<div id="contactStatus" class="text-sm text-base-content/70" data-contact-form-target="status"></div>
+				</div>
+			</form>
+		</div>
+	</main>
 
-            <script>
-        // Live counter for message textarea
-        (function(){
-            const textarea = document.getElementById('message');
-            const counter = document.getElementById('messageCounter');
-            const max = 2000;
-            function update() {
-                const len = textarea.value.length;
-                counter.textContent = `${len}/${max}`;
-                if (len > max) counter.classList.add('text-error'); else counter.classList.remove('text-error');
-            }
-            textarea.addEventListener('input', update);
-            // init
-            update();
-        })();
-
-        async function submitContact() {
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const subject = document.getElementById('subject').value;
-            const message = document.getElementById('message').value;
-            const status = document.getElementById('contactStatus');
-            status.textContent = '';
-
-            // Client-side quick checks
-            if (email && email.length > 254) { status.textContent = '{{ 'base.contact.error_invalid_email'|trans }}'; return; }
-            if (name && name.length > 100) { status.textContent = '{{ 'base.contact.error_name_too_long'|trans }}'; return; }
-            if (subject && subject.length > 150) { status.textContent = '{{ 'base.contact.error_subject_too_long'|trans }}'; return; }
-            if (!message || message.length < 5) { status.textContent = '{{ 'base.contact.error_short_message'|trans }}'; return; }
-            if (message.length > 2000) { status.textContent = '{{ 'base.contact.error_message_too_long'|trans }}'; return; }
-
-            try {
-                const res = await fetch('{{ path('app_contact') }}', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, subject, message, _csrf_token: document.getElementById('contact_csrf').value })
-                });
-
-			 console.log('Response received:', res);
-                const json = await res.json();
-                if (json.success) {
-                    status.textContent = json.message || '{{ 'base.contact.success'|trans }}';
-                } else {
-                    status.textContent = json.error || '{{ 'base.contact.error_generic'|trans }}';
-                }
-            } catch (err) {
-                status.textContent = '{{ 'base.contact.error_network'|trans }}';
-            }
-        }
-    </script>
-
+	{# Toast container (floating notifications) #}
+	<div id="toastContainer" class="fixed bottom-6 right-6 z-50"></div>
 {% endblock %}
