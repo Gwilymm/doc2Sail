@@ -141,9 +141,10 @@ export default class extends Controller {
 			uploadBtn.classList.add('loading');
 			uploadBtn.disabled = true;
 		}
+		const locale = document.documentElement.lang || 'fr';
 
 		try {
-			const response = await fetch('/document/upload', {
+			const response = await fetch(`/${locale}/document/upload`, {
 				method: 'POST',
 				body: formData
 			});
@@ -259,9 +260,11 @@ export default class extends Controller {
 
 	async deleteDocument(documentId) {
 		try {
-			const response = await fetch(`/document/${documentId}/delete`, {
+			const locale = document.documentElement.lang || 'fr';
+			const response = await fetch(`/${locale}/document/${documentId}/delete`, {
 				method: 'POST'
 			});
+			console.log('Delete response:', response);
 			const data = await response.json();
 
 			if (response.ok && data.success) {
