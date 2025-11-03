@@ -25,13 +25,13 @@
 
 				<!-- Desktop buttons - hidden on mobile -->
 				<div class="hidden md:flex gap-2">
-					<button onclick="inviteCoOwnerModal.showModal()" class="btn btn-accent btn-sm">
+					<button data-action="click->fab#invite" class="btn btn-accent btn-sm">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
 						</svg>
 						{{ 'regatta.documents.invite_co_owner'|trans }}
 					</button>
-					<button onclick="loadQRCodeModal('regatta', '{{ regatta.id }}')" class="btn btn-primary btn-sm">
+					<button data-action="click->document#loadQRCodeModal" data-qrcode-type="regatta" data-qrcode-id="{{ regatta.id }}" class="btn btn-primary btn-sm">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
 						</svg>
@@ -145,7 +145,7 @@
 				<div id="categoryFilters" class="flex flex-wrap gap-2">
 					{% for category in documentsByCategory|keys %}
 						<label class="cursor-pointer">
-							<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" onchange="filterCategories()">
+							<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" data-action="change->document#filterCategories" data-document-target="categoryCheckbox">
 							<span class="text-sm">{{ category }}</span>
 						</label>
 					{% endfor %}
@@ -167,7 +167,7 @@
 					</h2>
 
 					{% for category, documents in categoriesInSection %}
-						<div class="space-y-3 category-section mb-8" data-category="{{ category }}">
+						<div class="space-y-3 category-section mb-8" data-category="{{ category }}" data-document-target="categorySection">
 							<div class="flex items-center justify-between mb-3">
 								<h3 class="text-xl font-semibold">{{ category }}</h3>
 								<span class="badge badge-outline">{{ documents|length }}
@@ -320,24 +320,24 @@
 	<!-- Modal Invite Co-Owner -->
 	<dialog id="inviteCoOwnerModal" class="modal">
 		<div class="modal-box">
-			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="inviteCoOwnerModal.close()">✕</button>
+			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" data-action="click->document#closeInviteModal">✕</button>
 			<h3 class="font-bold text-lg mb-4">{{ 'regatta.documents.invite_modal.title'|trans }}</h3>
 			<p class="text-sm text-base-content/70 mb-4">
 				{{ 'regatta.documents.invite_modal.description'|trans }}
 			</p>
-			<form onsubmit="event.preventDefault(); inviteCoOwner();">
+			<form data-action="submit->document#inviteCoOwner">
 				<div class="form-control mb-4">
 					<label class="label">
 						<span class="label-text">{{ 'regatta.documents.invite_modal.email'|trans }}
 							*</span>
 					</label>
-					<input type="email" id="inviteEmail" name="email" class="input input-bordered" placeholder="{{ 'regatta.documents.invite_modal.email_placeholder'|trans }}" required/>
+					<input type="email" id="inviteEmail" name="email" class="input input-bordered" placeholder="{{ 'regatta.documents.invite_modal.email_placeholder'|trans }}" data-document-target="inviteEmail" required/>
 					<label class="label">
 						<span class="label-text-alt">{{ 'regatta.documents.invite_modal.email_help'|trans }}</span>
 					</label>
 				</div>
 				<div class="modal-action">
-					<button type="button" class="btn" onclick="inviteCoOwnerModal.close()">{{ 'regatta.documents.invite_modal.cancel'|trans }}</button>
+					<button type="button" class="btn" data-action="click->document#closeInviteModal">{{ 'regatta.documents.invite_modal.cancel'|trans }}</button>
 					<button type="submit" class="btn btn-accent">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -353,284 +353,8 @@
 	</dialog>
 
 	<!-- Toast Container -->
-	<div id="toast-container" class="toast toast-top toast-end"></div>
+	<div id="toast-container" class="toast toast-top toast-end" data-document-target="toastContainer"></div>
 
 	<!-- Conteneur pour la modal QR Code -->
 	<div id="qrCodeModalContainer"></div>
-
-	<!-- PWA Install Handler -->
-	<script>
-
-		// Copy public URL
-function copyPublicUrl()
-{
-
-
-
-
-
-const input = document.getElementById( 'publicUrl' );
-input.select();
-document.execCommand( 'copy' );
-
-// Show toast
-const toast = document.createElement( 'div' );
-toast.className = 'alert alert-success';
-toast.innerHTML = '<span>URL copiée dans le presse-papier!</span>';
-document.getElementById( 'toastContainer' ).appendChild( toast );
-setTimeout( () => toast.remove(), 3000 );
-
-
-
-
-
-}
-
-// Category Filter
-function filterCategories()
-{
-
-
-
-
-
-const checkboxes = document.querySelectorAll( '#categoryFilters input[type="checkbox"]' );
-const selectedCategories = Array.from( checkboxes ).filter( cb => cb.checked ).map( cb => cb.value );
-
-// Si aucune checkbox n'est cochée, tout masquer
-const showAll = selectedCategories.length === 0;
-
-document.querySelectorAll( '.category-section' ).forEach( section => {
-
-
-
-
-
-const category = section.getAttribute( 'data-category' );
-if ( showAll )
-{
-
-
-
-
-
-section.style.display = 'block';
-
-
-
-
-
-}
-else
-{
-
-
-
-
-
-section.style.display = selectedCategories.includes( category ) ? 'block' : 'none';
-
-
-
-
-
-}
-
-} );
-
-
-
-
-
-}
-
-// Initialiser : tout masquer par défaut
-document.addEventListener( 'DOMContentLoaded', () => {
-
-
-
-
-
-filterCategories();
-
-
-
-
-
-} );
-
-// Invite co-owner
-function loadQRCodeModal( type, id )
-{
-
-
-	 const locale = document.documentElement.lang || 'fr';
-	 const path = id ? `/qrcode/modal/${ type }/${ id }` : `/qrcode/modal/${ type }`;
-	 const url = `/${locale}${path}`;
-
-
-fetch( url ).then( response => response.text() ).then( html => { // Supprimer l'ancienne modal si elle existe
-const container = document.getElementById( 'qrCodeModalContainer' );
-container.innerHTML = html;
-
-// Ouvrir la modal DaisyUI
-const modal = document.getElementById( 'qrCodeModal' );
-if ( modal )
-{
-
-
-
-
-
-modal.showModal();
-
-
-
-
-
-} } ).catch( error => {
-
-
-
-
-
-console.error( 'Erreur lors du chargement du QR code:', error );
-showToast( 'Impossible de charger le QR code', 'error' );
-
-
-
-
-
-} );
-
-
-
-
-
-}
-
-async function inviteCoOwner()
-{
-
-
-
-
-
-const email = document.getElementById( 'inviteEmail' ).value;
-
-if ( ! email || ! email.includes( '@' ) )
-{
-
-
-
-
-
-showToast( 'Veuillez entrer une adresse email valide', 'error' );
-return;
-
-
-
-
-
-}
-
-try
-{
-
-
-
-
-
-const response = await fetch( '/regatta/                                               {{ regatta.id }}/invite',
-{
-
-
-
-
-
-method: 'POST',
-headers: {
-
-
-
-
-
-'Content-Type': 'application/json'
-
-
-
-
-
-},
-body: JSON.stringify(
-{ email: email }
-)
-
-
-
-
-
-} );
-
-const result = await response.json();
-
-if ( result.success )
-{
-
-
-
-
-
-showToast( result.message, 'success' );
-inviteCoOwnerModal.close();
-document.getElementById( 'inviteEmail' ).value = '';
-
-
-
-
-
-}
-else
-{
-
-
-
-
-
-showToast( result.error || 'Erreur lors de l\'envoi de l\'invitation', 'error' );
-if ( result.debug_url )
-{
-
-
-
-
-
-console.log( 'Debug URL:', result.debug_url );
-
-
-
-
-
-}
-
-}
-
-} catch ( error )
-{
-
-
-
-
-
-showToast( 'Erreur lors de l\'envoi de l\'invitation', 'error' );
-console.error( error );
-
-
-
-
-
-}
-
-}
-	</script>
 {% endblock %}
