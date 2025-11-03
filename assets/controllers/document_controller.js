@@ -1,6 +1,14 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
+	static targets = [
+		'categoryCheckbox',
+		'categorySection',
+		'inviteEmail',
+		'publicUrl',
+		'toastContainer'
+	];
+
 	static values = {
 		regattaId: Number,
 		defaultCategory: String
@@ -19,6 +27,7 @@ export default class extends Controller {
 		this.setupDeleteButtons();
 		this.setupInstallButton();
 		this.toggleCategorySections();
+		this.filterCategories(); // Initialiser le filtre au chargement
 	}
 
 	setupDropZone() {
@@ -313,8 +322,18 @@ export default class extends Controller {
 	}
 
 	showToast(message, type = 'info') {
-		const container = document.getElementById('toastContainer');
+		let container;
+
+		// Chercher le container de toast (peut avoir différents IDs)
+		if (this.hasToastContainerTarget) {
+			container = this.toastContainerTarget;
+		} else {
+			container = document.getElementById('toast-container') ||
+				document.getElementById('toastContainer');
+		}
+
 		if (!container) {
+			console.warn('Toast container not found, logging message:', message);
 			return;
 		}
 
@@ -329,7 +348,7 @@ export default class extends Controller {
 		toast.className = `alert ${alertClass} shadow-lg`;
 		toast.innerHTML = `
 			<div>
-				<span>${message}</span>
+				<span>${this.escapeHtml(message)}</span>
 			</div>
 		`;
 
@@ -378,5 +397,193 @@ export default class extends Controller {
 		if (categoryInput && this.hasDefaultCategoryValue && !categoryInput.value) {
 			categoryInput.value = this.defaultCategoryValue;
 		}
+	}
+
+	/**
+	 * Filtre les sections de documents par catégorie
+	 * Affiche uniquement les catégories cochées, ou tout masquer si aucune n'est cochée
+	 */
+	filterCategories() {
+		if (!this.hasCategoryCheckboxTarget) {
+			return;
+		}
+
+		// Récupérer toutes les checkboxes cochées
+		const selectedCategories = this.categoryCheckboxTargets
+			.filter(cb => cb.checked)
+			.map(cb => cb.value);
+
+		// Si aucune checkbox n'est cochée, tout masquer
+		const showAll = selectedCategories.length === 0;
+
+		// Parcourir toutes les sections et afficher/masquer selon le filtre
+		this.categorySectionTargets.forEach(section => {
+			const category = section.dataset.category;
+
+			if (showAll) {
+				section.style.display = 'block';
+			} else {
+				section.style.display = selectedCategories.includes(category) ? 'block' : 'none';
+			}
+		});
+	}
+
+	/**
+	 * Charge et affiche la modal QR Code pour partager la régate
+	 * @param {Event} event - L'événement de clic
+	 */
+	async loadQRCodeModal(event) {
+		event?.preventDefault();
+
+		const type = event.currentTarget.dataset.qrcodeType || 'regatta';
+		const id = event.currentTarget.dataset.qrcodeId || this.regattaIdValue;
+
+		if (!id) {
+			console.error('No ID provided for QR code');
+			return;
+		}
+
+		const locale = document.documentElement.lang || 'fr';
+		const path = `/${locale}/qrcode/modal/${type}/${id}`;
+
+		try {
+			const response = await fetch(path);
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			const html = await response.text();
+
+			// Supprimer l'ancienne modal si elle existe
+			const container = document.getElementById('qrCodeModalContainer');
+			if (container) {
+				container.innerHTML = html;
+
+				// Ouvrir la modal DaisyUI
+				const modal = document.getElementById('qrCodeModal');
+				if (modal && typeof modal.showModal === 'function') {
+					modal.showModal();
+				}
+			}
+		} catch (error) {
+			console.error('Erreur lors du chargement du QR code:', error);
+			this.showToast('Impossible de charger le QR code', 'error');
+		}
+	}
+
+	/**
+	 * Envoie une invitation à un co-propriétaire
+	 * @param {Event} event - L'événement de soumission du formulaire
+	 */
+	async inviteCoOwner(event) {
+		event.preventDefault();
+
+		if (!this.hasInviteEmailTarget) {
+			console.error('Invite email target not found');
+			return;
+		}
+
+		const email = this.inviteEmailTarget.value.trim();
+
+		// Validation de l'email
+		if (!email || !email.includes('@')) {
+			this.showToast('Veuillez entrer une adresse email valide', 'error');
+			return;
+		}
+
+		if (!this.hasRegattaIdValue) {
+			this.showToast('Erreur: ID de régate manquant', 'error');
+			return;
+		}
+
+		try {
+			const response = await fetch(`/regatta/${this.regattaIdValue}/invite`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ email: email })
+			});
+
+			const result = await response.json();
+
+			if (result.success) {
+				this.showToast(result.message, 'success');
+
+				// Fermer la modal
+				const modal = document.getElementById('inviteCoOwnerModal');
+				if (modal && typeof modal.close === 'function') {
+					modal.close();
+				}
+
+				// Réinitialiser le formulaire
+				this.inviteEmailTarget.value = '';
+			} else {
+				this.showToast(result.error || "Erreur lors de l'envoi de l'invitation", 'error');
+
+				if (result.debug_url) {
+					console.log('Debug URL:', result.debug_url);
+				}
+			}
+		} catch (error) {
+			this.showToast("Erreur lors de l'envoi de l'invitation", 'error');
+			console.error(error);
+		}
+	}
+
+	/**
+	 * Copie l'URL publique dans le presse-papier
+	 * @param {Event} event - L'événement de clic
+	 */
+	async copyPublicUrl(event) {
+		event?.preventDefault();
+
+		if (!this.hasPublicUrlTarget) {
+			console.error('Public URL target not found');
+			return;
+		}
+
+		try {
+			// Sélectionner le texte
+			this.publicUrlTarget.select();
+
+			// Utiliser l'API moderne Clipboard si disponible
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				await navigator.clipboard.writeText(this.publicUrlTarget.value);
+			} else {
+				// Fallback pour les navigateurs plus anciens
+				document.execCommand('copy');
+			}
+
+			this.showToast('URL copiée dans le presse-papier!', 'success');
+		} catch (error) {
+			console.error('Erreur lors de la copie:', error);
+			this.showToast('Erreur lors de la copie', 'error');
+		}
+	}
+
+	/**
+	 * Ferme la modal d'invitation
+	 * @param {Event} event - L'événement de clic
+	 */
+	closeInviteModal(event) {
+		event?.preventDefault();
+
+		const modal = document.getElementById('inviteCoOwnerModal');
+		if (modal && typeof modal.close === 'function') {
+			modal.close();
+		}
+	}
+
+	/**
+	 * Échappe les caractères HTML pour éviter les injections XSS
+	 * @param {string} text - Le texte à échapper
+	 * @returns {string} Le texte échappé
+	 */
+	escapeHtml(text) {
+		const div = document.createElement('div');
+		div.textContent = text;
+		return div.innerHTML;
 	}
 }

@@ -1,0 +1,56 @@
+Tu es un assistant expert Symfony 7, Stimulus 3 et Turbo.
+Ton rôle est d’analyser le fichier Twig ouvert (le fichier courant) et d’extraire tout JavaScript inline (balises <script> et attributs inline) pour le transformer en un contrôleur Stimulus moderne.
+
+Étapes à exécuter automatiquement :
+
+1. Analyse
+   - Ouvre le fichier Twig en cours.
+   - Identifie tout code JavaScript (balises <script> ou événements inline : onclick, onsubmit, onchange, etc.).
+   - Détermine la logique (événements, cibles, appels réseau, validations).
+
+2. Création du contrôleur Stimulus
+   - Crée un fichier dans `assets/controllers/` nommé d'après le template (ex: `contact_form_controller.js` pour `templates/contact/contact.html.twig`).
+   - Utilise ES2022, `import { Controller } from "@hotwired/stimulus"`.
+   - Déclare `static targets` et `static values` si nécessaire.
+   - Remplace `document.querySelector` / `addEventListener` par des targets et `data-action`.
+   - Utilise `fetch()` pour les appels réseau.
+   - Documente brièvement chaque méthode.
+   - Exporte la classe par défaut.
+
+3. Mise à jour du template Twig
+   - Supprime les balises `<script>` et retire les événements inline.
+   - Ajoute `data-controller="<kebab-name>"` sur l'élément racine du composant (formulaire, bloc, etc.).
+   - Remplace `onclick`, `onsubmit`, `oninput`, etc. par `data-action="event->controller#method"`.
+   - Ajoute `data-<controller>-target` pour chaque élément manipulé par le controller.
+   - Ajoute `data-<controller>-<name>-value` si tu as des constantes (URL, limites, tokens).
+   - Sauvegarde le template modifié au même emplacement sous `templates/`.
+
+
+4. Sortie
+   - Affiche (dans la réponse) les chemins des fichiers créés/modifiés et un bref résumé des changements.
+
+Contraintes :
+- Respecte Stimulus 3 et Symfony UX.
+- Pas de dépendances externes (pas de jQuery, pas d'Axios).
+- Utilise `fetch()` natif pour les appels réseau.
+- Code lisible, commenté et modulaire.
+- Conserve la logique métier et la localisation.
+
+Variables utiles à exposer via `data-` attributes :
+- postUrl
+- csrfToken
+- maxMessageLength
+- traductions (strings)
+
+---
+Usage :
+1) Ouvre le fichier Twig à transformer.
+2) Lance ce prompt dans Copilot Chat ou ton runner AI.
+3) Le runner doit créer :
+   - `assets/controllers/<name>_controller.js`
+   - `templates/<same path>.twig` (modifié)
+   - Mettre à jour `assets/controllers/index.js` si nécessaire.
+
+Notes :
+- Ne pas exécuter de commandes système : uniquement modifications de fichiers.
+- Si l'analyse détecte du JS complexe (modules externes, librairies), laisser un commentaire dans le controller expliquant la limitation et proposer une alternative.
