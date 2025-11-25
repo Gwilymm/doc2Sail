@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Api;
 
 use App\Entity\MagicLink;
 use App\Repository\MagicLinkRepository;
@@ -16,6 +16,8 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class ApiAuthController extends AbstractController
 {
@@ -26,6 +28,7 @@ class ApiAuthController extends AbstractController
 		private JWTTokenManagerInterface $jwtManager,
 		private MailerInterface $mailer,
 		private ParameterBagInterface $params,
+		private CacheInterface $cache,
 		#[Autowire(service: 'limiter.magic_link_request_by_email')]
 		private RateLimiterFactoryInterface $magicLinkLimiter
 	) {}
@@ -72,17 +75,13 @@ class ApiAuthController extends AbstractController
 		$displayName = $data['displayName'] ?? null;
 		$user = $this->userRepository->findOrCreateByEmail($email, $displayName);
 
-		// Anti-spam : max 3 magic links actifs par utilisateur
-		$activeLinks = $this->magicLinkRepo->countActiveLinksForUser($user->getId());
-		if ($activeLinks >= 3) {
-			return $this->json([
-				'error' => 'Trop de codes actifs. Veuillez utiliser un code existant ou attendre son expiration.'
-			], 429);
-		}
+		// SÉCURITÉ Priority 2 : Invalider tous les anciens magic links de l'utilisateur
+		$this->magicLinkRepo->invalidateUserActiveLinks($user->getId());
 
 		// Créer le magic link
 		$magicLink = new MagicLink();
 		$magicLink->setUser($user);
+		$magicLink->setEmailHash(hash('sha256', $email)); // Hash SHA-256 de l'email
 		$magicLink->setIpAddress($request->getClientIp());
 		$magicLink->setUserAgent($request->headers->get('User-Agent'));
 
@@ -105,23 +104,68 @@ class ApiAuthController extends AbstractController
 	 * Retourne: {token, refreshToken, user}
 	 */
 	#[Route('/api/auth/verify', name: 'api_auth_verify', methods: ['POST'])]
-	public function verify(Request $request): JsonResponse
-	{
+	public function verify(
+		Request $request,
+		#[Autowire(service: 'limiter.magic_link_verify')]
+		RateLimiterFactoryInterface $verifyLimiter
+	): JsonResponse {
+		// Rate limiting par IP pour éviter brute force
+		$limiter = $verifyLimiter->create($request->getClientIp() ?? 'unknown');
+		$limit = $limiter->consume(1);
+
+		if (!$limit->isAccepted()) {
+			return $this->json([
+				'error' => 'Trop de tentatives. Veuillez réessayer plus tard.',
+				'retryAfter' => $limit->getRetryAfter()?->getTimestamp()
+			], 429);
+		}
+
 		$data = json_decode($request->getContent(), true);
+		$email = $data['email'] ?? null;
 		$code = $data['code'] ?? null;
 
-		if (!$code) {
-			return $this->json(['error' => 'Code requis'], 400);
+		if (!$email || !$code) {
+			return $this->json(['error' => 'Email et code requis'], 400);
+		}
+
+		// Normaliser les données
+		$email = strtolower(trim($email));
+		$code = strtoupper(trim($code));
+
+		// Valider le format email
+		if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+			return $this->json(['error' => 'Email invalide'], 400);
 		}
 
 		// Trouver le magic link par code court
 		$magicLink = $this->magicLinkRepo->findByShortCode($code);
 
 		if (!$magicLink || !$magicLink->isValid()) {
+			$this->trackFailedAttempt($request->getClientIp());
+			// Message neutre pour éviter timing attack
+			usleep(random_int(100000, 300000)); // 100-300ms délai aléatoire
 			return $this->json(['error' => 'Code invalide ou expiré'], 401);
 		}
 
+		// SÉCURITÉ : Vérifier que l'email correspond au magic link
+		if ($magicLink->getEmailHash() !== hash('sha256', $email)) {
+			$this->trackFailedAttempt($request->getClientIp());
+			usleep(random_int(100000, 300000)); // Délai aléatoire
+			return $this->json(['error' => 'Code invalide ou expiré'], 401);
+		}
+
+		// Vérifier si l'IP est bloquée pour trop d'échecs
+		if ($this->isIpBlocked($request->getClientIp())) {
+			return $this->json([
+				'error' => 'Trop de tentatives échouées. Votre accès est temporairement bloqué.',
+				'retryAfter' => time() + 3600 // Bloqué 1h
+			], 429);
+		}
+
 		$user = $magicLink->getUser();
+
+		// Réinitialiser le compteur d'échecs après succès
+		$this->resetFailedAttempts($request->getClientIp());
 
 		// Marquer le magic link comme utilisé
 		$magicLink->incrementUseCount();
@@ -219,5 +263,38 @@ class ApiAuthController extends AbstractController
 			'shortCode' => $magic->getShortCode(),
 			'expiresAt' => $magic->getExpiresAt()->format(DATE_ATOM)
 		]);
+	}
+
+	/**
+	 * Tracking des tentatives échouées de vérification par IP
+	 */
+	private function trackFailedAttempt(?string $ip): void
+	{
+		if (!$ip) return;
+
+		$key = 'magic_link_failed_' . md5($ip);
+		$attempts = $this->cache->get($key, fn() => 0);
+		$this->cache->delete($key);
+		$this->cache->get($key, fn(ItemInterface $item) => [
+			$item->expiresAfter(3600), // 1 heure
+			$attempts + 1
+		][1]);
+	}
+
+	private function isIpBlocked(?string $ip): bool
+	{
+		if (!$ip) return false;
+
+		$key = 'magic_link_failed_' . md5($ip);
+		$attempts = $this->cache->get($key, fn() => 0);
+		return $attempts >= 10;
+	}
+
+	private function resetFailedAttempts(?string $ip): void
+	{
+		if (!$ip) return;
+
+		$key = 'magic_link_failed_' . md5($ip);
+		$this->cache->delete($key);
 	}
 }

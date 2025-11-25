@@ -2,6 +2,9 @@ root_redirect:
     path: /
     controller: App\Controller\RootRedirectController::redirectToLocale
 
+api_refresh_token:
+    path: /api/token/refresh
+
 api_controllers:
     resource:
         path: ../src/Api/
@@ -19,6 +22,3 @@ controllers:
     #    _locale: "fr"
     requirements:
         _locale: en|fr
-# config/routes.yaml
-api_refresh_token:
-    path: /api/token/refresh

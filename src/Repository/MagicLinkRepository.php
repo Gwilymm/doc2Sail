@@ -19,10 +19,43 @@ class MagicLinkRepository extends ServiceEntityRepository
 			->where('ml.token = :token')
 			->andWhere('ml.used = false')
 			->andWhere('ml.expiresAt > :now')
+			->andWhere('ml.useCount < ml.maxUses')
 			->setParameter('token', $token)
 			->setParameter('now', new \DateTimeImmutable())
 			->getQuery()
 			->getOneOrNullResult();
+	}
+
+	/**
+	 * Trouve un magic link valide par code court
+	 */
+	public function findByShortCode(string $shortCode): ?MagicLink
+	{
+		return $this->createQueryBuilder('ml')
+			->where('ml.shortCode = :code')
+			->andWhere('ml.used = false')
+			->andWhere('ml.expiresAt > :now')
+			->andWhere('ml.useCount < ml.maxUses')
+			->setParameter('code', strtoupper($shortCode))
+			->setParameter('now', new \DateTimeImmutable())
+			->getQuery()
+			->getOneOrNullResult();
+	}
+
+	/**
+	 * Compte les magic links actifs pour un utilisateur (anti-spam)
+	 */
+	public function countActiveLinksForUser(int $userId): int
+	{
+		return (int) $this->createQueryBuilder('ml')
+			->select('COUNT(ml.id)')
+			->where('ml.user = :userId')
+			->andWhere('ml.used = false')
+			->andWhere('ml.expiresAt > :now')
+			->setParameter('userId', $userId)
+			->setParameter('now', new \DateTimeImmutable())
+			->getQuery()
+			->getSingleScalarResult();
 	}
 
 	/**
@@ -36,6 +69,24 @@ class MagicLinkRepository extends ServiceEntityRepository
 			->delete()
 			->where('ml.createdAt < :yesterday')
 			->setParameter('yesterday', $yesterday)
+			->getQuery()
+			->execute();
+	}
+
+	/**
+	 * Invalide tous les magic links actifs d'un utilisateur
+	 * (appelé avant de créer un nouveau magic link)
+	 */
+	public function invalidateUserActiveLinks(int $userId): int
+	{
+		return $this->createQueryBuilder('ml')
+			->update()
+			->set('ml.used', 'true')
+			->where('ml.user = :userId')
+			->andWhere('ml.used = false')
+			->andWhere('ml.expiresAt > :now')
+			->setParameter('userId', $userId)
+			->setParameter('now', new \DateTimeImmutable())
 			->getQuery()
 			->execute();
 	}

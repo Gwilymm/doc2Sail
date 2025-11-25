@@ -141,6 +141,103 @@ final class OpenApiDecorator implements OpenApiFactoryInterface
 		);
 		$paths->addPath('/api/documents/{id}/download', $pathItem);
 
+		// Endpoint POST /api/auth/request - Demande de magic link
+		$pathItem = new Model\PathItem(
+			ref: 'AuthRequest',
+			post: new Model\Operation(
+				operationId: 'requestMagicLink',
+				tags: ['Authentication'],
+				responses: [
+					'200' => [
+						'description' => 'Code envoyé par email',
+						'content' => [
+							'application/json' => [
+								'schema' => [
+									'type' => 'object',
+									'properties' => [
+										'success' => ['type' => 'boolean'],
+										'expiresIn' => ['type' => 'integer', 'description' => 'Secondes avant expiration'],
+										'message' => ['type' => 'string'],
+									],
+								],
+							],
+						],
+					],
+					'400' => ['description' => 'Email invalide'],
+					'429' => ['description' => 'Trop de demandes'],
+				],
+				summary: 'Demander un code de connexion par email',
+				description: 'Envoie un code à 6 caractères par email pour authentification mobile',
+				requestBody: new Model\RequestBody(
+					description: 'Email et nom optionnel',
+					content: new \ArrayObject([
+						'application/json' => [
+							'schema' => [
+								'type' => 'object',
+								'properties' => [
+									'email' => ['type' => 'string', 'format' => 'email'],
+									'displayName' => ['type' => 'string', 'nullable' => true],
+								],
+								'required' => ['email'],
+							],
+						],
+					]),
+				),
+			),
+		);
+		$paths->addPath('/api/auth/request', $pathItem);
+
+		// Endpoint POST /api/auth/verify - Vérification du code
+		$pathItem = new Model\PathItem(
+			ref: 'AuthVerify',
+			post: new Model\Operation(
+				operationId: 'verifyMagicLinkCode',
+				tags: ['Authentication'],
+				responses: [
+					'200' => [
+						'description' => 'Code valide, JWT retourné',
+						'content' => [
+							'application/json' => [
+								'schema' => [
+									'type' => 'object',
+									'properties' => [
+										'token' => ['type' => 'string', 'description' => 'JWT token'],
+										'user' => [
+											'type' => 'object',
+											'properties' => [
+												'id' => ['type' => 'integer'],
+												'displayName' => ['type' => 'string', 'nullable' => true],
+												'roles' => ['type' => 'array', 'items' => ['type' => 'string']],
+											],
+										],
+									],
+								],
+							],
+						],
+					],
+					'400' => ['description' => 'Code manquant'],
+					'401' => ['description' => 'Code invalide ou expiré'],
+				],
+				summary: 'Vérifier un code de connexion',
+				description: 'Vérifie le code à 6 caractères et retourne un JWT si valide',
+				requestBody: new Model\RequestBody(
+					description: 'Code de vérification',
+					content: new \ArrayObject([
+						'application/json' => [
+							'schema' => [
+								'type' => 'object',
+								'properties' => [
+									'code' => ['type' => 'string', 'minLength' => 6, 'maxLength' => 6, 'example' => 'ABC123'],
+								],
+								'required' => ['code'],
+							],
+						],
+					]),
+				),
+			),
+		);
+		$paths->addPath('/api/auth/verify', $pathItem);
+
 		// Mettre à jour les components avec le schéma de sécurité
 		$openApi = $openApi->withComponents($components);
 

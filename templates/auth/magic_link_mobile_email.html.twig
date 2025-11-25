@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<style>
+			body
+			{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px}
+			.header
+			{text-align:center;padding:20px 0;border-bottom:3px solid #0066cc}
+			.code-box
+			{background:#f8f9fa;border:2px solid #0066cc;border-radius:8px;padding:30px;text-align:center;margin:30px 0}
+			.code
+			{font-size:36px;font-weight:bold;letter-spacing:8px;color:#0066cc;font-family:'Courier New',monospace}
+			.expires
+			{color:#666;font-size:14px;margin-top:15px}
+			.instructions
+			{background:#fff3cd;border-left:4px solid #ffc107;padding:15px;margin:20px 0}
+			.footer
+			{text-align:center;color:#666;font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid #ddd}
+		</style>
+	</head>
+	<body>
+		<div class="header">
+			<h1>🔐 Doc2Sail</h1>
+			<p>Votre code de connexion</p>
+		</div>
+
+		{% if displayName %}
+			<p>Bonjour
+				{{ displayName }},</p>
+		{% else %}
+			<p>Bonjour,</p>
+		{% endif %}
+
+		<p>Vous avez demandé à vous connecter à l'application Doc2Sail. Voici votre code de connexion :</p>
+
+		<div class="code-box">
+			<div class="code">{{ shortCode }}</div>
+			<div class="expires">
+				<strong>Expire le :</strong>
+				{{ expiresAt|date('d/m/Y à H:i') }}
+				(dans 15 minutes)
+			</div>
+		</div>
+
+		<div class="instructions">
+			<strong>📱 Comment l'utiliser :</strong>
+			<ol>
+				<li>Ouvrez l'application Doc2Sail sur votre mobile</li>
+				<li>Saisissez ce code à 6 caractères</li>
+				<li>Vous serez automatiquement connecté</li>
+			</ol>
+		</div>
+
+		<p>
+			<strong>⚠️ Important :</strong>
+		</p>
+		<ul>
+			<li>Ce code ne peut être utilisé qu'<strong>une seule fois</strong>
+			</li>
+			<li>Il expire dans
+				<strong>15 minutes</strong>
+			</li>
+			<li>Ne partagez ce code avec personne</li>
+		</ul>
+
+		<p>Si vous n'avez pas demandé ce code, vous pouvez ignorer cet email en toute sécurité.</p>
+
+		<div class="footer">
+			<p>©
+				{{ 'now'|date('Y') }}
+				Doc2Sail - Gestion de documents de régate</p>
+			<p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+		</div>
+	</body>
+</html>
