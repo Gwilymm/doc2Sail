@@ -13,3 +13,6 @@ controllers:
     #    _locale: "fr"
     requirements:
         _locale: en|fr
+# config/routes.yaml
+api_refresh_token:
+    path: /api/token/refresh

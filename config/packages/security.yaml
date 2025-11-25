@@ -14,6 +14,28 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        # API login firewall (uses JSON login and returns JWT via lexik success handler)
+        login:
+            pattern: "^/(?:[a-z]{2}/)?api/login"
+            stateless: true
+            json_login:
+                check_path: /api/login
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        # API firewall for JWT protected routes
+        # Permet l'accès anonyme, la sécurité est gérée par les attributs des ApiResource
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            entry_point: jwt
+            jwt: ~
+            refresh_jwt:
+                check_path: /api/token/refresh
+
         main:
             lazy: true
             provider: app_user_provider
@@ -34,11 +56,30 @@ security:
         # Easy way to control access for large sections of your site
         # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/login_check, roles: PUBLIC_ACCESS }
+        # Routes publiques de connexion et refresh
+        - { path: "^/(?:[a-z]{2}/)?login", roles: PUBLIC_ACCESS }
+        - { path: "^/(?:[a-z]{2}/)?login_check", roles: PUBLIC_ACCESS }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
+
+        # Documentation API Platform (Swagger)
+        - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+        - { path: ^/api$, roles: PUBLIC_ACCESS }
+
+        # Endpoints de développement (dev seulement)
+        - { path: "^/(?:[a-z]{2}/)?api/dev", roles: PUBLIC_ACCESS }
+        - { path: "^/(?:[a-z]{2}/)?api/auth/token", roles: PUBLIC_ACCESS }
+        - { path: "^/(?:[a-z]{2}/)?api/auth/dev/magic", roles: PUBLIC_ACCESS }
+
+        # API Platform: GET sur regattas est public, le reste nécessite authentification
+        # La sécurité fine (owner/coOwner) est gérée par les Voters dans l'ApiResource
+        - { path: ^/api/regattas, roles: PUBLIC_ACCESS, methods: [GET] }
+
+        # Toutes les autres routes API nécessitent une authentification
+        - { path: ^/api, roles: ROLE_USER }
+
+        # Routes web classiques
         - { path: ^/regatta, roles: ROLE_USER }
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
     security:
