@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: MagicLinkRepository::class)]
 #[ORM\Table(name: 'magic_link')]
 #[ORM\Index(columns: ['token'], name: 'idx_magic_link_token')]
-#[ORM\Index(columns: ['short_code'], name: 'idx_magic_link_short_code')]
+#[ORM\Index(columns: ['short_code_hash'], name: 'idx_magic_link_short_code_hash')]
 #[ORM\Index(columns: ['expires_at'], name: 'idx_magic_link_expires_at')]
 class MagicLink
 {
@@ -24,10 +24,10 @@ class MagicLink
 	#[ORM\Column(length: 64, unique: true)]
 	private ?string $token = null;
 
-	#[ORM\Column(length: 6, unique: true)]
-	private ?string $shortCode = null;
+	#[ORM\Column(length: 64, nullable: false)]
+	private ?string $shortCodeHash = null;
 
-	#[ORM\Column(length: 64)]
+	#[ORM\Column(length: 64, nullable: false)]
 	private ?string $emailHash = null;
 
 	#[ORM\Column]
@@ -54,10 +54,16 @@ class MagicLink
 	public function __construct()
 	{
 		$this->token = bin2hex(random_bytes(32)); // 64 caractères
-		$this->shortCode = $this->generateShortCode();
+		$shortCode = $this->generateShortCode();
+		$this->shortCodeHash = hash('sha256', $shortCode);
+		// Stocker temporairement le code en clair pour l'email (non persisté)
+		$this->plainShortCode = $shortCode;
 		$this->createdAt = new \DateTimeImmutable();
 		$this->expiresAt = new \DateTimeImmutable('+15 minutes'); // Expire après 15 min
 	}
+
+	// Code en clair temporaire (NON persisté en DB)
+	private ?string $plainShortCode = null;
 
 	private function generateShortCode(): string
 	{
@@ -98,15 +104,24 @@ class MagicLink
 		return $this;
 	}
 
-	public function getShortCode(): ?string
+	public function getShortCodeHash(): ?string
 	{
-		return $this->shortCode;
+		return $this->shortCodeHash;
 	}
 
-	public function setShortCode(string $shortCode): static
+	public function setShortCodeHash(string $shortCodeHash): static
 	{
-		$this->shortCode = $shortCode;
+		$this->shortCodeHash = $shortCodeHash;
 		return $this;
+	}
+
+	/**
+	 * Retourne le code en clair (disponible uniquement juste après création)
+	 * Utilisé pour l'envoi email, non stocké en DB
+	 */
+	public function getPlainShortCode(): ?string
+	{
+		return $this->plainShortCode;
 	}
 
 	public function getEmailHash(): ?string

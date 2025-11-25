@@ -1,10 +1,21 @@
 nelmio_cors:
     defaults:
-        origin_regex: true
-        allow_origin: ['%env(CORS_ALLOW_ORIGIN)%']
-        allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
-        allow_headers: ['Content-Type', 'Authorization']
-        expose_headers: ['Link']
+        origin_regex: false # Désactiver regex pour sécurité stricte
+        allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"] # Liste blanche exacte depuis .env
+        allow_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        allow_headers: ["Content-Type", "Authorization", "X-Requested-With"]
+        expose_headers: ["Link", "X-Total-Count"]
+        allow_credentials: true # Permet cookies/auth
         max_age: 3600
     paths:
-        '^/': null
+        # API endpoints - CORS strict
+        "^/api":
+            allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"]
+            allow_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+            allow_credentials: true
+
+        # Auth endpoints - CORS encore plus strict (uniquement app mobile)
+        "^/api/auth":
+            allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"]
+            allow_methods: ["POST", "OPTIONS"] # Seulement POST pour auth
+            allow_credentials: true

@@ -27,16 +27,18 @@ class MagicLinkRepository extends ServiceEntityRepository
 	}
 
 	/**
-	 * Trouve un magic link valide par code court
+	 * Trouve un magic link valide par code court (hash)
 	 */
 	public function findByShortCode(string $shortCode): ?MagicLink
 	{
+		$shortCodeHash = hash('sha256', strtoupper($shortCode));
+
 		return $this->createQueryBuilder('ml')
-			->where('ml.shortCode = :code')
+			->where('ml.shortCodeHash = :hash')
 			->andWhere('ml.used = false')
 			->andWhere('ml.expiresAt > :now')
 			->andWhere('ml.useCount < ml.maxUses')
-			->setParameter('code', strtoupper($shortCode))
+			->setParameter('hash', $shortCodeHash)
 			->setParameter('now', new \DateTimeImmutable())
 			->getQuery()
 			->getOneOrNullResult();
