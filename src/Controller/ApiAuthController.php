@@ -83,6 +83,7 @@ class ApiAuthController extends AbstractController
 		// Créer le magic link
 		$magicLink = new MagicLink();
 		$magicLink->setUser($user);
+		$magicLink->setEmailHash(hash('sha256', $email)); // Hash SHA-256 de l'email
 		$magicLink->setIpAddress($request->getClientIp());
 		$magicLink->setUserAgent($request->headers->get('User-Agent'));
 
@@ -148,7 +149,7 @@ class ApiAuthController extends AbstractController
 			->to($email)
 			->subject('🔐 Votre code de connexion Doc2Sail')
 			->html($this->renderView('auth/magic_link_mobile_email.html.twig', [
-				'shortCode' => $magicLink->getShortCode(),
+				'shortCode' => $magicLink->getPlainShortCode(),
 				'expiresAt' => $magicLink->getExpiresAt(),
 				'displayName' => $user->getDisplayName(),
 			]));
@@ -158,7 +159,7 @@ class ApiAuthController extends AbstractController
 		} catch (\Throwable $e) {
 			// En dev, afficher le code dans les logs
 			if ($this->getParameter('kernel.environment') === 'dev') {
-				$this->container->get('logger')->info('Magic link code: ' . $magicLink->getShortCode());
+				$this->container->get('logger')->info('Magic link code: ' . $magicLink->getPlainShortCode());
 			}
 		}
 	}
@@ -216,7 +217,7 @@ class ApiAuthController extends AbstractController
 
 		return $this->json([
 			'token' => $magic->getToken(),
-			'shortCode' => $magic->getShortCode(),
+			'shortCode' => $magic->getPlainShortCode(),
 			'expiresAt' => $magic->getExpiresAt()->format(DATE_ATOM)
 		]);
 	}

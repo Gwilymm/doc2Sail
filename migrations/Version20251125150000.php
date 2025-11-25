@@ -13,45 +13,94 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20251125150000 extends AbstractMigration
 {
-    public function getDescription(): string
-    {
-        return 'Hash short_code pour sécurité renforcée - Priority 3';
-    }
+	public function getDescription(): string
+	{
+		return 'Hash short_code pour sécurité renforcée - Priority 3';
+	}
 
-    public function up(Schema $schema): void
-    {
-        // Ajouter colonne short_code_hash
-        $this->addSql('ALTER TABLE magic_link ADD short_code_hash VARCHAR(64) DEFAULT NULL');
-        
-        // Créer index sur short_code_hash
-        $this->addSql('CREATE INDEX idx_magic_link_short_code_hash ON magic_link (short_code_hash)');
-        
-        // Migrer les données existantes : hasher les short_code actuels
-        $this->addSql("UPDATE magic_link SET short_code_hash = SHA2(short_code, 256) WHERE short_code IS NOT NULL");
-        
-        // Rendre la colonne NOT NULL après migration
-        $this->addSql('ALTER TABLE magic_link MODIFY short_code_hash VARCHAR(64) NOT NULL');
-        
-        // Supprimer l'ancien index sur short_code
-        $this->addSql('DROP INDEX idx_magic_link_short_code ON magic_link');
-        $this->addSql('DROP INDEX UNIQ_short_code ON magic_link');
-        
-        // Supprimer la colonne short_code (on garde uniquement le hash)
-        $this->addSql('ALTER TABLE magic_link DROP short_code');
-    }
+	public function up(Schema $schema): void
+	{
+		// SQLite : Recréer la table avec la nouvelle structure
 
-    public function down(Schema $schema): void
-    {
-        // Restore short_code column
-        $this->addSql('ALTER TABLE magic_link ADD short_code VARCHAR(6) DEFAULT NULL');
-        
-        // Note: Impossible de restaurer les codes originaux depuis le hash
-        // Les codes existants seront perdus (acceptable car expiration 15min)
-        
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_short_code ON magic_link (short_code)');
-        $this->addSql('CREATE INDEX idx_magic_link_short_code ON magic_link (short_code)');
-        
-        $this->addSql('DROP INDEX idx_magic_link_short_code_hash ON magic_link');
-        $this->addSql('ALTER TABLE magic_link DROP short_code_hash');
-    }
+		// 1. Créer nouvelle table avec short_code_hash
+		$this->addSql('CREATE TABLE magic_link_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            user_id INTEGER NOT NULL,
+            token VARCHAR(64) NOT NULL,
+            short_code_hash VARCHAR(64) NOT NULL,
+            email_hash VARCHAR(64) NOT NULL,
+            created_at DATETIME NOT NULL,
+            expires_at DATETIME NOT NULL,
+            used BOOLEAN NOT NULL,
+            use_count INTEGER NOT NULL,
+            max_uses INTEGER NOT NULL,
+            ip_address VARCHAR(45) DEFAULT NULL,
+            user_agent VARCHAR(255) DEFAULT NULL,
+            CONSTRAINT FK_magic_link_user FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE
+        )');
+	}
+
+	public function postUp(Schema $schema): void
+	{
+		// 2. Migrer les données APRÈS création de la table
+		$connection = $this->connection;
+		$magicLinks = $connection->fetchAllAssociative('SELECT * FROM magic_link');
+
+		foreach ($magicLinks as $link) {
+			$shortCodeHash = hash('sha256', $link['short_code']);
+			$connection->insert('magic_link_new', [
+				'id' => $link['id'],
+				'user_id' => $link['user_id'],
+				'token' => $link['token'],
+				'short_code_hash' => $shortCodeHash,
+				'email_hash' => $link['email_hash'],
+				'created_at' => $link['created_at'],
+				'expires_at' => $link['expires_at'],
+				'used' => $link['used'],
+				'use_count' => $link['use_count'],
+				'max_uses' => $link['max_uses'],
+				'ip_address' => $link['ip_address'] ?? null,
+				'user_agent' => $link['user_agent'] ?? null,
+			]);
+		}
+
+		// 3. Supprimer ancienne table et renommer
+		$connection->executeStatement('DROP TABLE magic_link');
+		$connection->executeStatement('ALTER TABLE magic_link_new RENAME TO magic_link');
+
+		// 4. Créer les index
+		$connection->executeStatement('CREATE UNIQUE INDEX UNIQ_5B94FEE35F37A13B ON magic_link (token)');
+		$connection->executeStatement('CREATE INDEX idx_magic_link_short_code_hash ON magic_link (short_code_hash)');
+		$connection->executeStatement('CREATE INDEX idx_magic_link_expires_at ON magic_link (expires_at)');
+		$connection->executeStatement('CREATE INDEX IDX_magic_link_user ON magic_link (user_id)');
+	}
+
+	public function down(Schema $schema): void
+	{
+		// Restore avec short_code - impossible de retrouver les codes originaux
+		// Les magic links expireront de toute façon en 15min
+
+		$this->addSql('CREATE TABLE magic_link_old (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            user_id INTEGER NOT NULL,
+            token VARCHAR(64) NOT NULL,
+            short_code VARCHAR(6) DEFAULT NULL,
+            email_hash VARCHAR(64) NOT NULL,
+            created_at DATETIME NOT NULL,
+            expires_at DATETIME NOT NULL,
+            used BOOLEAN NOT NULL,
+            use_count INTEGER NOT NULL,
+            max_uses INTEGER NOT NULL,
+            ip_address VARCHAR(45) DEFAULT NULL,
+            user_agent VARCHAR(255) DEFAULT NULL,
+            CONSTRAINT FK_magic_link_user FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+        )');
+
+		$this->addSql('DROP TABLE magic_link');
+		$this->addSql('ALTER TABLE magic_link_old RENAME TO magic_link');
+
+		$this->addSql('CREATE UNIQUE INDEX UNIQ_5B94FEE35F37A13B ON magic_link (token)');
+		$this->addSql('CREATE INDEX idx_magic_link_expires_at ON magic_link (expires_at)');
+		$this->addSql('CREATE INDEX IDX_magic_link_user ON magic_link (user_id)');
+	}
 }
