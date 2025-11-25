@@ -6,9 +6,37 @@ use App\Repository\DocumentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: DocumentRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[ApiResource(
+	normalizationContext: ['groups' => ['document:read']],
+	denormalizationContext: ['groups' => ['document:write']],
+	paginationItemsPerPage: 30,
+	operations: [
+		new Get(normalizationContext: ['groups' => ['document:read', 'document:read:details']]),
+		new GetCollection(
+			uriTemplate: '/regattas/{regattaId}/documents',
+			uriVariables: ['regattaId'],
+			paginationEnabled: true,
+			paginationItemsPerPage: 30,
+			paginationMaximumItemsPerPage: 100,
+			provider: \App\State\RegattaDocumentsProvider::class
+		),
+		new Post(
+			security: "is_granted('ROLE_USER')"
+		),
+		new Delete(
+			security: "is_granted('ROLE_USER')"
+		),
+	]
+)]
 class Document
 {
 	public const DEFAULT_CATEGORY = 'Autre';
@@ -24,34 +52,43 @@ class Document
 	#[ORM\Id]
 	#[ORM\GeneratedValue]
 	#[ORM\Column]
+	#[Groups(['document:read', 'regatta:read:details'])]
 	private ?int $id = null;
 
 	#[ORM\Column(length: 255)]
 	#[Assert\NotBlank(message: 'Le nom du document est obligatoire')]
+	#[Groups(['document:read', 'document:write', 'regatta:read:details'])]
 	private ?string $name = null;
 
 	#[ORM\Column(type: Types::TEXT, nullable: true)]
+	#[Groups(['document:read', 'document:write', 'regatta:read:details'])]
 	private ?string $description = null;
 
 	#[ORM\Column(length: 255)]
+	#[Groups(['document:read'])]
 	private ?string $filename = null;
 
 	#[ORM\Column(length: 255)]
+	#[Groups(['document:read', 'regatta:read:details'])]
 	private ?string $mimeType = null;
 
 	#[ORM\Column]
+	#[Groups(['document:read', 'regatta:read:details'])]
 	private ?int $size = null;
 
 	#[ORM\Column(type: Types::DATETIME_MUTABLE)]
+	#[Groups(['document:read', 'regatta:read:details'])]
 	private ?\DateTimeInterface $uploadedAt = null;
 
 	#[ORM\ManyToOne(targetEntity: Regatta::class, inversedBy: 'documents')]
 	#[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+	#[Groups(['document:read:details', 'document:write'])]
 	private ?Regatta $regatta = null;
 
 	#[ORM\Column(length: 100)]
 	#[Assert\NotBlank(message: 'La catégorie du document est obligatoire')]
 	#[Assert\Length(max: 100, maxMessage: 'La catégorie ne peut pas dépasser 100 caractères')]
+	#[Groups(['document:read', 'document:write', 'regatta:read:details'])]
 	private ?string $category = self::DEFAULT_CATEGORY;
 
 	// Propriété temporaire pour l'upload (non persistée en BDD)

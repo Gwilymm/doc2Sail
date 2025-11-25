@@ -54,3 +54,8 @@ services:
     App\Controller\AuthController:
         arguments:
             $magicLinkLimiter: "@limiter.magic_link_request_by_email"
+
+    # Décorateur OpenAPI pour ajouter les endpoints personnalisés dans Swagger
+    App\Api\OpenApiDecorator:
+        decorates: "api_platform.openapi.factory"
+        arguments: ['@App\Api\OpenApiDecorator.inner']

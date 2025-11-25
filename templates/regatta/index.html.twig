@@ -132,11 +132,15 @@
 
 
 
+
+
 const toast = document.createElement( 'div' );
 toast.className = `alert alert-${ type }`;
 toast.innerHTML = `<span>${ message }</span>`;
 document.getElementById( 'toastContainer' ).appendChild( toast );
 setTimeout( () => toast.remove(), 3000 );
+
+
 
 
 
@@ -147,8 +151,12 @@ async function deleteRegatta( id, name )
 
 
 
+
+
 if ( !confirm ( `{{ 'regatta.confirm.delete'|trans({'%name%': '${ name }'})|escape('js') }}` ) )
 {
+
+
 
 
 
@@ -156,10 +164,14 @@ return;
 
 
 
+
+
 }
 
 try
 {
+
+
 
 
 
@@ -172,8 +184,12 @@ if ( result.success )
 
 
 
+
+
 showToast( result.message, 'success' );
 setTimeout( () => window.location.reload(), 1000 );
+
+
 
 
 
@@ -183,7 +199,11 @@ else
 
 
 
+
+
 showToast( result.error, 'error' );
+
+
 
 
 
@@ -194,7 +214,11 @@ showToast( result.error, 'error' );
 
 
 
+
+
 showToast( '{{ 'regatta.errors.delete_failed'|trans|escape('js') }}', 'error' );
+
+
 
 
 
@@ -207,9 +231,13 @@ async function submitCreateRegatta()
 
 
 
+
+
 const form = document.getElementById( 'createRegattaForm' );
 const formData = new FormData( form );
 const data = {
+
+
 
 
 
@@ -220,6 +248,8 @@ description: formData.get( 'description' )
 
 
 
+
+
 };
 
 try
@@ -227,8 +257,12 @@ try
 
 
 
-const response = await fetch( '/regatta/create',
+
+
+const response = await fetch( '/ {{ app.request.locale }}/regatta/create',
 {
+
+
 
 
 
@@ -237,12 +271,18 @@ headers: {
 
 
 
+
+
 'Content-Type': 'application/json'
+
+
 
 
 
 },
 body: JSON.stringify( data )
+
+
 
 
 
@@ -253,10 +293,14 @@ if ( result.success )
 
 
 
+
+
 showToast( result.message, 'success' );
 createRegattaModal.close();
 form.reset();
 setTimeout( () => window.location.reload(), 1000 );
+
+
 
 
 
@@ -266,7 +310,11 @@ else
 
 
 
+
+
 showToast( result.error, 'error' );
+
+
 
 
 
@@ -277,7 +325,11 @@ showToast( result.error, 'error' );
 
 
 
+
+
 showToast( '{{ 'regatta.errors.create_failed'|trans|escape('js') }}', 'error' );
+
+
 
 
 
