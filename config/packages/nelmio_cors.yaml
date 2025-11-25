@@ -1,7 +1,7 @@
 nelmio_cors:
     defaults:
-        origin_regex: false # Désactiver regex pour sécurité stricte
-        allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"] # Liste blanche exacte depuis .env
+        origin_regex: true # Activer regex pour supporter plusieurs ports localhost
+        allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"] # Liste blanche depuis .env
         allow_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         allow_headers: ["Content-Type", "Authorization", "X-Requested-With"]
         expose_headers: ["Link", "X-Total-Count"]
@@ -14,7 +14,7 @@ nelmio_cors:
             allow_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
             allow_credentials: true
 
-        # Auth endpoints - CORS encore plus strict (uniquement app mobile)
+        # Auth endpoints - CORS strict (app mobile)
         "^/api/auth":
             allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"]
             allow_methods: ["POST", "OPTIONS"] # Seulement POST pour auth
