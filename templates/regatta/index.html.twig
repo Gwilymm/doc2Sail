@@ -130,49 +130,73 @@
 		function showToast( message, type = 'info' )
 {
 
+
+
 const toast = document.createElement( 'div' );
 toast.className = `alert alert-${ type }`;
 toast.innerHTML = `<span>${ message }</span>`;
 document.getElementById( 'toastContainer' ).appendChild( toast );
 setTimeout( () => toast.remove(), 3000 );
 
+
+
 }
 
 async function deleteRegatta( id, name )
 {
 
+
+
 if ( !confirm ( `{{ 'regatta.confirm.delete'|trans({'%name%': '${ name }'})|escape('js') }}` ) )
 {
 
+
+
 return;
+
+
 
 }
 
 try
 {
 
-const response = await fetch ( `/regatta/${ id }/delete`,
+
+
+const response = await fetch ( `/{{ app.request.locale }}/regatta/${ id }/delete`,
 { method: 'POST' } );
 const result = await response.json();
 
 if ( result.success )
 {
 
+
+
 showToast( result.message, 'success' );
 setTimeout( () => window.location.reload(), 1000 );
+
+
 
 }
 else
 {
 
+
+
 showToast( result.error, 'error' );
+
+
 
 }
 
 } catch ( error )
 {
 
+
+
 showToast( '{{ 'regatta.errors.delete_failed'|trans|escape('js') }}', 'error' );
+
+
 
 }
 
@@ -181,53 +205,81 @@ showToast( '{{ 'regatta.errors.delete_failed'|trans|escape('js') }}', 'error' );
 async function submitCreateRegatta()
 {
 
+
+
 const form = document.getElementById( 'createRegattaForm' );
 const formData = new FormData( form );
 const data = {
+
+
 
 name: formData.get( 'name' ),
 startDate: formData.get( 'startDate' ),
 endDate: formData.get( 'endDate' ),
 description: formData.get( 'description' )
 
+
+
 };
 
 try
 {
 
+
+
 const response = await fetch( '/regatta/create',
 {
+
+
 
 method: 'POST',
 headers: {
 
+
+
 'Content-Type': 'application/json'
+
+
 
 },
 body: JSON.stringify( data )
+
+
 
 } );
 const result = await response.json();
 if ( result.success )
 {
 
+
+
 showToast( result.message, 'success' );
 createRegattaModal.close();
 form.reset();
 setTimeout( () => window.location.reload(), 1000 );
 
+
+
 }
 else
 {
 
+
+
 showToast( result.error, 'error' );
+
+
 
 }
 
 } catch ( error )
 {
 
+
+
 showToast( '{{ 'regatta.errors.create_failed'|trans|escape('js') }}', 'error' );
+
+
 
 }
 

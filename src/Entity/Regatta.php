@@ -9,8 +9,35 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RegattaRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['regatta:read']],
+    denormalizationContext: ['groups' => ['regatta:write']],
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(
+            security: "is_granted('ROLE_USER')",
+            processor: \App\State\RegattaProcessor::class
+        ),
+        new Put(
+            security: "is_granted('REGATTA_EDIT', object)",
+            securityMessage: "Seul le propriétaire ou un co-propriétaire peut modifier cette régate."
+        ),
+        new Delete(
+            security: "is_granted('REGATTA_DELETE', object)",
+            securityMessage: "Seul le propriétaire peut supprimer cette régate."
+        ),
+    ]
+)]
 #[UniqueEntity(
     fields: ['name'],
     message: 'Une régate avec ce nom existe déjà.'
@@ -20,22 +47,27 @@ class Regatta
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['regatta:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
     #[Assert\NotBlank(message: 'Le nom de la régate est obligatoire')]
     #[Assert\Length(max: 255)]
+    #[Groups(['regatta:read', 'regatta:write'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank(message: 'La date de début est obligatoire')]
+    #[Groups(['regatta:read', 'regatta:write'])]
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank(message: 'La date de fin est obligatoire')]
+    #[Groups(['regatta:read', 'regatta:write'])]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['regatta:read', 'regatta:write'])]
     private ?string $description = null;
 
     /**
@@ -45,14 +77,15 @@ class Regatta
     private Collection $documents;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['regatta:read'])]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(length: 64, unique: true, nullable: true)]
+    #[Groups(['regatta:read'])]
     private ?string $accessToken = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'regattas')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    #[Assert\NotNull(message: 'Un propriétaire doit être défini')]
     private ?User $owner = null;
 
     /**
