@@ -2,6 +2,12 @@ root_redirect:
     path: /
     controller: App\Controller\RootRedirectController::redirectToLocale
 
+api_controllers:
+    resource:
+        path: ../src/Api/
+        namespace: App\Api
+    type: attribute
+
 controllers:
     resource:
         path: ../src/Controller/

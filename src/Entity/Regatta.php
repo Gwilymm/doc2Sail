@@ -21,9 +21,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     normalizationContext: ['groups' => ['regatta:read']],
     denormalizationContext: ['groups' => ['regatta:write']],
+    paginationItemsPerPage: 20,
     operations: [
-        new Get(),
-        new GetCollection(),
+        new Get(normalizationContext: ['groups' => ['regatta:read', 'regatta:read:details']]),
+        new GetCollection(
+            paginationEnabled: true,
+            paginationItemsPerPage: 20,
+            paginationMaximumItemsPerPage: 100
+        ),
         new Post(
             security: "is_granted('ROLE_USER')",
             processor: \App\State\RegattaProcessor::class
@@ -74,6 +79,7 @@ class Regatta
      * @var Collection<int, Document>
      */
     #[ORM\OneToMany(targetEntity: Document::class, mappedBy: 'regatta', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups(['regatta:read:details'])]
     private Collection $documents;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -86,6 +92,7 @@ class Regatta
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'regattas')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[Groups(['regatta:read', 'regatta:write'])]
     private ?User $owner = null;
 
     /**
@@ -93,6 +100,7 @@ class Regatta
      */
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'sharedRegattas')]
     #[ORM\JoinTable(name: 'regatta_co_owners')]
+    #[Groups(['regatta:read'])]
     private Collection $coOwners;
 
     public function __construct()
