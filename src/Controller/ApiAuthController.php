@@ -80,6 +80,24 @@ class ApiAuthController extends AbstractController
 			], 429);
 		}
 
+		// Si un link actif existe (créé il y a moins de 15 minutes), on renvoie un message sans en créer un nouveau,
+		// sauf si le client demande explicitement 'force' pour invalider et en générer un nouveau.
+		$existing = $this->magicLinkRepo->findLatestActiveLinkForUser($user->getId());
+		$force = isset($data['force']) && (bool)$data['force'];
+		if ($existing && !$force) {
+			return $this->json([
+				'success' => true,
+				'alreadySent' => true,
+				'expiresIn' => $existing->getRemainingSeconds(),
+				'message' => 'Un code a déjà été envoyé. Veuillez utiliser ce code ou demandez-en un nouveau.'
+			], 200);
+		}
+
+		if ($force && $existing) {
+			// Invalider les liens actifs de l'utilisateur
+			$this->magicLinkRepo->invalidateUserActiveLinks($user->getId());
+		}
+
 		// Créer le magic link
 		$magicLink = new MagicLink();
 		$magicLink->setUser($user);
