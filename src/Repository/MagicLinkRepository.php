@@ -92,4 +92,21 @@ class MagicLinkRepository extends ServiceEntityRepository
 			->getQuery()
 			->execute();
 	}
+
+	/**
+	 * Retourne le dernier magic link actif d'un utilisateur (non utilisé et pas expiré), ou null si aucun
+	 */
+	public function findLatestActiveLinkForUser(int $userId): ?MagicLink
+	{
+		return $this->createQueryBuilder('ml')
+			->where('ml.user = :userId')
+			->andWhere('ml.used = false')
+			->andWhere('ml.expiresAt > :now')
+			->setParameter('userId', $userId)
+			->setParameter('now', new \DateTimeImmutable())
+			->orderBy('ml.createdAt', 'DESC')
+			->setMaxResults(1)
+			->getQuery()
+			->getOneOrNullResult();
+	}
 }
