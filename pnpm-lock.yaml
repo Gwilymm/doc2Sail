@@ -16,7 +16,7 @@ importers:
         version: 8.5.6
       postcss-loader:
         specifier: ^8.2.0
-        version: 8.2.0(postcss@8.5.6)(webpack@5.102.1)
+        version: 8.2.0(postcss@8.5.6)(typescript@5.9.3)(webpack@5.102.1)
       tailwindcss:
         specifier: ^4.1.14
         version: 4.1.14
@@ -44,7 +44,10 @@ importers:
         version: file:vendor/symfony/ux-turbo/assets(@hotwired/stimulus@3.2.2)(@hotwired/turbo@8.0.18)
       '@symfony/webpack-encore':
         specifier: ^5.0.0
-        version: 5.2.0(@babel/core@7.28.4)(@babel/preset-env@7.28.3(@babel/core@7.28.4))(@symfony/stimulus-bridge@4.0.1(@hotwired/stimulus@3.2.2))(postcss-loader@8.2.0(postcss@8.5.6)(webpack@5.102.1))(postcss@8.5.6)(webpack-cli@5.1.4)(webpack@5.102.1)
+        version: 5.2.0(@babel/core@7.28.4)(@babel/preset-env@7.28.3(@babel/core@7.28.4))(@symfony/stimulus-bridge@4.0.1(@hotwired/stimulus@3.2.2))(postcss-loader@8.2.0(postcss@8.5.6)(typescript@5.9.3)(webpack@5.102.1))(postcss@8.5.6)(typescript@5.9.3)(webpack-cli@5.1.4)(webpack@5.102.1)
+      '@types/react':
+        specifier: ~19.1.17
+        version: 19.1.17
       core-js:
         specifier: ^3.38.0
         version: 3.46.0
@@ -54,6 +57,9 @@ importers:
       regenerator-runtime:
         specifier: ^0.13.9
         version: 0.13.11
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
       webpack:
         specifier: ^5.74.0
         version: 5.102.1(webpack-cli@5.1.4)
@@ -829,6 +835,9 @@ packages:
   '@types/node@24.7.2':
     resolution: {integrity: sha512-/NbVmcGTP+lj5oa4yiYxxeBjRivKQ5Ns1eSZeB99ExsEQ6rX5XYU1Zy/gGxY/ilqtD4Etx9mKyrPxZRetiahhA==}
 
+  '@types/react@19.1.17':
+    resolution: {integrity: sha512-Qec1E3mhALmaspIrhWt9jkQMNdw6bReVu64mjvhbhq2NFPftLPVr+l1SZgmw/66WwBNpDh7ao5AT6gF5v41PFA==}
+
   '@types/webpack-env@1.18.8':
     resolution: {integrity: sha512-G9eAoJRMLjcvN4I08wB5I7YofOb/kaJNd5uoCMX+LbKXTPCF+ZIHuqTnFaK9Jz1rgs035f9JUPUhNFtqgucy/A==}
 
@@ -1180,6 +1189,9 @@ packages:
   csso@5.0.5:
     resolution: {integrity: sha512-0LrrStPOdJj+SPCCrGhzryycLjwcgUSHBtxNA8aIDxf0GLsRh1cKYhB00Gd1lDOS4yGH69+SNn13+TWbVHETFQ==}
     engines: {node: ^10 || ^12.20.0 || ^14.13.0 || >=15.0.0, npm: '>=7.0.0'}
+
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
   daisyui@5.3.1:
     resolution: {integrity: sha512-h2RqYCfavz3ZHoRhkn9xsDjMTSvCqAf44ve1Lh5nZvXWrnxgnzVvwGhhnM/lwvFo42aK3Rfly0wE4d5t9LKhRQ==}
@@ -2035,6 +2047,11 @@ packages:
     resolution: {integrity: sha512-voyz6MApa1rQGUxT3E+BK7/ROe8itEx7vD8/HEvt4xwXucvQ5G5oeEiHkmHZJuBO21RpOf+YYm9MOivj709jow==}
     engines: {node: '>=14.14'}
 
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   undici-types@7.14.0:
     resolution: {integrity: sha512-QQiYxHuyZ9gQUIrmPo3IA+hUl4KYk8uSA7cHrcKd/l3p1OTpZcM0Tbp9x7FAtXdAYhlasd60ncPpgu6ihG6TOA==}
 
@@ -2872,7 +2889,7 @@ snapshots:
       '@hotwired/stimulus': 3.2.2
       '@hotwired/turbo': 8.0.18
 
-  '@symfony/webpack-encore@5.2.0(@babel/core@7.28.4)(@babel/preset-env@7.28.3(@babel/core@7.28.4))(@symfony/stimulus-bridge@4.0.1(@hotwired/stimulus@3.2.2))(postcss-loader@8.2.0(postcss@8.5.6)(webpack@5.102.1))(postcss@8.5.6)(webpack-cli@5.1.4)(webpack@5.102.1)':
+  '@symfony/webpack-encore@5.2.0(@babel/core@7.28.4)(@babel/preset-env@7.28.3(@babel/core@7.28.4))(@symfony/stimulus-bridge@4.0.1(@hotwired/stimulus@3.2.2))(postcss-loader@8.2.0(postcss@8.5.6)(typescript@5.9.3)(webpack@5.102.1))(postcss@8.5.6)(typescript@5.9.3)(webpack-cli@5.1.4)(webpack@5.102.1)':
     dependencies:
       '@babel/core': 7.28.4
       '@babel/preset-env': 7.28.3(@babel/core@7.28.4)
@@ -2897,7 +2914,8 @@ snapshots:
     optionalDependencies:
       '@symfony/stimulus-bridge': 4.0.1(@hotwired/stimulus@3.2.2)
       postcss: 8.5.6
-      postcss-loader: 8.2.0(postcss@8.5.6)(webpack@5.102.1)
+      postcss-loader: 8.2.0(postcss@8.5.6)(typescript@5.9.3)(webpack@5.102.1)
+      typescript: 5.9.3
     transitivePeerDependencies:
       - '@parcel/css'
       - '@rspack/core'
@@ -3008,6 +3026,10 @@ snapshots:
   '@types/node@24.7.2':
     dependencies:
       undici-types: 7.14.0
+
+  '@types/react@19.1.17':
+    dependencies:
+      csstype: 3.2.3
 
   '@types/webpack-env@1.18.8': {}
 
@@ -3265,12 +3287,14 @@ snapshots:
 
   core-js@3.46.0: {}
 
-  cosmiconfig@9.0.0:
+  cosmiconfig@9.0.0(typescript@5.9.3):
     dependencies:
       env-paths: 2.2.1
       import-fresh: 3.3.1
       js-yaml: 4.1.0
       parse-json: 5.2.0
+    optionalDependencies:
+      typescript: 5.9.3
 
   cross-spawn@7.0.6:
     dependencies:
@@ -3382,6 +3406,8 @@ snapshots:
   csso@5.0.5:
     dependencies:
       css-tree: 2.2.1
+
+  csstype@3.2.3: {}
 
   daisyui@5.3.1: {}
 
@@ -3791,9 +3817,9 @@ snapshots:
     dependencies:
       postcss: 8.5.6
 
-  postcss-loader@8.2.0(postcss@8.5.6)(webpack@5.102.1):
+  postcss-loader@8.2.0(postcss@8.5.6)(typescript@5.9.3)(webpack@5.102.1):
     dependencies:
-      cosmiconfig: 9.0.0
+      cosmiconfig: 9.0.0(typescript@5.9.3)
       jiti: 2.6.1
       postcss: 8.5.6
       semver: 7.7.3
@@ -4133,6 +4159,8 @@ snapshots:
       source-map-support: 0.5.21
 
   tmp@0.2.5: {}
+
+  typescript@5.9.3: {}
 
   undici-types@7.14.0: {}
 
