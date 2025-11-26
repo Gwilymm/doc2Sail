@@ -1,383 +1,289 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
     View,
-    Text,
-    TouchableOpacity,
-    TextInput,
-    ActivityIndicator,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    TextInput as RNTextInput,
 } from "react-native";
+import { useAuth } from "../context/AuthContext";
+import { Button } from "@/components/nativewindui/Button";
+import { Text } from "@/components/nativewindui/Text";
+import { ActivityIndicator } from "@/components/nativewindui/ActivityIndicator";
+import { cn } from "@/lib/cn";
 
-type LoginStep = "email" | "code";
-type LoginStatus = "idle" | "loading" | "success" | "error";
-
-// 🔧 Configuration API selon l'environnement
-// - Android Emulator : utilisez http://10.0.2.2:8000
-// - iOS Simulator : utilisez http://localhost:8000
-// - Appareil physique : utilisez l'IP locale de votre machine (ex: http://192.168.1.X:8000)
-// - Expo Go : utilisez l'IP locale de votre machine
-const API_URL = "http://10.0.2.2:8000"; // Android Emulator
-// const API_URL = "http://192.168.1.100:8000"; // Remplacer par votre IP locale pour appareil physique
+type Step = "intro" | "email" | "code";
 
 export default function HomeScreen() {
-    const [step, setStep] = useState<LoginStep>("email");
+    const {
+        user,
+        token,
+        requestMagicLink,
+        verifyCode,
+        logout,
+        loading,
+        biometricAvailable,
+        unlockWithBiometrics,
+    } = useAuth();
+
+    // Consider session locked if biometrics are available, token exists, and user is not yet unlocked
+    const locked = biometricAvailable && token && !user;
+    const [step, setStep] = useState<Step>("intro");
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
-    const [status, setStatus] = useState<LoginStatus>("idle");
-    const [token, setToken] = useState<string | null>(null);
-    const [userName, setUserName] = useState<string>("");
+    const [working, setWorking] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // Étape 1 : Demander un code par email
-    const requestCode = useCallback(async () => {
+    useEffect(() => {
+        if (biometricAvailable && token && !user) {
+            unlockWithBiometrics();
+        }
+    }, [biometricAvailable, token, user, unlockWithBiometrics]);
+
+    const handleRequest = useCallback(async () => {
+        setError(null);
         if (!email.trim()) {
-            Alert.alert("Erreur", "Veuillez entrer votre email");
+            setError("Veuillez entrer un email valide");
             return;
         }
-
-        setStatus("loading");
-
-        try {
-            const response = await fetch(`${API_URL}/api/auth/request`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({ email: email.trim() }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                setStatus("idle");
-                setStep("code");
-                Alert.alert(
-                    "Email envoyé",
-                    data.message || "Vérifiez votre boîte mail"
-                );
-            } else {
-                setStatus("error");
-                Alert.alert(
-                    "Erreur",
-                    data.error || "Impossible d'envoyer le code"
-                );
-            }
-        } catch (error) {
-            console.error("Request Code Error:", error);
-            setStatus("error");
-            Alert.alert("Erreur", "Impossible de se connecter à l'API");
+        setWorking(true);
+        const ok = await requestMagicLink(email.trim());
+        setWorking(false);
+        if (ok) {
+            Alert.alert("Email envoyé", "Vérifiez votre boîte mail / Mailpit");
+            setStep("code");
+        } else {
+            setError("Impossible d'envoyer le code");
         }
-    }, [email]);
+    }, [email, requestMagicLink]);
 
-    // Étape 2 : Vérifier le code
-    const verifyCode = useCallback(async () => {
+    const handleVerify = useCallback(async () => {
+        setError(null);
         if (!code.trim()) {
-            Alert.alert("Erreur", "Veuillez entrer le code de connexion");
+            setError("Code requis");
             return;
         }
+        setWorking(true);
+        const ok = await verifyCode(code.trim());
+        setWorking(false);
+        if (!ok) setError("Code invalide ou expiré");
+    }, [code, verifyCode]);
 
-        setStatus("loading");
-
-        try {
-            const response = await fetch(`${API_URL}/api/auth/verify`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                body: JSON.stringify({ code: code.trim() }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.token) {
-                setToken(data.token);
-                setUserName(data.user?.displayName || "");
-                setStatus("success");
-            } else {
-                setStatus("error");
-                Alert.alert("Erreur", data.error || "Code invalide");
-            }
-        } catch (error) {
-            console.error("Verify Code Error:", error);
-            setStatus("error");
-            Alert.alert("Erreur", "Impossible de vérifier le code");
-        }
-    }, [code]);
-
-    // Écran de succès
-    if (status === "success" && token) {
+    if (loading) {
         return (
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: "white",
-                    paddingHorizontal: 24,
-                }}
-            >
-                <Text
-                    style={{
-                        fontSize: 20,
-                        fontWeight: "bold",
-                        color: "#059669",
-                        marginBottom: 16,
-                    }}
-                >
-                    ✓ Connecté !
-                </Text>
-                {userName && (
-                    <Text
-                        style={{
-                            fontSize: 16,
-                            color: "#4b5563",
-                            marginBottom: 16,
-                        }}
-                    >
-                        Bienvenue {userName}
-                    </Text>
-                )}
-                <Text
-                    style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}
-                >
-                    Token JWT:
-                </Text>
-                <Text
-                    style={{
-                        fontSize: 10,
-                        color: "#1f2937",
-                        paddingHorizontal: 16,
-                        paddingVertical: 8,
-                        backgroundColor: "#f3f4f6",
-                        borderRadius: 8,
-                        marginBottom: 24,
-                    }}
-                    numberOfLines={3}
-                >
-                    {token}
-                </Text>
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: "#4b5563",
-                        paddingHorizontal: 24,
-                        paddingVertical: 12,
-                        borderRadius: 8,
-                    }}
-                    onPress={() => {
-                        setToken(null);
-                        setStatus("idle");
-                        setStep("email");
-                        setEmail("");
-                        setCode("");
-                    }}
-                >
-                    <Text style={{ color: "white", fontWeight: "600" }}>
-                        Se déconnecter
-                    </Text>
-                </TouchableOpacity>
+            <View className="flex-1 items-center justify-center bg-background">
+                <ActivityIndicator />
+                <Text className="mt-3 text-foreground">Chargement...</Text>
             </View>
         );
     }
 
-    // Écran principal de connexion
-    return (
-        <View
-            style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "white",
-                paddingHorizontal: 32,
-            }}
-        >
-            <Text
-                style={{
-                    fontSize: 32,
-                    fontWeight: "bold",
-                    color: "#1e40af",
-                    marginBottom: 8,
-                }}
-            >
-                Doc2Sail
-            </Text>
-            <Text style={{ color: "#6b7280", marginBottom: 48 }}>
-                Mobile App
-            </Text>
-
-            <View style={{ width: "100%", maxWidth: 400 }}>
-                {step === "email" ? (
-                    <>
-                        <Text
-                            style={{
-                                color: "#374151",
-                                fontWeight: "600",
-                                marginBottom: 12,
-                            }}
-                        >
-                            Adresse email
-                        </Text>
-
-                        <TextInput
-                            style={{
-                                width: "100%",
-                                backgroundColor: "white",
-                                borderWidth: 2,
-                                borderColor: "#d1d5db",
-                                borderRadius: 8,
-                                paddingHorizontal: 16,
-                                paddingVertical: 16,
-                                fontSize: 16,
-                                marginBottom: 24,
-                            }}
-                            placeholder="email@exemple.com"
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            keyboardType="email-address"
-                            autoCorrect={false}
-                            editable={status !== "loading"}
-                        />
-
-                        <TouchableOpacity
-                            style={{
-                                width: "100%",
-                                paddingVertical: 16,
-                                borderRadius: 8,
-                                backgroundColor:
-                                    status === "loading"
-                                        ? "#93c5fd"
-                                        : "#2563eb",
-                            }}
-                            onPress={requestCode}
-                            disabled={status === "loading"}
-                        >
-                            <Text
-                                style={{
-                                    color: "white",
-                                    fontSize: 16,
-                                    fontWeight: "bold",
-                                    textAlign: "center",
-                                }}
-                            >
-                                {status === "loading"
-                                    ? "Envoi..."
-                                    : "Recevoir un code"}
-                            </Text>
-                        </TouchableOpacity>
-                    </>
-                ) : (
-                    <>
-                        <Text
-                            style={{
-                                color: "#374151",
-                                fontWeight: "600",
-                                marginBottom: 12,
-                            }}
-                        >
-                            Code de connexion
-                        </Text>
-
-                        <TextInput
-                            style={{
-                                width: "100%",
-                                backgroundColor: "white",
-                                borderWidth: 2,
-                                borderColor: "#d1d5db",
-                                borderRadius: 8,
-                                paddingHorizontal: 16,
-                                paddingVertical: 16,
-                                fontSize: 20,
-                                textAlign: "center",
-                                fontFamily: "monospace",
-                                marginBottom: 24,
-                                letterSpacing: 4,
-                            }}
-                            placeholder="ABC-123"
-                            value={code}
-                            onChangeText={setCode}
-                            autoCapitalize="characters"
-                            autoCorrect={false}
-                            editable={status !== "loading"}
-                        />
-
-                        <TouchableOpacity
-                            style={{
-                                width: "100%",
-                                paddingVertical: 16,
-                                borderRadius: 8,
-                                backgroundColor:
-                                    status === "loading"
-                                        ? "#93c5fd"
-                                        : "#2563eb",
-                                marginBottom: 12,
-                            }}
-                            onPress={verifyCode}
-                            disabled={status === "loading"}
-                        >
-                            <Text
-                                style={{
-                                    color: "white",
-                                    fontSize: 16,
-                                    fontWeight: "bold",
-                                    textAlign: "center",
-                                }}
-                            >
-                                {status === "loading"
-                                    ? "Vérification..."
-                                    : "Se connecter"}
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={{ paddingVertical: 8 }}
-                            onPress={() => {
-                                setStep("email");
-                                setCode("");
-                                setStatus("idle");
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    color: "#6b7280",
-                                    textAlign: "center",
-                                }}
-                            >
-                                ← Changer d&apos;email
-                            </Text>
-                        </TouchableOpacity>
-                    </>
-                )}
-
-                {status === "loading" && (
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginTop: 16,
-                        }}
+    if (token && user) {
+        return (
+            <View className="flex-1 items-center justify-center bg-background px-6">
+                <View className="bg-card p-6 rounded-2xl gap-4 w-full max-w-md shadow-lg">
+                    <Text variant="title1" className="text-secondary">
+                        ✓ Connecté
+                    </Text>
+                    <Text variant="body">Bienvenue {user.displayName}</Text>
+                    <Text variant="caption1" color="secondary">
+                        Token JWT
+                    </Text>
+                    <Text
+                        variant="caption2"
+                        className="bg-muted p-3 rounded-lg"
+                        numberOfLines={4}
                     >
-                        <ActivityIndicator size="small" color="#2563eb" />
-                        <Text style={{ marginLeft: 8, color: "#6b7280" }}>
-                            Connexion...
+                        {token}
+                    </Text>
+                    <Button variant="secondary" onPress={logout}>
+                        <Text>Se déconnecter</Text>
+                    </Button>
+                </View>
+            </View>
+        );
+    }
+
+    // Main onboarding/auth flow
+    return (
+        <View className="flex-1 bg-background">
+            <KeyboardAvoidingView
+                className="flex-1"
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+            >
+                <ScrollView
+                    contentContainerStyle={{
+                        flexGrow: 1,
+                        paddingHorizontal: 24,
+                        paddingVertical: 48,
+                    }}
+                >
+                    <View className="mb-6">
+                        <Text variant="largeTitle" className="text-foreground">
+                            Doc2Sail
+                        </Text>
+                        <Text variant="subhead" color="secondary">
+                            App Mobile – Onboarding
                         </Text>
                     </View>
-                )}
-
-                {status === "error" && (
-                    <Text
-                        style={{
-                            color: "#dc2626",
-                            textAlign: "center",
-                            marginTop: 16,
-                            fontWeight: "500",
-                        }}
-                    >
-                        ✗ Erreur de connexion
-                    </Text>
-                )}
-            </View>
+                    {/* ...existing code for locked, intro, email, code steps... */}
+                    {locked && (
+                        <View className="bg-card p-5 rounded-xl mb-6">
+                            <Text variant="callout" className="mb-3">
+                                Session protégée par biométrie
+                            </Text>
+                            <Button onPress={unlockWithBiometrics}>
+                                <Text>Déverrouiller</Text>
+                            </Button>
+                        </View>
+                    )}
+                    {step === "intro" && !locked && (
+                        <View className="bg-card p-6 rounded-2xl gap-4 shadow">
+                            <Text variant="title3">
+                                Connexion sans mot de passe
+                            </Text>
+                            <Text variant="subhead" color="secondary">
+                                Nous utilisons des « liens magiques » et des
+                                codes courts temporaires :
+                            </Text>
+                            <Text variant="footnote" color="tertiary">
+                                1. Vous entrez votre email.
+                            </Text>
+                            <Text variant="footnote" color="tertiary">
+                                2. Vous recevez un email avec un code (ex:
+                                ABC-123).
+                            </Text>
+                            <Text variant="footnote" color="tertiary">
+                                3. Vous entrez le code et votre session est
+                                créée.
+                            </Text>
+                            <Text
+                                variant="footnote"
+                                color="tertiary"
+                                className="mt-2"
+                            >
+                                Le jeton est stocké en sécurisé. Si disponible,
+                                Face ID / empreinte déverrouille votre session.
+                            </Text>
+                            {biometricAvailable && (
+                                <Text
+                                    variant="caption1"
+                                    className="text-secondary"
+                                >
+                                    Biométrie disponible ✓
+                                </Text>
+                            )}
+                            <Button onPress={() => setStep("email")}>
+                                <Text>Commencer</Text>
+                            </Button>
+                        </View>
+                    )}
+                    {step === "email" && !locked && (
+                        <View className="bg-card p-6 rounded-2xl gap-4 shadow">
+                            <Text variant="title3">Votre email</Text>
+                            <View>
+                                <Text
+                                    variant="caption1"
+                                    color="secondary"
+                                    className="mb-2"
+                                >
+                                    Adresse
+                                </Text>
+                                <RNTextInput
+                                    className={cn(
+                                        "bg-input border-2 border-border px-4 py-3 rounded-xl text-base",
+                                        error && "border-destructive"
+                                    )}
+                                    placeholder="email@exemple.com"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    editable={!working}
+                                />
+                                {error && (
+                                    <Text
+                                        variant="caption1"
+                                        className="text-destructive mt-1"
+                                    >
+                                        {error}
+                                    </Text>
+                                )}
+                            </View>
+                            <Button onPress={handleRequest} disabled={working}>
+                                {working ? (
+                                    <ActivityIndicator />
+                                ) : (
+                                    <Text>
+                                        {working
+                                            ? "Envoi..."
+                                            : "Recevoir mon code"}
+                                    </Text>
+                                )}
+                            </Button>
+                            <Button
+                                variant="plain"
+                                onPress={() => setStep("intro")}
+                            >
+                                <Text>← Retour</Text>
+                            </Button>
+                        </View>
+                    )}
+                    {step === "code" && !locked && (
+                        <View className="bg-card p-6 rounded-2xl gap-4 shadow">
+                            <Text variant="title3">Code reçu par email</Text>
+                            <View>
+                                <Text
+                                    variant="caption1"
+                                    color="secondary"
+                                    className="mb-2"
+                                >
+                                    Code
+                                </Text>
+                                <RNTextInput
+                                    className={cn(
+                                        "bg-input border-2 border-border px-4 py-3 rounded-xl text-center text-xl tracking-widest font-mono",
+                                        error && "border-destructive"
+                                    )}
+                                    placeholder="ABC-123"
+                                    value={code}
+                                    onChangeText={setCode}
+                                    autoCapitalize="characters"
+                                    editable={!working}
+                                />
+                                {error && (
+                                    <Text
+                                        variant="caption1"
+                                        className="text-destructive mt-1"
+                                    >
+                                        {error}
+                                    </Text>
+                                )}
+                            </View>
+                            <Button onPress={handleVerify} disabled={working}>
+                                {working ? (
+                                    <ActivityIndicator />
+                                ) : (
+                                    <Text>
+                                        {working
+                                            ? "Vérification..."
+                                            : "Se connecter"}
+                                    </Text>
+                                )}
+                            </Button>
+                            <Button
+                                variant="plain"
+                                onPress={() => setStep("email")}
+                            >
+                                <Text>← Changer d&apos;email</Text>
+                            </Button>
+                        </View>
+                    )}
+                </ScrollView>
+            </KeyboardAvoidingView>
         </View>
     );
 }
+
+// Remove all legacy/duplicate code below this line

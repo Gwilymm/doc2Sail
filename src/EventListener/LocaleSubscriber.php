@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class LocaleSubscriber implements EventSubscriberInterface
 {
 	private string $defaultLocale;
+	private const SUPPORTED = ['en', 'fr'];
 
 	public function __construct(string $defaultLocale = 'fr')
 	{
@@ -19,17 +20,41 @@ class LocaleSubscriber implements EventSubscriberInterface
 	{
 		$request = $event->getRequest();
 
-		// Essayer de récupérer la locale depuis la session
-		if (!$request->hasPreviousSession()) {
+		// Ne pas écraser si locale forcée par l'URL (/{_locale}/...)
+		if ($request->attributes->get('_locale')) {
 			return;
 		}
 
-		// Si la locale est définie dans la session, l'utiliser
-		if ($locale = $request->getSession()->get('_locale')) {
-			$request->setLocale($locale);
-		} else {
-			$request->setLocale($this->defaultLocale);
+		// 1. Query param explicite ?lang=fr
+		$paramLocale = $request->query->get('lang');
+		if ($paramLocale && in_array($paramLocale, self::SUPPORTED, true)) {
+			$request->setLocale($paramLocale);
+			return;
 		}
+
+		// 2. Session précédente
+		if ($request->hasPreviousSession()) {
+			if ($sessionLocale = $request->getSession()->get('_locale')) {
+				$request->setLocale($sessionLocale);
+				return;
+			}
+		}
+
+		// 3. Header Accept-Language
+		if ($accept = $request->headers->get('Accept-Language')) {
+			$parts = explode(',', $accept);
+			foreach ($parts as $part) {
+				$lang = strtolower(trim(explode(';', $part)[0]));
+				$langShort = substr($lang, 0, 2);
+				if (in_array($langShort, self::SUPPORTED, true)) {
+					$request->setLocale($langShort);
+					return;
+				}
+			}
+		}
+
+		// 4. Fallback
+		$request->setLocale($this->defaultLocale);
 	}
 
 	public static function getSubscribedEvents(): array
