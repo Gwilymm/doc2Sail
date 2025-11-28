@@ -8,44 +8,98 @@
 {% block body %}
 	{% include '_navbar.html.twig' %}
 
-	<div class="container mx-auto px-4 py-10 max-w-screen-2xl" data-controller="document">
-		<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-			<div class="lg:col-span-9">
-				<div class="card bg-base-100 shadow overflow-hidden">
-					<div class="card-body p-4 lg:p-6">
-						<h2 class="card-title">{{ document.name }}</h2>
-						<p class="text-sm text-base-content/60 mb-4">{{ document.description }}</p>
+	<div class="container mx-auto px-4 py-6 max-w-screen-2xl" data-controller="document">
+		<div
+			class="space-y-6">
+			<!-- Emphasized preview card (top on mobile) -->
+			<section class="card bg-base-100 shadow overflow-hidden">
+				<div class="card-body p-4 lg:p-6">
+					<div class="flex items-start gap-4">
+						<div class="flex-1">
+							<h2 class="card-title text-lg sm:text-xl">{{ document.name }}</h2>
+							<p class="text-sm text-base-content/60 mt-1">{{ document.description }}</p>
+						</div>
+						<div class="hidden md:flex md:flex-col md:items-end md:space-y-2">
+							<a href="{{ downloadUrl }}" class="btn btn-outline">Télécharger</a>
+							<a href="{{ fileUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ouvrir (raw)</a>
+						</div>
+					</div>
 
+					<div class="mt-4">
 						{% if isImage %}
-							<div class="text-center">
-								<img src="{{ fileUrl }}" alt="{{ document.name }}" class="mx-auto max-h-[80vh] w-auto object-contain"/>
+							<div class="w-full flex justify-center">
+								<img src="{{ fileUrl }}" alt="{{ document.name }}" class="w-full max-w-4xl h-auto object-contain"/>
 							</div>
 						{% elseif isPdf %}
-							<div class="relative w-full lg:h-[80vh] lg:pb-0" style="padding-bottom:56.25%;">
-								<div id="viewerFrame" class="absolute inset-0 w-full h-full">
-									<iframe src="{{ fileUrl }}" frameborder="0" class="absolute inset-0 w-full h-full"></iframe>
+							<div
+								class="w-full">
+
+								<!-- Aperçu PDF intégré dans la page -->
+								<div class="relative w-full" style="padding-bottom:56.25%;">
+									<iframe src="/pdfjs/web/viewer.html?file={{ fileUrl|url_encode }}#page=1&zoom=auto&sidebar=0" class="absolute inset-0 w-full h-full rounded-lg shadow" frameborder="0"></iframe>
+								</div>
+
+								<!-- Bouton plein écran -->
+								<div class="text-center mt-4">
+									<a href="{{ path('app_document_viewer', {'id': document.id}) }}?file={{ fileUrl|url_encode }}" class="btn btn-primary btn-wide">
+										Voir en plein écran
+									</a>
 								</div>
 							</div>
+
+
 						{% elseif isOffice %}
-							<div class="relative w-full lg:h-[80vh] lg:pb-0" style="padding-bottom:56.25%;">
-								<div id="viewerFrame" class="absolute inset-0 w-full h-full">
-									<iframe src="https://view.officeapps.live.com/op/embed.aspx?src={{ fileUrl|url_encode }}" frameborder="0" class="absolute inset-0 w-full h-full"></iframe>
+							<div class="w-full">
+								<div class="relative w-full" style="padding-bottom:56.25%;">
+									<div id="viewerFrame" class="absolute inset-0 w-full h-full">
+										<iframe src="https://view.officeapps.live.com/op/embed.aspx?src={{ fileUrl|url_encode }}" frameborder="0" class="absolute inset-0 w-full h-full"></iframe>
+									</div>
 								</div>
 							</div>
 						{% else %}
 							<div class="p-6 text-center">
-								<p class="text-base">Aperçu non disponible pour ce format.</p>
-								<a href="{{ downloadUrl }}" class="btn btn-primary mt-4">Télécharger</a>
+								<p class="text-base">Aperçu indisponible — ouvrez le PDF dans le lecteur optimisé Doc2Sail ou téléchargez-le.</p>
+								<div class="mt-4 flex items-center justify-center gap-2">
+									{% if isPdf %}
+										<a href="{{ path('app_document_viewer', {'id': document.id}) }}?file={{ fileUrl|url_encode }}" class="btn btn-primary">Ouvrir dans le lecteur Doc2Sail</a>
+									{% endif %}
+									<a href="{{ downloadUrl }}" class="btn btn-outline">Télécharger</a>
+								</div>
 							</div>
 						{% endif %}
 					</div>
-				</div>
-			</div>
 
-			<div class="lg:col-span-3">
-				<div class="card bg-base-100 shadow">
-					<div class="card-body">
-						<h3 class="font-semibold">Détails</h3>
+					<!-- Primary actions: full width on mobile, compact on larger screens -->
+					<div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+						<a href="{{ downloadUrl }}" class="btn btn-primary w-full">Télécharger</a>
+						<a href="{{ fileUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline w-full">Ouvrir (raw)</a>
+						<button data-action="click->document#toggleFullscreen" data-document-file-url-value="{{ fileUrl }}" class="btn btn-ghost w-full">Plein écran</button>
+					</div>
+
+					<!-- Embedded signing iframe + fallback -->
+					<div class="mt-4">
+						<div class="relative w-full" style="padding-bottom:50%;">
+							<iframe id="signFrame" src="https://sign.doc2sail.com/embed?doc={{ fileUrl|url_encode }}" frameborder="0" class="absolute inset-0 w-full h-full"></iframe>
+						</div>
+						<div id="signEmbedFallback" class="alert alert-warning mt-4 hidden" role="alert">
+							<div>
+								<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+								<span>Contenu bloqué — impossible d'afficher l'iframe. Ouvrez la ressource dans un nouvel onglet ou contactez l'administrateur de sign.doc2sail.com pour autoriser l'intégration.</span>
+							</div>
+							<div class="mt-2">
+								<a id="signFallbackOpen" href="https://sign.doc2sail.com/embed?doc={{ fileUrl|url_encode }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Ouvrir dans un nouvel onglet</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Details card (below preview on mobile) -->
+			<section class="card bg-base-100 shadow">
+				<div class="card-body p-4">
+					<h3 class="font-semibold">Détails</h3>
+					<details class="mt-2" open>
+						<summary class="font-medium cursor-pointer">Voir les détails</summary>
 						<ul class="mt-2 text-sm space-y-2">
 							<li>
 								<strong>Nom:</strong>
@@ -64,36 +118,24 @@
 								{{ document.category }}</li>
 						</ul>
 
-						<div class="mt-4 flex flex-col gap-2">
-							<a href="{{ downloadUrl }}" class="btn btn-outline">Télécharger</a>
-							<div class="relative w-full lg:h-[40vh] lg:pb-0" style="padding-bottom:50%;">
-								<iframe id="signFrame" src="https://sign.doc2sail.com/embed?doc={{ fileUrl|url_encode }}" frameborder="0" class="absolute inset-0 w-full h-full"></iframe>
-							</div>
-							<div id="signEmbedFallback" class="alert alert-warning mt-4 hidden" role="alert">
-								<div>
-									<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-									<span>Contenu bloqué — impossible d'afficher l'iframe. Ouvrez la ressource dans un nouvel onglet ou contactez l'administrateur de sign.doc2sail.com pour autoriser l'intégration.</span>
-								</div>
-								<div class="mt-2">
-									<a id="signFallbackOpen" href="https://sign.doc2sail.com/embed?doc={{ fileUrl|url_encode }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Ouvrir dans un nouvel onglet</a>
-								</div>
-							</div>
-							<a href="{{ fileUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ouvrir le fichier (raw)</a>
-							<button data-action="click->document#toggleFullscreen" data-document-file-url-value="{{ fileUrl }}" class="btn btn-sm btn-ghost">Plein écran</button>
+						<div class="mt-4 flex flex-col gap-2 sm:hidden">
+							<a href="{{ downloadUrl }}" class="btn btn-primary w-full">Télécharger</a>
+							<a href="{{ fileUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline w-full">Ouvrir (raw)</a>
+						</div>
+
+						<div class="mt-4">
 							{% if document.regatta %}
 								<a href="{{ path('app_regatta_documents', {'id': document.regatta.id}) }}" class="btn btn-ghost">Retour à la régate</a>
 							{% else %}
 								<a href="{{ path('app_home') }}" class="btn btn-ghost">Accueil</a>
 							{% endif %}
 						</div>
-					</div>
+					</details>
 				</div>
-			</div>
+			</section>
 		</div>
 	</div>
-
 {% endblock %}
-
 {% block javascripts %}
 	{{ parent() }}
 	<script nonce="{{ csp_nonce('script') }}">

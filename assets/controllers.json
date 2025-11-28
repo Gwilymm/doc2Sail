@@ -22,7 +22,8 @@
         "ui": { "enabled": true },
         "notification": { "enabled": true },
         "offline": { "enabled": true },
-        "theme": { "enabled": true }
+        "theme": { "enabled": true },
+        "pdf-viewer": { "enabled": true }
     },
     "entrypoints": []
 }
