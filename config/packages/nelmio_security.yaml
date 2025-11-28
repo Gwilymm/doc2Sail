@@ -39,7 +39,10 @@ nelmio_security:
                     "https://docs.google.com",
                     "https://drive.google.com",
                     "https://sign.doc2sail.com",
+                    "blob:",
+                    "data:",
                 ]
             base-uri: ["self"]
             form-action: ["self"]
             object-src: ["none"]
+            worker-src: ["'self'", "blob:"]
