@@ -1,0 +1,179 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{{ document.name }}
+	- Doc2Sail
+{% endblock %}
+
+{% block body %}
+	{% include '_navbar.html.twig' %}
+
+	<div class="container mx-auto px-4 py-10 max-w-screen-2xl">
+		<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+			<div class="lg:col-span-9">
+				<div class="card bg-base-100 shadow overflow-hidden">
+					<div class="card-body p-4 lg:p-6">
+						<h2 class="card-title">{{ document.name }}</h2>
+						<p class="text-sm text-base-content/60 mb-4">{{ document.description }}</p>
+
+						{% if isImage %}
+							<div class="text-center">
+								<img src="{{ fileUrl }}" alt="{{ document.name }}" class="mx-auto max-h-[80vh] w-auto object-contain"/>
+							</div>
+						{% elseif isPdf %}
+							<div class="w-full" style="height: 80vh;">
+								<div id="viewerFrame" class="w-full h-full">
+									<iframe src="{{ fileUrl }}" frameborder="0" class="w-full h-full"></iframe>
+								</div>
+							</div>
+						{% elseif isOffice %}
+							<div class="w-full" style="height: 80vh;">
+								<div id="viewerFrame" class="w-full h-full">
+									<iframe src="https://view.officeapps.live.com/op/embed.aspx?src={{ fileUrl|url_encode }}" frameborder="0" class="w-full h-full"></iframe>
+								</div>
+							</div>
+						{% else %}
+							<div class="p-6 text-center">
+								<p class="text-base">Aperçu non disponible pour ce format.</p>
+								<a href="{{ downloadUrl }}" class="btn btn-primary mt-4">Télécharger</a>
+							</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+
+			<div class="lg:col-span-3">
+				<div class="card bg-base-100 shadow">
+					<div class="card-body">
+						<h3 class="font-semibold">Détails</h3>
+						<ul class="mt-2 text-sm space-y-2">
+							<li>
+								<strong>Nom:</strong>
+								{{ document.name }}</li>
+							<li>
+								<strong>Taille:</strong>
+								{{ document.getFormattedSize() }}</li>
+							<li>
+								<strong>Type:</strong>
+								{{ document.mimeType }}</li>
+							<li>
+								<strong>Téléchargé le:</strong>
+								{{ document.uploadedAt ? document.uploadedAt|date('d/m/Y H:i') : '—' }}</li>
+							<li>
+								<strong>Catégorie:</strong>
+								{{ document.category }}</li>
+						</ul>
+
+						<div class="mt-4 flex flex-col gap-2">
+							<a href="{{ downloadUrl }}" class="btn btn-outline">Télécharger</a>
+							<iframe id="signFrame" src="https://sign.doc2sail.com/embed?doc={{ fileUrl|url_encode }}" width="600" height="300" frameborder="0" class="w-full h-60 lg:h-96"></iframe>
+							<div id="signEmbedFallback" class="alert alert-warning mt-4 hidden" role="alert">
+								<div>
+									<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+									<span>Contenu bloqué — impossible d'afficher l'iframe. Ouvrez la ressource dans un nouvel onglet ou contactez l'administrateur de sign.doc2sail.com pour autoriser l'intégration.</span>
+								</div>
+								<div class="mt-2">
+									<a id="signFallbackOpen" href="https://sign.doc2sail.com/embed?doc={{ fileUrl|url_encode }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Ouvrir dans un nouvel onglet</a>
+								</div>
+							</div>
+							<a href="{{ fileUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ouvrir le fichier (raw)</a>
+							<button onclick="(function(){const el=document.getElementById('viewerFrame'); if(!el) return; if(el.requestFullscreen){ el.requestFullscreen(); } else if (el.webkitRequestFullscreen){el.webkitRequestFullscreen();}else{window.open('{{ fileUrl }}','_blank');}})()" class="btn btn-sm btn-ghost">Plein écran</button>
+							{% if document.regatta %}
+								<a href="{{ path('app_regatta_documents', {'id': document.regatta.id}) }}" class="btn btn-ghost">Retour à la régate</a>
+							{% else %}
+								<a href="{{ path('app_home') }}" class="btn btn-ghost">Accueil</a>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+		document.addEventListener( 'DOMContentLoaded', function ()
+{
+
+
+
+
+
+const frame = document.getElementById( 'signFrame' );
+const fallback = document.getElementById( 'signEmbedFallback' );
+if ( ! frame || ! fallback )
+
+
+
+return;
+
+
+
+let loaded = false;
+const checkTime = 1500; // ms
+const timer = setTimeout( function ()
+{
+
+
+
+
+
+if ( ! loaded )
+{
+
+
+
+
+
+fallback.classList.remove( 'hidden' );
+frame.style.display = 'none';
+
+
+
+
+
+}
+
+}, checkTime );
+frame.addEventListener( 'load', function ()
+{
+
+
+
+
+
+loaded = true;
+clearTimeout( timer );
+
+
+
+
+
+} );
+// Also listen for error events (not always available cross-origin)
+frame.addEventListener( 'error', function ()
+{
+
+
+
+
+
+fallback.classList.remove( 'hidden' );
+frame.style.display = 'none';
+
+
+
+
+
+} );
+
+
+
+
+
+} );
+	</script>
+{% endblock %}
