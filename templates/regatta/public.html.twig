@@ -28,7 +28,7 @@
 					Un nouveau document vient d'être ajouté
 				</div>
 			</div>
-			<button class="btn btn-sm btn-primary" onclick="window.location.reload()">
+			<button class="btn btn-sm btn-primary" data-action="click->notification#refresh">
 				Actualiser
 			</button>
 			<button class="btn btn-sm btn-ghost" data-action="click->notification#closeBanner">
@@ -51,7 +51,7 @@
 						documents) pour y accéder même sans connexion internet
 					</div>
 				</div>
-				<button onclick="this.closest('[data-controller]').getAttribute('data-controller').split(' ').forEach(c => { if(window[c + 'Controller']) window[c + 'Controller'].downloadForOffline(); })" class="btn btn-sm btn-primary" data-action="click->offline#downloadForOffline">
+				<button class="btn btn-sm btn-primary" data-action="click->offline#downloadForOffline">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
 					</svg>
@@ -260,7 +260,8 @@
 
 {% block javascripts %}
 	{{ parent() }}
-	<script>
+	<script nonce="{{ csp_nonce('script') }}">
+
 		// Category Filter
 function filterCategories()
 {
@@ -407,9 +408,13 @@ navigator.serviceWorker.getRegistrations().then( registrations => {
 
 
 
+
+
 registrations.forEach( reg => { // Désinscrire SW avec scope / ou /public/
 if ( reg.scope.endsWith( '/' ) && !reg.scope.endsWith( '/r/' ) )
 {
+
+
 
 
 
@@ -418,7 +423,11 @@ reg.unregister();
 
 
 
+
+
 } } );
+
+
 
 
 

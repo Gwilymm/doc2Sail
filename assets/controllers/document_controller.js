@@ -11,13 +11,35 @@ export default class extends Controller {
 
 	static values = {
 		regattaId: Number,
-		defaultCategory: String
+		defaultCategory: String,
+		fileUrl: String
 	};
 
 	connect() {
 		console.log('Document controller connected');
 		if (this.hasRegattaIdValue) {
 			console.log('Regatta ID:', this.regattaIdValue);
+		}
+
+		toggleFullscreen(event) {
+			event?.preventDefault();
+			try {
+				const el = document.getElementById('viewerFrame');
+				const fileUrl = event?.currentTarget?.dataset?.documentFileUrlValue || this.fileUrlValue || null;
+				if (el && el.requestFullscreen) {
+					el.requestFullscreen();
+					return;
+				}
+				if (el && el.webkitRequestFullscreen) {
+					el.webkitRequestFullscreen();
+					return;
+				}
+				if (fileUrl) {
+					window.open(fileUrl, '_blank');
+				}
+			} catch (e) {
+				console.error('Error toggling fullscreen', e);
+			}
 		}
 
 		this.selectedFile = null;

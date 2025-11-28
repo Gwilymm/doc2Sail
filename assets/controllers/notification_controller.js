@@ -94,6 +94,13 @@ export default class extends Controller {
         }
     }
 
+    /*
+     * Refresh the page (used by the 'Actualiser' button on the banner)
+     */
+    refresh() {
+        window.location.reload();
+    }
+
     async showBrowserNotification(documentName, category) {
         if (!('Notification' in window)) {
             console.warn('Notifications not supported');

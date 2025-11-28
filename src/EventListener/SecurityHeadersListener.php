@@ -36,23 +36,8 @@ class SecurityHeadersListener
 			$headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
 		}
 
-		// Content Security Policy : Restreint sources de contenu
-		// Adapté pour API (pas de scripts/styles inline)
-		$csp = implode('; ', [
-			"default-src 'self'",
-			"script-src 'self'",
-			"style-src 'self' 'unsafe-inline'", // unsafe-inline pour emails HTML
-			"img-src 'self' data: https:",
-			"font-src 'self'",
-			"connect-src 'self'",
-			"frame-ancestors 'self'", // Autorise les iframes pour même origine
-			"frame-src 'self' https://view.officeapps.live.com https://docs.google.com https://drive.google.com https://sign.doc2sail.com",
-			"base-uri 'self'",
-			"form-action 'self'",
-			"object-src 'none'",
-			"upgrade-insecure-requests"
-		]);
-		$headers->set('Content-Security-Policy', $csp);
+		// Let Nelmio Security Bundle handle CSP headers (including nonce generation)
+		// If no Nelmio CSP is set, avoid overriding CSP to keep Twig-generated nonces working
 
 		// Referrer Policy : Contrôle info envoyée dans referer
 		$headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
