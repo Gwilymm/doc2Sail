@@ -21,8 +21,8 @@ class SecurityHeadersListener
 		$response = $event->getResponse();
 		$headers = $response->headers;
 
-		// Anti-Clickjacking : Empêche l'iframe embedding
-		$headers->set('X-Frame-Options', 'DENY');
+		// Anti-Clickjacking : Autoriser l'iframe pour la même origine (SAMEORIGIN) - utile pour l'aperçu des documents
+		$headers->set('X-Frame-Options', 'SAMEORIGIN');
 
 		// Anti-MIME sniffing : Force respect du Content-Type
 		$headers->set('X-Content-Type-Options', 'nosniff');
@@ -45,7 +45,8 @@ class SecurityHeadersListener
 			"img-src 'self' data: https:",
 			"font-src 'self'",
 			"connect-src 'self'",
-			"frame-ancestors 'none'", // Equivalent à X-Frame-Options DENY
+			"frame-ancestors 'self'", // Autorise les iframes pour même origine
+			"frame-src 'self' https://view.officeapps.live.com https://docs.google.com https://drive.google.com https://sign.doc2sail.com",
 			"base-uri 'self'",
 			"form-action 'self'",
 			"object-src 'none'",
