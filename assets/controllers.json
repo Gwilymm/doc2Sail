@@ -15,15 +15,7 @@
                 "enabled": false,
                 "fetch": "eager"
             }
-        },
-        "auth": { "enabled": true },
-        "document": { "enabled": true },
-        "regatta": { "enabled": true },
-        "ui": { "enabled": true },
-        "notification": { "enabled": true },
-        "offline": { "enabled": true },
-        "theme": { "enabled": true },
-        "pdf-viewer": { "enabled": true }
+        }
     },
     "entrypoints": []
 }

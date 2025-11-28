@@ -170,26 +170,57 @@ class DocumentController extends AbstractController
 	#[Route('/document/{id}/view', name: 'app_document_view')]
 	public function view(Document $document): Response
 	{
-		// URL publique (absolue) vers le fichier en inline (utilisé pour l'iframe/embed)
-		$fileUrl = $this->generateUrl('app_document_file', ['id' => $document->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-		$downloadUrl = $this->generateUrl('app_document_download', ['id' => $document->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+		// URLs publiques
+		$fileUrl = $this->generateUrl(
+			'app_document_file',
+			['id' => $document->getId()],
+			UrlGeneratorInterface::ABSOLUTE_URL
+		);
 
-		// Type simple (image / pdf / office) via mimeType
-		$mime = $document->getMimeType();
-		$isImage = str_starts_with((string) $mime, 'image/');
-		$isPdf = (string) $mime === 'application/pdf';
-		$extension = pathinfo($document->getFilename(), PATHINFO_EXTENSION);
-		$officeExt = in_array(strtolower($extension), ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
+		$downloadUrl = $this->generateUrl(
+			'app_document_download',
+			['id' => $document->getId()],
+			UrlGeneratorInterface::ABSOLUTE_URL
+		);
+
+		// Types détectés
+		$mime = (string) $document->getMimeType();
+		$extension = strtolower(pathinfo($document->getFilename(), PATHINFO_EXTENSION));
+
+		$isImage  = str_starts_with($mime, 'image/');
+		$isPdf    = $mime === 'application/pdf';
+		$isOffice = in_array($extension, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
+		$isTxt    = in_array($extension, ['txt', 'md', 'json', 'csv', 'log']);
+
+		// Lecture TXT
+		$txtContent = null;
+		if ($isTxt) {
+			// Construction du chemin physique EXACT
+			$absolutePath = $_SERVER['DOCUMENT_ROOT']
+				. '/uploads/documents/'
+				. $document->getId()
+				. '/'
+				. $document->getFilename();
+
+			if (is_readable($absolutePath)) {
+				$txtContent = file_get_contents($absolutePath);
+			}
+		}
 
 		return $this->render('document/view.html.twig', [
-			'document' => $document,
-			'fileUrl' => $fileUrl,
-			'downloadUrl' => $downloadUrl,
-			'isImage' => $isImage,
-			'isPdf' => $isPdf,
-			'isOffice' => $officeExt,
+			'document'     => $document,
+			'fileUrl'      => $fileUrl,
+			'downloadUrl'  => $downloadUrl,
+			'isImage'      => $isImage,
+			'isPdf'        => $isPdf,
+			'isOffice'     => $isOffice,
+			'isTxt'        => $isTxt,
+			'txtContent'   => $txtContent,
 		]);
 	}
+
+
+
 
 	#[Route('/document/{id}/delete', name: 'app_document_delete', methods: ['POST'])]
 	public function delete(Document $document): JsonResponse

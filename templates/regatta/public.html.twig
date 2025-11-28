@@ -94,7 +94,6 @@
 				</div>
 			</div>
 
-			<div class="flex items-center justify-between mb-4">
 				<div class="flex items-center gap-3">
 
 					<div>
@@ -113,39 +112,27 @@
 			<div class="card bg-base-100 shadow-sm">
 				<div class="card-body p-4">
 					<h3 class="text-sm font-semibold mb-3">🔍 Filtrer par catégorie</h3>
-					<div id="categoryFilters" class="flex flex-wrap gap-2">
+					<div id="categoryFilters" class="flex flex-wrap gap-2" data-controller="filters">
 						{% for category in documentsByCategory|keys %}
 							<label class="cursor-pointer">
-								<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" onchange="filterCategories()">
+								<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" data-action="change->filters#filter">
 								<span class="text-sm">{{ category }}</span>
 							</label>
 						{% endfor %}
 					</div>
 				</div>
 			</div>
-		</div>
-
-		<!-- Documents by Category -->
-		<div class="mb-4 flex justify-between items-center">
-			<h2 class="text-2xl font-bold">
-				Documents
-				<span class="badge badge-primary">{{ documents|length }}</span>
-			</h2>
-		</div>
-
-		{% if documentsByCategory|length > 0 %}
-			{% for sectionTitle, categoriesInSection in categorySections %}
-				<div class="section-group mb-10">
-					<h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
-						{% if sectionTitle == 'Documents de course' %}
-							🏆
-							{{ sectionTitle }}
-						{% else %}
-							📋
-							{{ sectionTitle }}
-						{% endif %}
-					</h2>
-
+							{# Category filter is now handled by Stimulus controller 'filters' to avoid inline event handlers #}
+					{% for sectionTitle, categoriesInSection in categorySections %}
+						<div class="section-group mb-10">
+							<h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+								{% if sectionTitle == 'Documents de course' %}
+									🏆
+								{% else %}
+									📋
+								{% endif %}
+								{{ sectionTitle }}
+							</h2>
 					{% for category, categoryDocuments in categoriesInSection %}
 						<!-- Category Section -->
 						<div class="mb-8 category-section">
@@ -214,7 +201,6 @@
 							</div>
 						</div>
 					{% endfor %}
-				{% endfor %}
 			{% else %}
 				<div class="text-center py-16">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewbox="0 0 24 24" stroke="currentColor">
@@ -223,7 +209,7 @@
 					<p class="text-xl text-base-content/50">Aucun document disponible</p>
 					<p class="text-sm text-base-content/40 mt-2">Les documents seront affichés ici quand ils seront ajoutés</p>
 				</div>
-			{% endif %}
+			{% endfor %}
 		</div>
 
 		<!-- Toast Container -->

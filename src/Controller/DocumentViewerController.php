@@ -7,11 +7,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\DocumentRepository;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class DocumentViewerController extends AbstractController
 {
 	#[Route('/document/{id}/viewer', name: 'app_document_viewer')]
-	public function viewer(Request $request, DocumentRepository $documents, int $id): Response
+	public function viewer(Request $request, DocumentRepository $documents, int $id, UrlGeneratorInterface $urlGenerator): Response
 	{
 		$document = $documents->find($id);
 		if (! $document) {
@@ -24,6 +25,10 @@ class DocumentViewerController extends AbstractController
 			// Fallback: if the document entity exposes a public URL method (adjust as needed)
 			if (method_exists($document, 'getPublicUrl')) {
 				$file = $document->getPublicUrl();
+			}
+			// If still missing, try to generate a direct link to the file route
+			if (! $file) {
+				$file = $urlGenerator->generate('app_document_file', ['id' => $document->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 			}
 		}
 
