@@ -2,26 +2,7 @@
 
 {% block title %}
 	{{ regatta.name }}
-	- Doc2Sail
-{% endblock %}
 
-{% block stylesheets %}
-	<!-- Manifest dynamique pour cette regatta -->
-	<link rel="manifest" href="{{ path('app_manifest_regatta', {token: regatta.accessToken}) }}">
-	{{ encore_entry_link_tags('app') }}
-{% endblock %}
-
-{% block body %}
-	{% include '_navbar.html.twig' %}
-
-	<div
-		class="container mx-auto px-4 py-8 max-w-7xl" data-controller="offline notification" data-offline-regatta-token-value="{{ regatta.accessToken }}" data-offline-documents-value="{{ documentsForOffline|json_encode|e('html_attr') }}" data-notification-topic-value="/regatta/{{ regatta.accessToken }}/documents" data-notification-mercure-url-value="http://localhost:3000/.well-known/mercure">
-
-		<!-- Banner de notification pour nouveaux documents -->
-		<div id="notificationBanner" class="alert alert-success mb-4 hidden" data-notification-target="banner">
-			<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-			</svg>
 			<div class="flex-1">
 				<h3 class="font-bold">📄 Nouveau document disponible !</h3>
 				<div class="text-xs mt-1" data-notification-target="message">
@@ -108,14 +89,15 @@
 				</div>
 			</div>
 
-			<!-- Category Filter -->
+			<!-- Category Filter (wrapped by document controller for filter behavior) -->
+			<div data-controller="document">
 			<div class="card bg-base-100 shadow-sm">
 				<div class="card-body p-4">
 					<h3 class="text-sm font-semibold mb-3">🔍 Filtrer par catégorie</h3>
-					<div id="categoryFilters" class="flex flex-wrap gap-2" data-controller="filters">
+					<div id="categoryFilters" class="flex flex-wrap gap-2">
 						{% for category in documentsByCategory|keys %}
 							<label class="cursor-pointer">
-								<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" data-action="change->filters#filter">
+								<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" data-action="change->document#filterCategories" data-document-target="categoryCheckbox">
 								<span class="text-sm">{{ category }}</span>
 							</label>
 						{% endfor %}
@@ -135,7 +117,7 @@
 							</h2>
 					{% for category, categoryDocuments in categoriesInSection %}
 						<!-- Category Section -->
-						<div class="mb-8 category-section">
+						<div class="mb-8 category-section" data-document-target="categorySection" data-category="{{ category }}">
 							<div class="flex items-center gap-2 mb-3">
 								<h3 class="text-xl font-semibold">
 									{{ category }}
@@ -198,6 +180,7 @@
 										</div>
 									</div>
 								{% endfor %}
+								</div> {# end data-controller=\"document\" wrapper #}
 							</div>
 						</div>
 					{% endfor %}
