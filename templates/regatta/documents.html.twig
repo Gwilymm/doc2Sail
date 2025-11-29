@@ -141,17 +141,24 @@
 		</div>
 		<div class="card bg-base-100 shadow-sm">
 			<div class="card-body p-4">
-				<h3 class="text-sm font-semibold mb-3">{{ 'regatta.documents.filter.title'|trans }}</h3>
-				<div id="categoryFilters" class="flex flex-wrap gap-2" >
+				<h3 class="text-sm font-semibold mb-3">
+					{{ 'regatta.documents.filter.title'|trans }}
+				</h3>
+
+				<div id="categoryFilters" class="flex flex-wrap gap-2">
 					{% for category in documentsByCategory|keys %}
-						<label class="cursor-pointer">
-							<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" data-action="change->document#filterCategories" data-document-target="categoryCheckbox">
+						<label
+							class="cursor-pointer flex items-center gap-1" data-action="click->document#filterCategories">
+							<!-- INPUT désactivé pour les interactions directes → DaisyUI-friendly -->
+							<input type="checkbox" class="checkbox checkbox-primary checkbox-sm pointer-events-none" data-document-target="categoryCheckbox" data-category="{{ category }}">
+
 							<span class="text-sm">{{ category }}</span>
 						</label>
 					{% endfor %}
 				</div>
 			</div>
 		</div>
+
 
 		<div id="documentsGrid" class="space-y-8">
 			{% for sectionTitle, categoriesInSection in categorySections %}
