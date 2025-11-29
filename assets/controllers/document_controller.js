@@ -21,26 +21,7 @@ export default class extends Controller {
 			console.log('Regatta ID:', this.regattaIdValue);
 		}
 
-		toggleFullscreen(event) {
-			event?.preventDefault();
-			try {
-				const el = document.getElementById('viewerFrame');
-				const fileUrl = event?.currentTarget?.dataset?.documentFileUrlValue || this.fileUrlValue || null;
-				if (el && el.requestFullscreen) {
-					el.requestFullscreen();
-					return;
-				}
-				if (el && el.webkitRequestFullscreen) {
-					el.webkitRequestFullscreen();
-					return;
-				}
-				if (fileUrl) {
-					window.open(fileUrl, '_blank');
-				}
-			} catch (e) {
-				console.error('Error toggling fullscreen', e);
-			}
-		}
+		// toggleFullscreen moved to class method accessible by Stimulus actions
 
 		this.selectedFile = null;
 		this.setupDropZone();
@@ -50,6 +31,27 @@ export default class extends Controller {
 		this.setupInstallButton();
 		this.toggleCategorySections();
 		this.filterCategories(); // Initialiser le filtre au chargement
+	}
+
+	toggleFullscreen(event) {
+		event?.preventDefault();
+		try {
+			const el = document.getElementById('viewerFrame');
+			const fileUrl = event?.currentTarget?.dataset?.documentFileUrlValue || this.fileUrlValue || null;
+			if (el && el.requestFullscreen) {
+				el.requestFullscreen();
+				return;
+			}
+			if (el && el.webkitRequestFullscreen) {
+				el.webkitRequestFullscreen();
+				return;
+			}
+			if (fileUrl) {
+				window.open(fileUrl, '_blank');
+			}
+		} catch (e) {
+			console.error('Error toggling fullscreen', e);
+		}
 	}
 
 	setupDropZone() {
@@ -423,31 +425,35 @@ export default class extends Controller {
 
 	/**
 	 * Filtre les sections de documents par catégorie
-	 * Affiche uniquement les catégories cochées, ou tout masquer si aucune n'est cochée
+	 * Affiche seulement les sections dont la catégorie est cochée.
+	 * Si aucune catégorie n'est cochée, toutes les sections sont affichées.
 	 */
 	filterCategories() {
-		if (!this.hasCategoryCheckboxTarget) {
+		// Ensure we have the expected targets
+		if (!this.hasCategoryCheckboxTarget || !this.hasCategorySectionTarget) {
 			return;
 		}
 
-		// Récupérer toutes les checkboxes cochées
 		const selectedCategories = this.categoryCheckboxTargets
 			.filter(cb => cb.checked)
 			.map(cb => cb.value);
 
-		// Si aucune checkbox n'est cochée, tout masquer
 		const showAll = selectedCategories.length === 0;
 
-		// Parcourir toutes les sections et afficher/masquer selon le filtre
+		// We prefer toggling the `.hidden` Tailwind/DaisyUI class so other code that
+		// relies on classes (toggleCategorySections) can still work.
 		this.categorySectionTargets.forEach(section => {
-			const category = section.dataset.category;
+			const category = (section.dataset.category || '').toString();
 
-			if (showAll) {
-				section.style.display = 'block';
+			if (showAll || selectedCategories.includes(category)) {
+				section.classList.remove('hidden');
 			} else {
-				section.style.display = selectedCategories.includes(category) ? 'block' : 'none';
+				section.classList.add('hidden');
 			}
 		});
+
+		// Update counts and empty state after filtering
+		this.toggleCategorySections();
 	}
 
 	/**
