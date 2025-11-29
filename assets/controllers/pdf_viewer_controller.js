@@ -14,16 +14,18 @@ export default class extends Controller {
 	static values = { url: String };
 
 	async connect() {
-		// Dynamic import of the runtime module from /pdfjs/pdf.js (public path)
+		// Dynamic import of the runtime module from the public pdfjs build
 		try {
-			this.pdfjsLib = await import('/pdfjs/pdf.js');
+			// Import the bundled vendor build from assets so webpack can resolve it
+			const mod = await import('../vendor/pdfjs-dist/pdfjs-dist.index.js');
+			this.pdfjsLib = mod.default || mod;
 		} catch (e) {
 			console.error('Failed to load PDF.js runtime', e);
 			this._showError(e);
 			return;
 		}
 
-		this.pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.js';
+		this.pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/build/pdf.worker.mjs';
 
 		this.canvas = this.canvasTarget;
 		this.ctx = this.canvas.getContext('2d');

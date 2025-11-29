@@ -16,10 +16,15 @@ export default class extends Controller {
 	};
 
 	connect() {
-		console.log('Document controller connected');
+		console.log('Document controller connected et mes couilles');
 		if (this.hasRegattaIdValue) {
 			console.log('Regatta ID:', this.regattaIdValue);
 		}
+		console.log("checkboxTargets:", this.categoryCheckboxTargets.length);
+		console.log("sectionTargets:", this.categorySectionTargets.length);
+		console.log("hasCategorySectionTarget:", this.hasCategorySectionTarget);
+		console.log("hasCategoryCheckboxTarget:", this.hasCategoryCheckboxTarget);
+
 
 		// toggleFullscreen moved to class method accessible by Stimulus actions
 
@@ -429,32 +434,24 @@ export default class extends Controller {
 	 * Si aucune catégorie n'est cochée, toutes les sections sont affichées.
 	 */
 	filterCategories() {
-		// Ensure we have the expected targets
-		if (!this.hasCategoryCheckboxTarget || !this.hasCategorySectionTarget) {
-			return;
-		}
-
-		const selectedCategories = this.categoryCheckboxTargets
+		const selected = this.categoryCheckboxTargets
 			.filter(cb => cb.checked)
-			.map(cb => cb.value);
+			.map(cb => cb.dataset.category);
 
-		const showAll = selectedCategories.length === 0;
+		console.log("Selected:", selected);
 
-		// We prefer toggling the `.hidden` Tailwind/DaisyUI class so other code that
-		// relies on classes (toggleCategorySections) can still work.
+		const showAll = selected.length === 0;
+
 		this.categorySectionTargets.forEach(section => {
-			const category = (section.dataset.category || '').toString();
+			const category = section.dataset.category;
+			console.log("Section:", category);
 
-			if (showAll || selectedCategories.includes(category)) {
-				section.classList.remove('hidden');
-			} else {
-				section.classList.add('hidden');
-			}
+			const shouldShow = showAll || selected.includes(category);
+			section.classList.toggle('hidden', !shouldShow);
 		});
-
-		// Update counts and empty state after filtering
-		this.toggleCategorySections();
 	}
+
+
 
 	/**
 	 * Charge et affiche la modal QR Code pour partager la régate
