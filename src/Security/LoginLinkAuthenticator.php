@@ -60,7 +60,7 @@ class LoginLinkAuthenticator extends AbstractAuthenticator implements Authentica
         $request->getSession()->getFlashBag()->add('error', 'Lien expiré ou invalide. Veuillez redemander un lien.');
         return new RedirectResponse($this->urlGenerator->generate('app_login'));
     }
-    public function start(Request $request, AuthenticationException $authException = null): RedirectResponse
+    public function start(Request $request, ?AuthenticationException $authException = null): RedirectResponse
 {
     return new RedirectResponse($this->urlGenerator->generate('app_login'));
 }
