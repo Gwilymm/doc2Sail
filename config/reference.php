@@ -2128,6 +2128,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     postcss_config_file?: scalar|Param|null, // Path to PostCSS config file which is passed to the Tailwind CLI // Default: null
  *     strict_mode?: bool|Param|null, // When enabled, an exception will be thrown if there are no built assets (default: false in `test` env, true otherwise) // Default: null
  * }
+ * @psalm-type UxNativeConfig = array{
+ *     output_dir?: scalar|Param|null, // Directory where configuration JSON files are written. Defaults to %kernel.project_dir%/public. // Default: null
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -2150,6 +2153,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     gesdinet_jwt_refresh_token?: GesdinetJwtRefreshTokenConfig,
  *     nelmio_security?: NelmioSecurityConfig,
  *     symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *     ux_native?: UxNativeConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -2175,6 +2179,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         gesdinet_jwt_refresh_token?: GesdinetJwtRefreshTokenConfig,
  *         nelmio_security?: NelmioSecurityConfig,
  *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         ux_native?: UxNativeConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -2198,6 +2203,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         gesdinet_jwt_refresh_token?: GesdinetJwtRefreshTokenConfig,
  *         nelmio_security?: NelmioSecurityConfig,
  *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         ux_native?: UxNativeConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -2222,6 +2228,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         gesdinet_jwt_refresh_token?: GesdinetJwtRefreshTokenConfig,
  *         nelmio_security?: NelmioSecurityConfig,
  *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         ux_native?: UxNativeConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

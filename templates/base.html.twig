@@ -104,13 +104,16 @@ document.documentElement.setAttribute( 'data-theme', theme );
 		<main class="flex-1"> {% block body %}{% endblock %}
 			</main>
 
-			{# Footer partial included on every page (sticky bottom via flex layout) #}
-			{% include 'partials/footer.html.twig' %}
+			{% if not ux_is_native() %}
+				{# Footer partial included on every page (sticky bottom via flex layout) #}
+				{% include 'partials/footer.html.twig' %}
+			{% endif %}
 
-			<!-- Service Worker Registration -->
-			<script nonce="{{ csp_nonce('script') }}">
+			{% if not ux_is_native() %}
+				<!-- Service Worker Registration -->
+				<script nonce="{{ csp_nonce('script') }}">
 
-				if ( 'serviceWorker' in navigator )
+					if ( 'serviceWorker' in navigator )
 {
 
 
@@ -193,6 +196,7 @@ console.log( '❌ Service Worker non supporté par ce navigateur' );
 
 
 }
-			</script>
+				</script>
+			{% endif %}
 		</body>
 	</html>

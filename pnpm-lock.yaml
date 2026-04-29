@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@hotwired/hotwire-native-bridge':
+        specifier: ^1.2.2
+        version: 1.2.2(@hotwired/stimulus@3.2.2)
       '@tailwindcss/postcss':
         specifier: ^4.1.14
         version: 4.1.14
@@ -567,6 +570,11 @@ packages:
   '@discoveryjs/json-ext@0.5.7':
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
+
+  '@hotwired/hotwire-native-bridge@1.2.2':
+    resolution: {integrity: sha512-P74kFtXjpY1wV/YneZBOrWJmddLGiKBRj73JB1UgUEOfsM69xpGJbwY0sotFyJgevs2YrBgP9yDNw/uEica2VQ==}
+    peerDependencies:
+      '@hotwired/stimulus': ^3.2.2
 
   '@hotwired/stimulus-webpack-helpers@1.0.1':
     resolution: {integrity: sha512-wa/zupVG0eWxRYJjC1IiPBdt3Lruv0RqGN+/DTMmUWUyMAEB27KXmVY6a8YpUVTM7QwVuaLNGW4EqDgrS2upXQ==}
@@ -2812,6 +2820,10 @@ snapshots:
       '@babel/helper-validator-identifier': 7.27.1
 
   '@discoveryjs/json-ext@0.5.7': {}
+
+  '@hotwired/hotwire-native-bridge@1.2.2(@hotwired/stimulus@3.2.2)':
+    dependencies:
+      '@hotwired/stimulus': 3.2.2
 
   '@hotwired/stimulus-webpack-helpers@1.0.1(@hotwired/stimulus@3.2.2)':
     dependencies:
