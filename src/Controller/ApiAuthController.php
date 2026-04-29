@@ -16,6 +16,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Psr\Log\LoggerInterface;
 
 class ApiAuthController extends AbstractController
 {
@@ -27,7 +28,8 @@ class ApiAuthController extends AbstractController
 		private MailerInterface $mailer,
 		private ParameterBagInterface $params,
 		#[Autowire(service: 'limiter.magic_link_request_by_email')]
-		private RateLimiterFactoryInterface $magicLinkLimiter
+		private RateLimiterFactoryInterface $magicLinkLimiter,
+		private LoggerInterface $logger
 	) {}
 
 	/**
@@ -175,6 +177,12 @@ class ApiAuthController extends AbstractController
 		try {
 			$this->mailer->send($emailMessage);
 		} catch (\Throwable $e) {
+			$this->logger->error('Mobile magic code email failed to send', [
+				'exception' => $e,
+				'recipient_domain' => substr(strrchr($email, '@') ?: '', 1),
+				'mailer_from' => $this->params->get('mailer_from'),
+			]);
+
 			// En dev, afficher le code dans les logs
 			if ($this->getParameter('kernel.environment') === 'dev') {
 				$this->container->get('logger')->info('Magic link code: ' . $magicLink->getPlainShortCode());
