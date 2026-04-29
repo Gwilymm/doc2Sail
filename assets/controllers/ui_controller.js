@@ -10,6 +10,7 @@ export default class extends Controller {
 		this._closeButtons.forEach(btn => {
 			btn.addEventListener('click', this._closeHandler);
 		});
+		this._openCreateDialogFromQuery();
 	}
 
 	disconnect() {
@@ -31,5 +32,19 @@ export default class extends Controller {
 		const dialog = document.querySelector(target);
 		if (!dialog) return;
 		if (typeof dialog.close === 'function') dialog.close();
+	}
+
+	_openCreateDialogFromQuery() {
+		const params = new URLSearchParams(window.location.search);
+		if (params.get('create') !== '1') return;
+
+		const dialog = document.querySelector('#createRegattaModal');
+		if (!dialog || typeof dialog.showModal !== 'function') return;
+
+		dialog.showModal();
+		params.delete('create');
+		const query = params.toString();
+		const nextUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+		window.history.replaceState({}, '', nextUrl);
 	}
 }
