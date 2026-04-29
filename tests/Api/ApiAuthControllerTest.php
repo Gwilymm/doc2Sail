@@ -20,6 +20,7 @@ use Symfony\Component\RateLimiter\Policy\SlidingWindowLimiter;
 use Symfony\Component\RateLimiter\RateLimit;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Psr\Log\LoggerInterface;
 
 class ApiAuthControllerTest extends TestCase
 {
@@ -49,7 +50,8 @@ class ApiAuthControllerTest extends TestCase
 		?JWTTokenManagerInterface $jwtManager = null,
 		?MailerInterface $mailer = null,
 		?ParameterBagInterface $params = null,
-		?RateLimiterFactoryInterface $rateLimiter = null
+		?RateLimiterFactoryInterface $rateLimiter = null,
+		?LoggerInterface $logger = null
 	): ApiAuthController {
 		$controller = new ApiAuthController(
 			$em ?? $this->createMock(EntityManagerInterface::class),
@@ -58,7 +60,8 @@ class ApiAuthControllerTest extends TestCase
 			$jwtManager ?? $this->createMock(JWTTokenManagerInterface::class),
 			$mailer ?? $this->createMock(MailerInterface::class),
 			$params ?? $this->createMock(ParameterBagInterface::class),
-			$rateLimiter ?? $this->createAcceptingRateLimiter()
+			$rateLimiter ?? $this->createAcceptingRateLimiter(),
+			$logger ?? $this->createMock(LoggerInterface::class)
 		);
 
 		// Injecter un container avec Twig pour renderView()

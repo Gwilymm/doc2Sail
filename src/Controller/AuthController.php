@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
+use Psr\Log\LoggerInterface;
 
 
 class AuthController extends AbstractController
@@ -25,7 +26,8 @@ class AuthController extends AbstractController
         private MailerInterface $mailer,
         private ParameterBagInterface $params,
         #[Autowire(service: 'limiter.magic_link_request_by_email')]
-        private RateLimiterFactoryInterface $magicLinkLimiter
+        private RateLimiterFactoryInterface $magicLinkLimiter,
+        private LoggerInterface $logger
     ) {}
 
     #[Route('/login', name: 'app_login')]
@@ -104,6 +106,12 @@ if (!$limit->isAccepted()) {
             // Message neutre (pas d’info de présence compte) — conforme anti-énumération
             $this->addFlash('success', '📧 Si un compte existe, un lien a été envoyé. Vérifiez votre boîte mail.');
         } catch (\Throwable $e) {
+            $this->logger->error('Magic login link email failed to send', [
+                'exception' => $e,
+                'recipient_domain' => substr(strrchr($email, '@') ?: '', 1),
+                'mailer_from' => $this->params->get('mailer_from'),
+            ]);
+
             // En dev, on peut exposer le lien pour tests
             $this->addFlash('info', sprintf(
                 '⚠️ Email non configuré (dev). Utilisez ce lien : <a href="%s" class="link link-primary" rel="nofollow noopener">%s</a>',
