@@ -29,4 +29,15 @@
     array (
     ),
   ),
+  '@hotwired/hotwire-native-bridge' => 
+  array (
+    'version' => '1.2.2',
+    'dependencies' => 
+    array (
+      0 => '@hotwired/stimulus',
+    ),
+    'extraFiles' => 
+    array (
+    ),
+  ),
 );
