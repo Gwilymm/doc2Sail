@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:1-php8.3
+FROM dunglas/frankenphp:1-php8.4
 
 # Préparer l'environnement pour apt non interactif
 ENV DEBIAN_FRONTEND=noninteractive

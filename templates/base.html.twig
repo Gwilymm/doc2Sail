@@ -1,6 +1,6 @@
 {% trans_default_domain 'base' %}
 <!DOCTYPE html>
-<html lang="{{ app.request.locale }}">
+<html lang="{{ app.request.locale }}" data-controller="theme">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,8 +30,8 @@
 		name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 		{# =========================
-												   🔗 META-TAGS POUR LE PARTAGE
-												   ========================= #}
+																								   🔗 META-TAGS POUR LE PARTAGE
+																								   ========================= #}
 		<meta property="og:type" content="website">
 		<meta property="og:locale" content="fr_FR">
 		<meta property="og:url" content="{{ app.request.uri }}">
@@ -48,11 +48,13 @@
 		{% endblock %}
 
 		{% block javascripts %}
+			{% block importmap %}{{ importmap('app', {'nonce': csp_nonce('script')}) }}{% endblock %}
 			{{ encore_entry_script_tags('app') }}
 		{% endblock %}
 
 		<!-- Theme Controller Script -->
-		<script>
+		<script nonce="{{ csp_nonce('script') }}">
+
 			( function ()
 {
 
@@ -69,46 +71,53 @@ document.documentElement.setAttribute( 'data-theme', theme );
 
 } )();
 		</script>
-		<script type="application/ld+json">
+		<script type="application/ld+json" nonce="{{ csp_nonce('script') }}">
 			{
-				"@context": "https://schema.org",
-				"@type": "SoftwareApplication",
-				"name": "Doc2Sail",
-				"applicationCategory": "WebApplication",
-				"operatingSystem": "Any",
-				"description": "Application PWA française pour gérer et partager vos documents de régate de voile.",
-				"url": "https://doc2sail.com/",
-				"image": "https://doc2sail.com/icon-192.png",
-				"author": {
-				"@type": "Organization",
-				"name": "Doc2Sail"
-				}
-			}
+																						"@context": "https://schema.org",
+																						"@type": "SoftwareApplication",
+																						"name": "Doc2Sail",
+																						"applicationCategory": "WebApplication",
+																						"operatingSystem": "Any",
+																						"description": "Application PWA française pour gérer et partager vos documents de régate de voile.",
+																						"url": "https://doc2sail.com/",
+																						"image": "https://doc2sail.com/icon-192.png",
+																						"author": {
+																						"@type": "Organization",
+																						"name": "Doc2Sail"
+																						}
+																					}
 		</script>
-		<script type="application/ld+json">
+		<script type="application/ld+json" nonce="{{ csp_nonce('script') }}">
 			{
-			"@context": "https://schema.org",
-			"@type": "Organization",
-			"name": "Doc2Sail",
-			"url": "https://doc2sail.com",
-			"logo": "https://doc2sail.com/favicon.png"
-			}
+																					"@context": "https://schema.org",
+																					"@type": "Organization",
+																					"name": "Doc2Sail",
+																					"url": "https://doc2sail.com",
+																					"logo": "https://doc2sail.com/favicon.png"
+																					}
 		</script>
 
 
 	</head>
 
-	<body class="bg-base-200 min-h-screen flex flex-col">
-		<main class="flex-1">
-			{% block body %}{% endblock %}
-		</main>
+	<body class="bg-base-200 min-h-screen flex flex-col {% if ux_is_native() %}pb-20{% endif %}" data-controller="ui">
+		<main class="flex-1"> {% block body %}{% endblock %}
+			</main>
 
-		{# Footer partial included on every page (sticky bottom via flex layout) #}
-		{% include 'partials/footer.html.twig' %}
+			{% if ux_is_native() %}
+				{% include 'partials/native_bottom_nav.html.twig' %}
+			{% endif %}
 
-		<!-- Service Worker Registration -->
-		<script>
-			if ( 'serviceWorker' in navigator )
+			{% if not ux_is_native() %}
+				{# Footer partial included on every page (sticky bottom via flex layout) #}
+				{% include 'partials/footer.html.twig' %}
+			{% endif %}
+
+			{% if not ux_is_native() %}
+				<!-- Service Worker Registration -->
+				<script nonce="{{ csp_nonce('script') }}">
+
+					if ( 'serviceWorker' in navigator )
 {
 
 
@@ -191,6 +200,7 @@ console.log( '❌ Service Worker non supporté par ce navigateur' );
 
 
 }
-		</script>
-	</body>
-</html>
+				</script>
+			{% endif %}
+		</body>
+	</html>

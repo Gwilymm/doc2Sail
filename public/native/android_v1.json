@@ -1,0 +1,72 @@
+{
+    "settings": {
+        "platform": "android",
+        "app_name": "Doc2Sail",
+        "use_local_db": false
+    },
+    "rules": [
+        {
+            "patterns": [
+                "/regatta$",
+                "/regatta/.*",
+                "/(en|fr)/regatta$",
+                "/(en|fr)/regatta/.*",
+                "/r/.*",
+                "/(en|fr)/r/.*"
+            ],
+            "properties": {
+                "context": "default",
+                "pull_to_refresh_enabled": true
+            }
+        },
+        {
+            "patterns": [
+                "/login",
+                "/login_check",
+                "/logout",
+                "/auth/.*",
+                "/(en|fr)/login",
+                "/(en|fr)/login_check",
+                "/(en|fr)/logout",
+                "/(en|fr)/auth/.*"
+            ],
+            "properties": {
+                "context": "default",
+                "pull_to_refresh_enabled": false
+            }
+        },
+        {
+            "patterns": [
+                "/document/.*/view",
+                "/document/.*/viewer",
+                "/(en|fr)/document/.*/view",
+                "/(en|fr)/document/.*/viewer"
+            ],
+            "properties": {
+                "context": "modal",
+                "pull_to_refresh_enabled": false
+            }
+        },
+        {
+            "patterns": [
+                "/document/.*/download",
+                "/document/.*/file",
+                "/(en|fr)/document/.*/download",
+                "/(en|fr)/document/.*/file"
+            ],
+            "properties": {
+                "context": "external",
+                "pull_to_refresh_enabled": false
+            }
+        },
+        {
+            "patterns": [
+                ".*"
+            ],
+            "properties": {
+                "context": "default",
+                "pull_to_refresh_enabled": false
+            }
+        }
+    ]
+}

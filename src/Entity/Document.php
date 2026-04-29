@@ -250,4 +250,12 @@ class Document
 
 		return $this;
 	}
+	public function getAbsolutePath(): string
+	{
+		return $_SERVER['DOCUMENT_ROOT']
+			. '/uploads/regattas/'
+			. $this->getRegatta()->getId()
+			. '/'
+			. $this->getFilename();
+	}
 }

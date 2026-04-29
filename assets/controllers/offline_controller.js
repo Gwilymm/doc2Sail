@@ -19,11 +19,20 @@ export default class extends Controller {
 			return;
 		}
 
+		// Register public service worker (if applicable)
+		this.registerServiceWorker();
+
 		// Attendre que le Service Worker soit prêt
 		this.waitForServiceWorker();
 
 		// Écouter les messages du Service Worker
 		this.listenToServiceWorker();
+
+		// Setup install button (PWA)
+		this.setupInstallButton();
+
+		// Category filters: if present, initialize filters
+		this.initCategoryFilters();
 	}
 
 	/**
@@ -45,6 +54,26 @@ export default class extends Controller {
 			console.error('❌ Erreur attente Service Worker:', error);
 		}
 	}
+
+	async registerServiceWorker() {
+		try {
+			if (!('serviceWorker' in navigator)) return;
+			// Identify public page scope by URL path (/r/)
+			const isPublicPage = window.location.pathname.startsWith('/r/');
+			if (isPublicPage) {
+				// Register public SW with /r/ scope
+				await navigator.serviceWorker.register('/sw-public.js', { scope: '/r/' });
+				console.log('✅ Service Worker Public enregistré');
+				return;
+			}
+			// Otherwise, register default sw
+			await navigator.serviceWorker.register('/sw.js');
+			console.log('✅ Service Worker enregistré');
+		} catch (err) {
+			console.warn('❌ Erreur enregistrement SW:', err);
+		}
+	}
+
 
 	/**
 	 * Vérifier si les documents sont déjà en cache
@@ -240,6 +269,59 @@ export default class extends Controller {
 			text.textContent = `${current} / ${total} documents`;
 		}
 	}
+
+	/**
+	 * Setup the PWA install button
+	 */
+
+	setupInstallButton() {
+		let deferredPrompt;
+		const installBtn = document.getElementById('installBtn');
+		if (!installBtn) return;
+
+		window.addEventListener('beforeinstallprompt', (event) => {
+			event.preventDefault();
+			deferredPrompt = event;
+			installBtn.classList.remove('hidden');
+		});
+
+		installBtn.addEventListener('click', async () => {
+			if (!deferredPrompt) return;
+			deferredPrompt.prompt();
+			const { outcome } = await deferredPrompt.userChoice;
+			deferredPrompt = null;
+			installBtn.classList.add('hidden');
+		});
+
+		window.addEventListener('appinstalled', () => {
+			this.showToast('App installée avec succès!', 'success');
+			installBtn.classList.add('hidden');
+		});
+	}
+
+	initCategoryFilters() {
+		const checkboxes = document.querySelectorAll('#categoryFilters input[type="checkbox"]');
+		if (!checkboxes || !checkboxes.length) return;
+		checkboxes.forEach(cb => cb.addEventListener('change', () => this.filterCategories()));
+		// Initial filter
+		document.addEventListener('DOMContentLoaded', () => this.filterCategories());
+	}
+
+	filterCategories() {
+		const checkboxes = document.querySelectorAll('#categoryFilters input[type="checkbox"]');
+		const selectedCategories = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+		const showAll = selectedCategories.length === 0;
+
+		document.querySelectorAll('.category-section').forEach(section => {
+			const category = section.querySelector('h3')?.textContent?.trim() ?? section.dataset.category;
+			if (showAll) {
+				section.style.display = 'block';
+			} else {
+				section.style.display = selectedCategories.includes(category) ? 'block' : 'none';
+			}
+		});
+	}
+
 
 	/**
 	 * Afficher un toast

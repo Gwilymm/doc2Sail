@@ -4,109 +4,118 @@
 {% endblock %}
 
 {% block body %}
-	<div class="container mx-auto px-4 py-8 max-w-4xl">
-		<h1 class="text-3xl font-bold mb-6">🔑 Vos tokens API</h1>
+<div class="container mx-auto px-4 py-8 max-w-4xl" data-controller="auth">
+	<h1 class="text-3xl font-bold mb-6">🔑 Vos tokens API</h1>
 
-		<div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-			<p class="text-blue-700">
-				Utilisez ces tokens pour accéder à l'API. Le JWT token expire après 1 heure, 
-				            utilisez le refresh token pour en obtenir un nouveau.
-			</p>
+	<div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+		<p class="text-blue-700">
+			Utilisez ces tokens pour accéder à l'API. Le JWT token expire après 1 heure, 
+																			            utilisez le refresh token pour en obtenir un nouveau.
+		</p>
+	</div>
+
+	<div
+		class="space-y-6">
+		{# JWT Token #}
+		<div class="bg-white shadow rounded-lg p-6">
+			<h2 class="text-xl font-semibold mb-3 flex items-center">
+				<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+				</svg>
+				JWT Token
+			</h2>
+			<p class="text-sm text-gray-600 mb-2">Expire dans 1 heure</p>
+			<div class="relative">
+				<input type="text" id="jwt-token" readonly value="{{ token }}" class="w-full p-3 pr-24 bg-gray-50 border border-gray-300 rounded font-mono text-sm break-all">
+				<button data-action="click->auth#copyToken" data-target-id="jwt-token" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+					Copier
+				</button>
+			</div>
 		</div>
 
-		<div
-			class="space-y-6">
-			{# JWT Token #}
-			<div class="bg-white shadow rounded-lg p-6">
-				<h2 class="text-xl font-semibold mb-3 flex items-center">
-					<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-					</svg>
-					JWT Token
-				</h2>
-				<p class="text-sm text-gray-600 mb-2">Expire dans 1 heure</p>
-				<div class="relative">
-					<input type="text" id="jwt-token" readonly value="{{ token }}" class="w-full p-3 pr-24 bg-gray-50 border border-gray-300 rounded font-mono text-sm break-all">
-					<button onclick="copyToken('jwt-token')" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
-						Copier
-					</button>
-				</div>
+		{# Refresh Token #}
+		<div class="bg-white shadow rounded-lg p-6">
+			<h2 class="text-xl font-semibold mb-3 flex items-center">
+				<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+				</svg>
+				Refresh Token
+			</h2>
+			<p class="text-sm text-gray-600 mb-2">Expire dans 30 jours</p>
+			<div class="relative">
+				<input type="text" id="refresh-token" readonly value="{{ refresh_token }}" class="w-full p-3 pr-24 bg-gray-50 border border-gray-300 rounded font-mono text-sm break-all">
+				<button data-action="click->auth#copyToken" data-target-id="refresh-token" class="absolute right-2 top-1/2 -translate-y-1/2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm">
+					Copier
+				</button>
 			</div>
+		</div>
 
-			{# Refresh Token #}
-			<div class="bg-white shadow rounded-lg p-6">
-				<h2 class="text-xl font-semibold mb-3 flex items-center">
-					<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-					</svg>
-					Refresh Token
-				</h2>
-				<p class="text-sm text-gray-600 mb-2">Expire dans 30 jours</p>
-				<div class="relative">
-					<input type="text" id="refresh-token" readonly value="{{ refresh_token }}" class="w-full p-3 pr-24 bg-gray-50 border border-gray-300 rounded font-mono text-sm break-all">
-					<button onclick="copyToken('refresh-token')" class="absolute right-2 top-1/2 -translate-y-1/2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm">
-						Copier
-					</button>
-				</div>
-			</div>
-
-			{# Usage Instructions #}
-			<div class="bg-white shadow rounded-lg p-6">
-				<h2 class="text-xl font-semibold mb-3">📖 Comment utiliser</h2>
-				<div class="space-y-4">
-					<div>
-						<h3 class="font-semibold text-sm mb-1">1. Utiliser le JWT Token dans vos requêtes API</h3>
-						<pre class="bg-gray-800 text-gray-100 p-3 rounded text-xs overflow-x-auto"><code>curl -H "Authorization: Bearer {{ token }}" \
+		{# Usage Instructions #}
+		<div class="bg-white shadow rounded-lg p-6">
+			<h2 class="text-xl font-semibold mb-3">📖 Comment utiliser</h2>
+			<div class="space-y-4">
+				<div>
+					<h3 class="font-semibold text-sm mb-1">1. Utiliser le JWT Token dans vos requêtes API</h3>
+					<pre class="bg-gray-800 text-gray-100 p-3 rounded text-xs overflow-x-auto"><code>curl -H "Authorization: Bearer {{ token }}" \
   http://localhost:8000/api/regattas</code></pre>
-					</div>
+				</div>
 
-					<div>
-						<h3 class="font-semibold text-sm mb-1">2. Rafraîchir le token quand il expire</h3>
-						<pre class="bg-gray-800 text-gray-100 p-3 rounded text-xs overflow-x-auto"><code>curl -X POST http://localhost:8000/api/token/refresh \
+				<div>
+					<h3 class="font-semibold text-sm mb-1">2. Rafraîchir le token quand il expire</h3>
+					<pre class="bg-gray-800 text-gray-100 p-3 rounded text-xs overflow-x-auto"><code>curl -X POST http://localhost:8000/api/token/refresh \
   -H "Content-Type: application/json" \
   -d '{"refresh_token":"{{ refresh_token }}"}'</code></pre>
-					</div>
+				</div>
 
-					<div>
-						<h3 class="font-semibold text-sm mb-1">3. Dans Swagger</h3>
-						<p class="text-sm text-gray-600">
-							Allez sur
-							<a href="/api" class="text-blue-500 hover:underline">/api</a>, 
-								                        cliquez sur "Authorize" et collez :
-							<code class="bg-gray-100 px-1">Bearer
-								{{ token }}</code>
-						</p>
-					</div>
+				<div>
+					<h3 class="font-semibold text-sm mb-1">3. Dans Swagger</h3>
+					<p class="text-sm text-gray-600">
+						Allez sur
+						<a href="/api" class="text-blue-500 hover:underline">/api</a>, 
+																																							                        cliquez sur "Authorize" et collez :
+						<code class="bg-gray-100 px-1">Bearer
+							{{ token }}</code>
+					</p>
 				</div>
 			</div>
-		</div>
-
-		<div class="mt-6 text-center">
-			<a href="{{ path('app_home') }}" class="text-blue-500 hover:underline">← Retour à l'accueil</a>
 		</div>
 	</div>
 
-	<script>
-		function copyToken( elementId )
-{
+	<div class="mt-6 text-center">
+		<a href="{{ path('app_home') }}" class="text-blue-500 hover:underline">← Retour à l'accueil</a>
+	</div>
+</div>
 
-const input = document.getElementById( elementId );
-input.select();
-document.execCommand( 'copy' );
+<script nonce="{{ csp_nonce('script') }}">
 
-// Feedback visuel
-const button = event.target;
-const originalText = button.textContent;
-button.textContent = '✓ Copié !';
-button.classList.add( 'bg-green-600' );
-
-setTimeout( () => {
-
-button.textContent = originalText;
-button.classList.remove( 'bg-green-600' );
-
-}, 2000 );
-
-}
-	</script>
-{% endblock %}
+	function copyToken( elementId )
+	{
+	
+	
+	
+	
+	
+	const input = document.getElementById( elementId );
+	input.select();
+	document.execCommand( 'copy' );
+	
+	// Feedback visuel
+	const button = event.target;
+	const originalText = button.textContent;
+	button.textContent = '✓ Copié !';
+	button.classList.add( 'bg-green-600' );
+	
+	setTimeout( () => {
+	
+	
+	
+	
+	
+	button.textContent = originalText;
+	button.classList.remove( 'bg-green-600' );
+	
+	
+	
+	
+	
+		{# copyToken is handled client-side by Stimulus controller assets/controllers/auth_controller.js #}
