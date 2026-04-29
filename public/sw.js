@@ -83,3 +83,52 @@ self.addEventListener('fetch', (event) => {
 	);
 });
 
+// Réception d'une notification push
+self.addEventListener('push', (event) => {
+	let data = {
+		title: 'Doc2Sail',
+		body: 'Nouveau document disponible',
+		icon: '/icon-192.png',
+		badge: '/icon-72.png',
+		data: { url: '/' }
+	};
+
+	if (event.data) {
+		try {
+			const parsed = event.data.json();
+			data = { ...data, ...parsed };
+		} catch (e) {
+			data.body = event.data.text();
+		}
+	}
+
+	event.waitUntil(
+		self.registration.showNotification(data.title, {
+			body: data.body,
+			icon: data.icon,
+			badge: data.badge,
+			data: data.data,
+			vibrate: [200, 100, 200],
+		})
+	);
+});
+
+// Clic sur la notification
+self.addEventListener('notificationclick', (event) => {
+	event.notification.close();
+
+	const url = event.notification.data?.url || '/';
+
+	event.waitUntil(
+		clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+			for (const client of clientList) {
+				if (client.url.includes(self.location.origin) && 'focus' in client) {
+					client.navigate(url);
+					return client.focus();
+				}
+			}
+			return clients.openWindow(url);
+		})
+	);
+});
+
