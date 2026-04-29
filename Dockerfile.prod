@@ -1,5 +1,5 @@
 # Dockerfile optimisé pour Raspberry Pi 5 (ARM64)
-# Version production - Assets pré-compilés en local
+# Version production - Build multi-stage
 
 # ============================================
 # Stage 1: Composer - Install PHP dependencies
@@ -38,7 +38,30 @@ COPY . .
 RUN composer dump-autoload --optimize --classmap-authoritative
 
 # ============================================
-# Stage 2: Runtime - Image finale légère
+# Stage 2: Node - Build assets JS + Tailwind
+# ============================================
+FROM node:22-alpine AS assets-builder
+
+WORKDIR /app
+
+# Installer pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copier les fichiers de dépendances JS et les assets Symfony UX référencés en file:vendor/...
+COPY package.json pnpm-lock.yaml ./
+COPY --from=composer-builder /app/vendor ./vendor
+
+# Installer les dépendances JS
+RUN pnpm install --frozen-lockfile
+
+# Copier le reste du projet (webpack config, assets, templates)
+COPY . .
+
+# Build Webpack Encore (JS + CSS via PostCSS/Tailwind)
+RUN pnpm run build
+
+# ============================================
+# Stage 3: Runtime - Image finale légère
 # ============================================
 FROM dunglas/frankenphp:1-php8.4-alpine
 
@@ -66,14 +89,13 @@ COPY --from=composer-builder /app/vendor ./vendor
 # Copier le code de l'application
 COPY . .
 
-# Les assets doivent être pré-compilés en local et copiés
-# Vérifier que public/build existe
+# Copier les assets compilés par Node (public/build/)
+COPY --from=assets-builder /app/public/build ./public/build
 
 # Créer les répertoires nécessaires et définir les permissions
 RUN mkdir -p var/cache var/log var/tmp public/uploads && \
     chown -R www-data:www-data var public/uploads && \
     chmod -R 775 var public/uploads
-
 
 # Configuration OPcache pour production
 RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini && \
