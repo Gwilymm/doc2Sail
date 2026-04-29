@@ -100,9 +100,13 @@ document.documentElement.setAttribute( 'data-theme', theme );
 
 	</head>
 
-	<body class="bg-base-200 min-h-screen flex flex-col" data-controller="ui">
+	<body class="bg-base-200 min-h-screen flex flex-col {% if ux_is_native() %}pb-20{% endif %}" data-controller="ui">
 		<main class="flex-1"> {% block body %}{% endblock %}
 			</main>
+
+			{% if ux_is_native() %}
+				{% include 'partials/native_bottom_nav.html.twig' %}
+			{% endif %}
 
 			{% if not ux_is_native() %}
 				{# Footer partial included on every page (sticky bottom via flex layout) #}
