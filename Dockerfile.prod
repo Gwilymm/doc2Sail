@@ -4,7 +4,7 @@
 # ============================================
 # Stage 1: Composer - Install PHP dependencies
 # ============================================
-FROM dunglas/frankenphp:1-php8.3-alpine AS composer-builder
+FROM dunglas/frankenphp:1-php8.4-alpine AS composer-builder
 
 # Configurer les DNS pour le build
 RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf.override || true
@@ -40,7 +40,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative
 # ============================================
 # Stage 2: Runtime - Image finale légère
 # ============================================
-FROM dunglas/frankenphp:1-php8.3-alpine
+FROM dunglas/frankenphp:1-php8.4-alpine
 
 # Variables d'environnement pour production
 ENV APP_ENV=prod \

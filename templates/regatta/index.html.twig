@@ -8,7 +8,7 @@
 {% block body %}
 	{% include '_navbar.html.twig' %}
 
-	<div class="container mx-auto px-4 py-8 max-w-7xl">
+	<div class="container mx-auto px-4 py-8 max-w-7xl" data-controller="regatta ui">
 		<div class="mb-8">
 			<div class="flex items-center justify-between mb-4">
 				<div class="flex items-center gap-3">
@@ -21,7 +21,7 @@
 				<!-- Desktop buttons - hidden on mobile -->
 				<div class="hidden md:flex gap-2">
 
-					<button onclick="createRegattaModal.showModal()" class="btn btn-primary btn-sm">
+					<button data-open-dialog="#createRegattaModal" class="btn btn-primary btn-sm">
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
 						</svg>
@@ -42,7 +42,7 @@
 						<p class="text-sm">{{ regatta.documents|length }}
 							{{ 'regatta.documents_count'|trans }}</p>
 						<div class="card-actions justify-end mt-4 gap-2">
-							<button onclick="deleteRegatta({{ regatta.id }}, '{{ regatta.name|escape('js') }}')" class="btn btn-error btn-sm">
+							<button data-action="click->regatta#delete" data-regatta-id="{{ regatta.id }}" data-regatta-name="{{ regatta.name|e('html_attr') }}" class="btn btn-error btn-sm">
 								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
 								</svg>
@@ -61,7 +61,7 @@
 			{% else %}
 				<div class="col-span-full text-center py-16">
 					<p class="text-xl text-base-content/50">{{ 'regatta.no_regattas'|trans }}</p>
-					<button onclick="createRegattaModal.showModal()" class="btn btn-primary mt-4">{{ 'regatta.create_first'|trans }}</button>
+					<button data-open-dialog="#createRegattaModal" class="btn btn-primary mt-4">{{ 'regatta.create_first'|trans }}</button>
 				</div>
 			{% endfor %}
 		</div>
@@ -69,7 +69,7 @@
 
 	<!-- FAB (Floating Action Button) - Visible only on mobile -->
 	<div class="md:hidden">
-		<button onclick="createRegattaModal.showModal()" class="btn btn-lg btn-circle btn-primary shadow-xl fixed bottom-6 right-6 z-50">
+		<button data-open-dialog="#createRegattaModal" class="btn btn-lg btn-circle btn-primary shadow-xl fixed bottom-6 right-6 z-50">
 			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
 			</svg>
@@ -78,9 +78,9 @@
 
 	<dialog id="createRegattaModal" class="modal">
 		<div class="modal-box">
-			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="createRegattaModal.close()">✕</button>
+			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" data-close-dialog="#createRegattaModal">✕</button>
 			<h3 class="font-bold text-lg mb-4">{{ 'regatta.modal.create_title'|trans }}</h3>
-			<form id="createRegattaForm" onsubmit="event.preventDefault(); submitCreateRegatta();">
+			<form id="createRegattaForm" data-action="submit->regatta#submitCreateRegatta">
 				<div class="form-control mb-4">
 					<label class="label">
 						<span class="label-text">{{ 'regatta.form.name'|trans }}
@@ -111,7 +111,7 @@
 					<textarea name="description" class="textarea textarea-bordered" rows="3"></textarea>
 				</div>
 				<div class="modal-action">
-					<button type="button" class="btn" onclick="createRegattaModal.close()">{{ 'regatta.modal.cancel'|trans }}</button>
+					<button type="button" class="btn" data-close-dialog="#createRegattaModal">{{ 'regatta.modal.cancel'|trans }}</button>
 					<button type="submit" class="btn btn-primary">{{ 'regatta.modal.create'|trans }}</button>
 				</div>
 			</form>
@@ -126,215 +126,5 @@
 
 {% block javascripts %}
 	{{ parent() }}
-	<script>
-		function showToast( message, type = 'info' )
-{
-
-
-
-
-
-const toast = document.createElement( 'div' );
-toast.className = `alert alert-${ type }`;
-toast.innerHTML = `<span>${ message }</span>`;
-document.getElementById( 'toastContainer' ).appendChild( toast );
-setTimeout( () => toast.remove(), 3000 );
-
-
-
-
-
-}
-
-async function deleteRegatta( id, name )
-{
-
-
-
-
-
-if ( !confirm ( `{{ 'regatta.confirm.delete'|trans({'%name%': '${ name }'})|escape('js') }}` ) )
-{
-
-
-
-
-
-return;
-
-
-
-
-
-}
-
-try
-{
-
-
-
-
-
-const response = await fetch ( `/{{ app.request.locale }}/regatta/${ id }/delete`,
-{ method: 'POST' } );
-const result = await response.json();
-
-if ( result.success )
-{
-
-
-
-
-
-showToast( result.message, 'success' );
-setTimeout( () => window.location.reload(), 1000 );
-
-
-
-
-
-}
-else
-{
-
-
-
-
-
-showToast( result.error, 'error' );
-
-
-
-
-
-}
-
-} catch ( error )
-{
-
-
-
-
-
-showToast( '{{ 'regatta.errors.delete_failed'|trans|escape('js') }}', 'error' );
-
-
-
-
-
-}
-
-}
-
-async function submitCreateRegatta()
-{
-
-
-
-
-
-const form = document.getElementById( 'createRegattaForm' );
-const formData = new FormData( form );
-const data = {
-
-
-
-
-
-name: formData.get( 'name' ),
-startDate: formData.get( 'startDate' ),
-endDate: formData.get( 'endDate' ),
-description: formData.get( 'description' )
-
-
-
-
-
-};
-
-try
-{
-
-
-
-
-
-const response = await fetch( '/ {{ app.request.locale }}/regatta/create',
-{
-
-
-
-
-
-method: 'POST',
-headers: {
-
-
-
-
-
-'Content-Type': 'application/json'
-
-
-
-
-
-},
-body: JSON.stringify( data )
-
-
-
-
-
-} );
-const result = await response.json();
-if ( result.success )
-{
-
-
-
-
-
-showToast( result.message, 'success' );
-createRegattaModal.close();
-form.reset();
-setTimeout( () => window.location.reload(), 1000 );
-
-
-
-
-
-}
-else
-{
-
-
-
-
-
-showToast( result.error, 'error' );
-
-
-
-
-
-}
-
-} catch ( error )
-{
-
-
-
-
-
-showToast( '{{ 'regatta.errors.create_failed'|trans|escape('js') }}', 'error' );
-
-
-
-
-
-}
-
-}
-	</script>
+	{# Regatta actions handled by Stimulus controllers: assets/controllers/regatta_controller.js and assets/controllers/ui_controller.js #}
 {% endblock %}

@@ -2,484 +2,251 @@
 
 {% block title %}
 	{{ regatta.name }}
-	- Doc2Sail
 {% endblock %}
-
-{% block stylesheets %}
-	<!-- Manifest dynamique pour cette regatta -->
-	<link rel="manifest" href="{{ path('app_manifest_regatta', {token: regatta.accessToken}) }}">
-	{{ encore_entry_link_tags('app') }}
-{% endblock %}
-
 {% block body %}
-	{% include '_navbar.html.twig' %}
+	<!-- Notification Banner (managed by Stimulus) -->
+	<div data-controller="notification" data-notification-topic-value="/regattas/{{ regatta.id }}" data-notification-mercure-url-value="{{ mercure() }}" data-notification-target="banner" class="alert shadow-lg rounded-none fixed top-0 left-0 right-0 z-50 hidden">
+		<div class="flex-1">
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+			</svg>
+			<div>
+				<h3 class="font-bold">📄 Nouveau document disponible !</h3>
+				<div class="text-xs" data-notification-target="message">Un nouveau document vient d'être ajouté.</div>
+			</div>
+		</div>
+		<div class="flex-none">
+			<button class="btn btn-sm btn-primary" data-action="click->notification#refresh">Actualiser</button>
+			<button class="btn btn-sm btn-ghost" data-action="click->notification#closeBanner">✕</button>
+		</div>
+	</div>
 
+	<!-- Header -->
 	<div
-		class="container mx-auto px-4 py-8 max-w-7xl" data-controller="offline notification" data-offline-regatta-token-value="{{ regatta.accessToken }}" data-offline-documents-value="{{ documentsForOffline|json_encode|e('html_attr') }}" data-notification-topic-value="/regatta/{{ regatta.accessToken }}/documents" data-notification-mercure-url-value="http://localhost:3000/.well-known/mercure">
-
-		<!-- Banner de notification pour nouveaux documents -->
-		<div id="notificationBanner" class="alert alert-success mb-4 hidden" data-notification-target="banner">
+		class="mb-8" data-controller="native-share" data-native-share-title-value="{{ regatta.name|e('html_attr') }}" data-native-share-text-value="Documents de régate {{ regatta.name|e('html_attr') }}" data-native-share-url-value="{{ app.request.uri|e('html_attr') }}">
+		<!-- Banner de téléchargement hors ligne -->
+		{% if not ux_is_native() %}
+		<div id="offlineBanner" class="alert alert-info mb-4 hidden">
 			<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
 			</svg>
 			<div class="flex-1">
-				<h3 class="font-bold">📄 Nouveau document disponible !</h3>
-				<div class="text-xs mt-1" data-notification-target="message">
-					Un nouveau document vient d'être ajouté
+				<h3 class="font-bold">📥 Télécharger pour consultation hors ligne</h3>
+				<div class="text-xs mt-1">
+					Téléchargez tous les documents ({{ documents|length }}
+					documents) pour y accéder même sans connexion internet
 				</div>
 			</div>
-			<button class="btn btn-sm btn-primary" onclick="window.location.reload()">
-				Actualiser
-			</button>
-			<button class="btn btn-sm btn-ghost" data-action="click->notification#closeBanner">
-				✕
-			</button>
-		</div>
-
-		<!-- Header -->
-		<div
-			class="mb-8">
-			<!-- Banner de téléchargement hors ligne -->
-			<div id="offlineBanner" class="alert alert-info mb-4 hidden">
-				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
+			<button class="btn btn-sm btn-primary" data-action="click->offline#downloadForOffline">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
 				</svg>
-				<div class="flex-1">
-					<h3 class="font-bold">📥 Télécharger pour consultation hors ligne</h3>
-					<div class="text-xs mt-1">
-						Téléchargez tous les documents ({{ documents|length }}
-						documents) pour y accéder même sans connexion internet
-					</div>
-				</div>
-				<button onclick="this.closest('[data-controller]').getAttribute('data-controller').split(' ').forEach(c => { if(window[c + 'Controller']) window[c + 'Controller'].downloadForOffline(); })" class="btn btn-sm btn-primary" data-action="click->offline#downloadForOffline">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-					</svg>
-					Télécharger maintenant
-				</button>
-			</div>
+				Télécharger maintenant
+			</button>
+		</div>
 
-			<!-- Statut "Déjà en cache" -->
-			<div id="cachedStatus" class="alert alert-success mb-4 hidden">
-				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+		<!-- Statut "Déjà en cache" -->
+		<div id="cachedStatus" class="alert alert-success mb-4 hidden">
+			<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+			</svg>
+			<div class="flex-1">
+				<h3 class="font-bold">✅ Disponible hors ligne</h3>
+				<div class="text-xs mt-1">
+					Dernière synchronisation :
+					<span id="cacheDate"></span>
+				</div>
+			</div>
+			<button class="btn btn-sm btn-ghost" data-action="click->offline#clearCache">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
 				</svg>
-				<div class="flex-1">
-					<h3 class="font-bold">✅ Disponible hors ligne</h3>
-					<div class="text-xs mt-1">
-						Dernière synchronisation :
-						<span id="cacheDate"></span>
+				Réinitialiser
+			</button>
+		</div>
+
+		<!-- Push Notifications -->
+		<div class="card bg-base-100 shadow-sm mb-4" data-controller="push-subscription" data-push-subscription-regatta-token-value="{{ regatta.accessToken }}">
+			<div class="card-body p-4">
+				<div class="flex items-center gap-4">
+					<div class="flex-1">
+						<h3 class="font-semibold">📲 Notifications Push</h3>
+						<p class="text-xs text-base-content/70">Recevez une notification même quand l'app est fermée</p>
 					</div>
+					<button class="btn btn-sm btn-primary">
+						🔔 Activer les notifications
+					</button>
 				</div>
-				<button class="btn btn-sm btn-ghost" data-action="click->offline#clearCache">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-					</svg>
-					Réinitialiser
+			</div>
+		</div>
+		{% endif %}
+
+		<div class="flex items-center gap-3">
+
+			<div class="flex-1">
+				<h1 class="text-4xl font-bold text-primary">{{ regatta.name }}</h1>
+				<p class="text-sm text-base-content/70">{{ regatta.startDate|date('d/m/Y') }}
+					-
+					{{ regatta.endDate|date('d/m/Y') }}</p>
+				{% if regatta.description %}
+					<p class="text-sm text-base-content/60 mt-2">{{ regatta.description }}</p>
+				{% endif %}
+			</div>
+			{% if ux_is_native() %}
+				<button type="button" class="btn btn-primary btn-sm" data-action="click->native-share#share">
+					Partager
 				</button>
-			</div>
+			{% endif %}
+		</div>
+	</div>
 
-			<!-- Push Notifications -->
-			<div class="card bg-base-100 shadow-sm mb-4" data-controller="push-subscription" data-push-subscription-regatta-token-value="{{ regatta.accessToken }}">
-				<div class="card-body p-4">
-					<div class="flex items-center gap-4">
-						<div class="flex-1">
-							<h3 class="font-semibold">📲 Notifications Push</h3>
-							<p class="text-xs text-base-content/70">Recevez une notification même quand l'app est fermée</p>
+	<!-- Category Filter (wrapped by document controller for filter behavior) -->
+	<div data-controller="document">
+		<div class="card bg-base-100 shadow-sm">
+			<div class="card-body p-4">
+				<h3 class="text-sm font-semibold mb-3">
+					{{ 'regatta.documents.filter.title'|trans }}
+				</h3>
+				<div id="categoryFilters" class="flex flex-wrap gap-2">
+					{% for category in documentsByCategory|keys %}
+						<label
+							class="cursor-pointer flex items-center gap-1" data-action="click->document#filterCategories">
+							<!-- INPUT désactivé pour les interactions directes → DaisyUI-friendly -->
+							<input type="checkbox" class="checkbox checkbox-primary checkbox-sm pointer-events-none" data-document-target="categoryCheckbox" data-category="{{ category }}">
+
+							<span class="text-sm">{{ category }}</span>
+						</label>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+		{# Category filter is now handled by Stimulus controller 'filters' to avoid inline event handlers #}
+		{% for sectionTitle, categoriesInSection in categorySections %}
+			<div class="section-group mb-10">
+				<h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+					{% if sectionTitle == 'Documents de course' %}
+						🏆
+						{{ sectionTitle }}
+					{% else %}
+						📋
+						{{ sectionTitle }}
+					{% endif %}
+				</h2>
+				{% for category, documents in categoriesInSection %}
+					<!-- Category Section -->
+					<div class="mb-8 category-section" data-document-target="categorySection" data-category="{{ category }}">
+						<div class="flex items-center gap-2 mb-3">
+							<h3 class="text-xl font-semibold">
+								{{ category }}
+							</h3>
+							<span class="badge badge-sm">{{ documents|length }}</span>
 						</div>
-						<button class="btn btn-sm btn-primary">
-							🔔 Activer les notifications
-						</button>
-					</div>
-				</div>
-			</div>
 
-			<div class="flex items-center justify-between mb-4">
-				<div class="flex items-center gap-3">
-
-					<div>
-						<h1 class="text-4xl font-bold text-primary">{{ regatta.name }}</h1>
-						<p class="text-sm text-base-content/70">{{ regatta.startDate|date('d/m/Y') }}
-							-
-							{{ regatta.endDate|date('d/m/Y') }}</p>
-						{% if regatta.description %}
-							<p class="text-sm text-base-content/60 mt-2">{{ regatta.description }}</p>
-						{% endif %}
-					</div>
-				</div>
-			</div>
-
-			<!-- Category Filter -->
-			<div class="card bg-base-100 shadow-sm">
-				<div class="card-body p-4">
-					<h3 class="text-sm font-semibold mb-3">🔍 Filtrer par catégorie</h3>
-					<div id="categoryFilters" class="flex flex-wrap gap-2">
-						{% for category in documentsByCategory|keys %}
-							<label class="cursor-pointer">
-								<input type="checkbox" class="checkbox checkbox-primary checkbox-sm mr-1" value="{{ category }}" onchange="filterCategories()">
-								<span class="text-sm">{{ category }}</span>
-							</label>
-						{% endfor %}
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Documents by Category -->
-		<div class="mb-4 flex justify-between items-center">
-			<h2 class="text-2xl font-bold">
-				Documents
-				<span class="badge badge-primary">{{ documents|length }}</span>
-			</h2>
-		</div>
-
-		{% if documentsByCategory|length > 0 %}
-			{% for sectionTitle, categoriesInSection in categorySections %}
-				<div class="section-group mb-10">
-					<h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
-						{% if sectionTitle == 'Documents de course' %}
-							🏆
-							{{ sectionTitle }}
-						{% else %}
-							📋
-							{{ sectionTitle }}
-						{% endif %}
-					</h2>
-
-					{% for category, categoryDocuments in categoriesInSection %}
-						<!-- Category Section -->
-						<div class="mb-8 category-section">
-							<div class="flex items-center gap-2 mb-3">
-								<h3 class="text-xl font-semibold">
-									{{ category }}
-								</h3>
-								<span class="badge badge-sm">{{ categoryDocuments|length }}</span>
-							</div>
-
-							<div class="space-y-2">
-								{% for document in categoryDocuments %}
-									<div class="card bg-base-100 shadow hover:shadow-lg transition-shadow document-card" data-category="{{ category }}">
-										<div class="card-body p-4">
-											<div
-												class="flex items-center gap-4">
-												<!-- Icône du fichier -->
-												<div class="avatar placeholder flex-shrink-0">
-													<div class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
-														<span class="text-2xl">
-															{% if 'pdf' in document.mimeType %}
-																📄
-															{% elseif 'image' in document.mimeType %}
-																🖼️
-															{% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
-																📝
-															{% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
-																📊
-															{% else %}
-																📁
-															{% endif %}
-														</span>
-													</div>
-												</div>
-
-												<!-- Informations du document -->
-												<div class="flex-1 min-w-0">
-													<h4 class="font-semibold text-base truncate mb-1">{{ document.name }}</h4>
-													<div class="flex items-center gap-3 text-xs text-base-content/70">
-														<span class="badge badge-outline badge-sm">{{ document.formattedSize }}</span>
-														<span>{{ document.uploadedAt|date('d/m/Y') }}</span>
-														{% if document.description %}
-															<span class="truncate hidden sm:inline">{{ document.description }}</span>
+						<div
+							class="space-y-2 columns-1 sm:columns-2 lg:columns-3 gap-4">
+							{# data-controller="document" wrapper to manage individual document cards #}
+							{% for document in documents %}
+								<div class="card bg-base-100 shadow hover:shadow-lg transition-shadow document-card" data-category="{{ category }}" data-document-id="{{ document.id }}">
+									<div class="card-body p-4">
+										<div
+											class="flex items-center gap-4">
+											<!-- Icône du fichier -->
+											<div class="avatar placeholder flex-shrink-0">
+												<div class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
+													<span class="text-2xl">
+														{% if 'pdf' in document.mimeType %}
+															📄
+														{% elseif 'image' in document.mimeType %}
+															🖼️
+														{% elseif 'word' in document.mimeType or 'document' in document.mimeType %}
+															📝
+														{% elseif 'excel' in document.mimeType or 'sheet' in document.mimeType %}
+															📊
+														{% else %}
+															📁
 														{% endif %}
-													</div>
+													</span>
 												</div>
+											</div>
 
-												<!-- Actions publiques -->
-												<div class="flex-shrink-0 flex gap-2">
-													<a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank" class="btn btn-sm btn-outline btn-circle" title="Consulter">
-														<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-														</svg>
-													</a>
-													<a href="{{ path('app_document_download', {id: document.id}) }}" class="btn btn-sm btn-primary btn-circle" title="Télécharger">
-														<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-														</svg>
-													</a>
+											<!-- Informations du document -->
+											<div class="flex-1 min-w-0">
+												<h4 class="font-semibold text-base truncate mb-1">{{ document.name }}</h4>
+												<div class="flex items-center gap-3 text-xs text-base-content/70">
+
+													<span>{{ document.uploadedAt|date('d/m/Y') }}</span>
+													{% if document.description %}
+														<span class="truncate hidden sm:inline">{{ document.description }}</span>
+													{% endif %}
 												</div>
+											</div>
+
+											<!-- Actions publiques -->
+											<div class="flex-shrink-0 flex gap-2">
+												<a href="{{ path('app_document_view', {id: document.id}) }}" target="_blank" class="btn btn-sm btn-outline btn-circle" title="Consulter">
+													<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+													</svg>
+												</a>
+												<a href="{{ path('app_document_download', {id: document.id}) }}" class="btn btn-sm btn-primary btn-circle" title="Télécharger">
+													<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+													</svg>
+												</a>
 											</div>
 										</div>
 									</div>
-								{% endfor %}
-							</div>
+								</div>
+							{% endfor %}
 						</div>
-					{% endfor %}
-				{% endfor %}
-			{% else %}
-				<div class="text-center py-16">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-					</svg>
-					<p class="text-xl text-base-content/50">Aucun document disponible</p>
-					<p class="text-sm text-base-content/40 mt-2">Les documents seront affichés ici quand ils seront ajoutés</p>
+						{# end data-controller=\"document\" wrapper #}
+					</div>
 				</div>
-			{% endif %}
-		</div>
-
-		<!-- Toast Container -->
-		<div id="toastContainer" class="toast toast-top toast-end z-50"></div>
-
-		<!-- Modal de progression du téléchargement -->
-		<dialog id="downloadModal" class="modal">
-			<div class="modal-box">
-				<h3 class="font-bold text-lg mb-4">📥 Téléchargement en cours...</h3>
-				<p class="mb-4">Préparation pour consultation hors ligne</p>
-
-				<div class="mb-4">
-					<progress id="downloadProgress" class="progress progress-primary w-full" value="0" max="100"></progress>
-				<p id="downloadProgressText" class="text-sm text-center mt-2">0 / 0 documents</p>
+			{% endfor %}
+		{% else %}
+			<div class="text-center py-16">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto mb-4 text-base-content/30" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+				</svg>
+				<p class="text-xl text-base-content/50">Aucun document disponible</p>
+				<p class="text-sm text-base-content/40 mt-2">Les documents seront affichés ici quand ils seront ajoutés</p>
 			</div>
+		{% endfor %}
+	</div>
 
-			<p class="text-xs text-base-content/60">
-				⚠️ Ne fermez pas cette page pendant le téléchargement
-			</p>
+	<!-- Toast Container -->
+	<div id="toastContainer" class="toast toast-top toast-end z-50"></div>
+
+	<!-- Modal de progression du téléchargement -->
+	<dialog id="downloadModal" class="modal">
+		<class="modal-box">
+			<h3 class="font-bold text-lg mb-4">📥 Téléchargement en cours...</h3>
+			<p class="mb-4">Préparation pour consultation hors ligne</p>
+
+			<div class="mb-4">
+				<progress id="downloadProgress" class="progress progress-primary w-full" value="0" max="100"></progress>
+			<p id="downloadProgressText" class="text-sm text-center mt-2">0 / 0 documents</p>
 		</div>
+
+		<p class="text-xs text-base-content/60">
+			⚠️ Ne fermez pas cette page pendant le téléchargement
+		</p>
+
+
 		<form method="dialog" class="modal-backdrop">
 			<button>Fermer</button>
 		</form>
 	</dialog>
-
-	<!-- Install PWA Button -->
-	<button id="installBtn" class="btn btn-primary fixed bottom-4 right-4 hidden shadow-lg">
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-		</svg>
-		Installer l'app
-	</button>
-{% endblock %}
-
-{% block javascripts %}
-	{{ parent() }}
-	<script>
-		// Category Filter
-function filterCategories()
-{
-
-
-
-
-
-const checkboxes = document.querySelectorAll( '#categoryFilters input[type="checkbox"]' );
-const selectedCategories = Array.from( checkboxes ).filter( cb => cb.checked ).map( cb => cb.value );
-
-// Si aucune checkbox n'est cochée, tout masquer
-const showAll = selectedCategories.length === 0;
-
-document.querySelectorAll( '.category-section' ).forEach( section => {
-
-
-
-
-
-const category = section.querySelector( 'h3' ).textContent.trim();
-if ( showAll )
-{
-
-
-
-
-
-section.style.display = 'block';
-
-
-
-
-
-}
-else
-{
-
-
-
-
-
-section.style.display = selectedCategories.includes( category ) ? 'block' : 'none';
-
-
-
-
-
-}
-
-} );
-
-
-
-
-
-}
-
-// Initialiser : tout masquer par défaut
-document.addEventListener( 'DOMContentLoaded', () => {
-
-
-
-
-
-filterCategories();
-
-
-
-
-
-} );
-
-// PWA Install
-let deferredPrompt;
-const installBtn = document.getElementById( 'installBtn' );
-
-if ( installBtn )
-{
-
-
-
-
-
-window.addEventListener( 'beforeinstallprompt', ( e ) => {
-
-
-
-
-
-e.preventDefault();
-deferredPrompt = e;
-installBtn.classList.remove( 'hidden' );
-
-
-
-
-
-} );
-
-installBtn.addEventListener( 'click', async () => {
-
-
-
-
-
-if ( deferredPrompt )
-{
-
-
-
-
-
-deferredPrompt.prompt();
-const
-{ outcome } = await deferredPrompt.userChoice;
-deferredPrompt = null;
-installBtn.classList.add( 'hidden' );
-
-
-
-
-
-}
-
-} );
-
-
-
-
-
-}
-
-// Enregistrement Service Worker Public
-if ( 'serviceWorker' in navigator )
-{
-
-
-
-
-
-window.addEventListener( 'load', () => { // D'abord, désinscrire les anciens SW avec mauvais scope
-navigator.serviceWorker.getRegistrations().then( registrations => {
-
-
-
-registrations.forEach( reg => { // Désinscrire SW avec scope / ou /public/
-if ( reg.scope.endsWith( '/' ) && !reg.scope.endsWith( '/r/' ) )
-{
-
-
-
-console.log( '🗑️ Suppression ancien SW:', reg.scope );
-reg.unregister();
-
-
-
-} } );
-
-
-
-} );
-
-// Puis enregistrer le nouveau avec bon scope
-navigator.serviceWorker.register( '/sw-public.js',
-{ scope: '/r/' } ).then( registration => {
-
-
-
-
-
-console.log( '✅ Service Worker Public enregistré:', registration.scope );
-console.log( '📍 SW State:', registration.active ? 'actif' : 'en attente' );
-
-// Forcer la mise à jour
-registration.update();
-
-
-
-
-
-} ).catch( error => {
-
-
-
-
-
-console.error( '❌ Erreur enregistrement SW Public:', error );
-
-
-
-
-
-} );
-
-
-
-
-
-} );
-
-
-
-
-
-}
-else
-{
-
-
-
-
-
-console.warn( '⚠️ Service Worker non supporté' );
-
-
-
-
-
-}
-	</script>
+	{% if not ux_is_native() %}
+		<!-- Install PWA Button -->
+		<div>
+			<button id="installBtn" class="btn btn-primary fixed bottom-4 right-4 hidden shadow-lg">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+				</svg>
+				Installer l'app
+			</button>
+		</div>
+	{% endif %}
 {% endblock %}

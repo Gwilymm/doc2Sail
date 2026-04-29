@@ -11,14 +11,22 @@ export default class extends Controller {
 
 	static values = {
 		regattaId: Number,
-		defaultCategory: String
+		defaultCategory: String,
+		fileUrl: String
 	};
 
 	connect() {
-		console.log('Document controller connected');
+		console.log('Document controller connected et mes couilles');
 		if (this.hasRegattaIdValue) {
 			console.log('Regatta ID:', this.regattaIdValue);
 		}
+		console.log("checkboxTargets:", this.categoryCheckboxTargets.length);
+		console.log("sectionTargets:", this.categorySectionTargets.length);
+		console.log("hasCategorySectionTarget:", this.hasCategorySectionTarget);
+		console.log("hasCategoryCheckboxTarget:", this.hasCategoryCheckboxTarget);
+
+
+		// toggleFullscreen moved to class method accessible by Stimulus actions
 
 		this.selectedFile = null;
 		this.setupDropZone();
@@ -28,6 +36,27 @@ export default class extends Controller {
 		this.setupInstallButton();
 		this.toggleCategorySections();
 		this.filterCategories(); // Initialiser le filtre au chargement
+	}
+
+	toggleFullscreen(event) {
+		event?.preventDefault();
+		try {
+			const el = document.getElementById('viewerFrame');
+			const fileUrl = event?.currentTarget?.dataset?.documentFileUrlValue || this.fileUrlValue || null;
+			if (el && el.requestFullscreen) {
+				el.requestFullscreen();
+				return;
+			}
+			if (el && el.webkitRequestFullscreen) {
+				el.webkitRequestFullscreen();
+				return;
+			}
+			if (fileUrl) {
+				window.open(fileUrl, '_blank');
+			}
+		} catch (e) {
+			console.error('Error toggling fullscreen', e);
+		}
 	}
 
 	setupDropZone() {
@@ -401,32 +430,28 @@ export default class extends Controller {
 
 	/**
 	 * Filtre les sections de documents par catégorie
-	 * Affiche uniquement les catégories cochées, ou tout masquer si aucune n'est cochée
+	 * Affiche seulement les sections dont la catégorie est cochée.
+	 * Si aucune catégorie n'est cochée, toutes les sections sont affichées.
 	 */
 	filterCategories() {
-		if (!this.hasCategoryCheckboxTarget) {
-			return;
-		}
-
-		// Récupérer toutes les checkboxes cochées
-		const selectedCategories = this.categoryCheckboxTargets
+		const selected = this.categoryCheckboxTargets
 			.filter(cb => cb.checked)
-			.map(cb => cb.value);
+			.map(cb => cb.dataset.category);
 
-		// Si aucune checkbox n'est cochée, tout masquer
-		const showAll = selectedCategories.length === 0;
+		console.log("Selected:", selected);
 
-		// Parcourir toutes les sections et afficher/masquer selon le filtre
+		const showAll = selected.length === 0;
+
 		this.categorySectionTargets.forEach(section => {
 			const category = section.dataset.category;
+			console.log("Section:", category);
 
-			if (showAll) {
-				section.style.display = 'block';
-			} else {
-				section.style.display = selectedCategories.includes(category) ? 'block' : 'none';
-			}
+			const shouldShow = showAll || selected.includes(category);
+			section.classList.toggle('hidden', !shouldShow);
 		});
 	}
+
+
 
 	/**
 	 * Charge et affiche la modal QR Code pour partager la régate

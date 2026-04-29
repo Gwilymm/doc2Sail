@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class DocumentController extends AbstractController
@@ -50,8 +51,8 @@ class DocumentController extends AbstractController
 				return new JsonResponse(['error' => 'Aucun fichier fourni'], 400);
 			}
 
-			
-			
+
+
 
 			// Créer l'entité Document
 			$document = new Document();
@@ -73,7 +74,7 @@ class DocumentController extends AbstractController
 
 			// Valider l'entité
 			$errors = $this->validator->validate($document);
-			
+
 			if (count($errors) > 0) {
 				$errorMessages = [];
 				foreach ($errors as $error) {
@@ -148,11 +149,13 @@ class DocumentController extends AbstractController
 			throw $this->createNotFoundException('Fichier non trouvé');
 		}
 
+
+
 		return $this->file($filePath, $document->getName());
 	}
 
-	#[Route('/document/{id}/view', name: 'app_document_view')]
-	public function view(Document $document): BinaryFileResponse
+	#[Route('/document/{id}/file', name: 'app_document_file')]
+	public function serveInline(Document $document): BinaryFileResponse
 	{
 		$filePath = $this->getParameter('kernel.project_dir') . '/public/' . $document->getFilePath();
 
@@ -160,8 +163,64 @@ class DocumentController extends AbstractController
 			throw $this->createNotFoundException('Fichier non trouvé');
 		}
 
-		return $this->file($filePath)->setContentDisposition('inline', $document->getName());
+		// Retourner en inline pour l'iframe / viewer
+		return parent::file($filePath)->setContentDisposition('inline', $document->getName());
 	}
+
+	#[Route('/document/{id}/view', name: 'app_document_view')]
+	public function view(Document $document): Response
+	{
+		// URLs publiques
+		$fileUrl = $this->generateUrl(
+			'app_document_file',
+			['id' => $document->getId()],
+			UrlGeneratorInterface::ABSOLUTE_URL
+		);
+
+		$downloadUrl = $this->generateUrl(
+			'app_document_download',
+			['id' => $document->getId()],
+			UrlGeneratorInterface::ABSOLUTE_URL
+		);
+
+		// Types détectés
+		$mime = (string) $document->getMimeType();
+		$extension = strtolower(pathinfo($document->getFilename(), PATHINFO_EXTENSION));
+
+		$isImage  = str_starts_with($mime, 'image/');
+		$isPdf    = $mime === 'application/pdf';
+		$isOffice = in_array($extension, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
+		$isTxt    = in_array($extension, ['txt', 'md', 'json', 'csv', 'log']);
+
+		// Lecture TXT
+		$txtContent = null;
+		if ($isTxt) {
+			// Construction du chemin physique EXACT
+			$absolutePath = $_SERVER['DOCUMENT_ROOT']
+				. '/uploads/documents/'
+				. $document->getId()
+				. '/'
+				. $document->getFilename();
+
+			if (is_readable($absolutePath)) {
+				$txtContent = file_get_contents($absolutePath);
+			}
+		}
+
+		return $this->render('document/view.html.twig', [
+			'document'     => $document,
+			'fileUrl'      => $fileUrl,
+			'downloadUrl'  => $downloadUrl,
+			'isImage'      => $isImage,
+			'isPdf'        => $isPdf,
+			'isOffice'     => $isOffice,
+			'isTxt'        => $isTxt,
+			'txtContent'   => $txtContent,
+		]);
+	}
+
+
+
 
 	#[Route('/document/{id}/delete', name: 'app_document_delete', methods: ['POST'])]
 	public function delete(Document $document): JsonResponse

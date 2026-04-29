@@ -9,11 +9,32 @@
     array (
     ),
   ),
-  '@hotwired/turbo' => 
+  'pdfjs-dist' => 
   array (
-    'version' => '7.3.0',
+    'version' => '5.4.394',
     'dependencies' => 
     array (
+    ),
+    'extraFiles' => 
+    array (
+    ),
+  ),
+  '@hotwired/turbo' => 
+  array (
+    'version' => '8.0.20',
+    'dependencies' => 
+    array (
+    ),
+    'extraFiles' => 
+    array (
+    ),
+  ),
+  '@hotwired/hotwire-native-bridge' => 
+  array (
+    'version' => '1.2.2',
+    'dependencies' => 
+    array (
+      0 => '@hotwired/stimulus',
     ),
     'extraFiles' => 
     array (

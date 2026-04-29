@@ -21,8 +21,8 @@ class SecurityHeadersListener
 		$response = $event->getResponse();
 		$headers = $response->headers;
 
-		// Anti-Clickjacking : Empêche l'iframe embedding
-		$headers->set('X-Frame-Options', 'DENY');
+		// Anti-Clickjacking : Autoriser l'iframe pour la même origine (SAMEORIGIN) - utile pour l'aperçu des documents
+		$headers->set('X-Frame-Options', 'SAMEORIGIN');
 
 		// Anti-MIME sniffing : Force respect du Content-Type
 		$headers->set('X-Content-Type-Options', 'nosniff');
@@ -36,22 +36,8 @@ class SecurityHeadersListener
 			$headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
 		}
 
-		// Content Security Policy : Restreint sources de contenu
-		// Adapté pour API (pas de scripts/styles inline)
-		$csp = implode('; ', [
-			"default-src 'self'",
-			"script-src 'self'",
-			"style-src 'self' 'unsafe-inline'", // unsafe-inline pour emails HTML
-			"img-src 'self' data: https:",
-			"font-src 'self'",
-			"connect-src 'self'",
-			"frame-ancestors 'none'", // Equivalent à X-Frame-Options DENY
-			"base-uri 'self'",
-			"form-action 'self'",
-			"object-src 'none'",
-			"upgrade-insecure-requests"
-		]);
-		$headers->set('Content-Security-Policy', $csp);
+		// Let Nelmio Security Bundle handle CSP headers (including nonce generation)
+		// If no Nelmio CSP is set, avoid overriding CSP to keep Twig-generated nonces working
 
 		// Referrer Policy : Contrôle info envoyée dans referer
 		$headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');

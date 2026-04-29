@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block javascripts %}
+	{{ parent() }}
+{% endblock %}
+
+{% block body %}
+	<div class="min-h-screen flex flex-col bg-base-200">
+		<main class="flex-1 flex items-center justify-center p-2">
+			<section class="w-full max-w-6xl">
+
+				<!-- PDF Viewer Container (fills large portion of viewport) -->
+				<div data-controller="pdf-viewer" data-pdf-viewer-url-value="{{ fileUrl }}" class="bg-base-100 p-3 sm:p-6 rounded-xl shadow">
+					<div class="w-full bg-white rounded overflow-hidden">
+						<canvas data-pdf-viewer-target="canvas" class="w-full h-[65vh] sm:h-[75vh] lg:h-[85vh] mx-auto block"></canvas>
+					</div>
+
+					<!-- Loading -->
+					<div data-pdf-viewer-target="loader" class="flex justify-center py-4">
+						<span class="loading loading-ring loading-lg text-primary"></span>
+					</div>
+
+					<!-- Error -->
+					<div data-pdf-viewer-target="error" class="hidden alert alert-error mt-4">
+						<span>Impossible de charger le PDF.</span>
+					</div>
+
+				</div>
+
+			</section>
+		</main>
+	</div>
+{% endblock %}
