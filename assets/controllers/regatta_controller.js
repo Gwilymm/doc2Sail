@@ -1,6 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
+	static values = {
+		createUrl: String
+	};
 
 	async delete(event) {
 		event.preventDefault();
@@ -56,8 +59,7 @@ export default class extends Controller {
 		};
 
 		try {
-			const locale = document.documentElement.lang || 'fr';
-			const response = await fetch(`/${locale}/regatta/create`, {
+			const response = await fetch(this.createUrlValue || '/regatta/create', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

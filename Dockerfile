@@ -1,51 +1,70 @@
-FROM dunglas/frankenphp:1-php8.4
-
-# Préparer l'environnement pour apt non interactif
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Mettre à jour les paquets et installer les dépendances système nécessaires
-# Ces paquets fournissent les headers/libs que install-php-extensions recherche
-RUN apt-get update && apt-get install -y --no-install-recommends \
-	ca-certificates \
-	build-essential \
-	pkg-config \
-	libicu-dev \
-	libzip-dev \
-	libmbedtls-dev \
-	libpng-dev \
-	libjpeg-dev \
-	libfreetype6-dev \
-	libxml2-dev \
-	zlib1g-dev \
-	&& rm -rf /var/lib/apt/lists/*
-
-# Installer les extensions PHP nécessaires (install-php-extensions gère les modules PECL)
-RUN install-php-extensions \
-	pdo_mysql \
-	pdo_sqlite \
-	gd \
-	intl \
-	zip \
-	opcache \
-	xsl \
-	gmp
-
-# Installer Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+FROM dunglas/frankenphp:1-php8.4-alpine AS composer-builder
 
 WORKDIR /app
 
-# Copier les fichiers du projet
-COPY ./ .
+COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
+
+RUN install-php-extensions \
+    pdo_sqlite \
+    intl \
+    zip \
+    xsl \
+    gmp
+
+COPY composer.json composer.lock symfony.lock ./
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Désactiver le runtime FrankenPHP pour le dev (on utilisera le serveur PHP classique)
-#ENV APP_RUNTIME=Runtime\\FrankenPhpSymfony\\Runtime
-#ENV FRANKENPHP_CONFIG="worker ./public/index.php"
+RUN composer install \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist
 
-ENV SERVER_NAME=:80
+COPY . .
 
-RUN composer install 
+RUN composer dump-autoload
 
+FROM node:22-alpine AS assets-builder
 
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@10.19.0 --activate
+
+COPY package.json pnpm-lock.yaml ./
+COPY --from=composer-builder /app/vendor ./vendor
+
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+RUN pnpm run build
+
+FROM dunglas/frankenphp:1-php8.4-alpine
+
+ENV APP_ENV=dev \
+    COMPOSER_ALLOW_SUPERUSER=1 \
+    SERVER_NAME=:80
+
+WORKDIR /app
+
+RUN install-php-extensions \
+    pdo_sqlite \
+    opcache \
+    intl \
+    zip \
+    gd \
+    xsl \
+    gmp \
+    apcu
+
+COPY --from=composer-builder /app/vendor ./vendor
+COPY . .
+COPY --from=assets-builder /app/public/build ./public/build
+
+RUN mkdir -p var/cache var/log var/tmp public/uploads && \
+    chown -R www-data:www-data var public/uploads && \
+    chmod -R 775 var public/uploads && \
+    echo "upload_max_filesize=50M" > /usr/local/etc/php/conf.d/99-upload-size.ini && \
+    echo "post_max_size=50M" >> /usr/local/etc/php/conf.d/99-upload-size.ini
+
+EXPOSE 80
