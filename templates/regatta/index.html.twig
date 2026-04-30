@@ -80,7 +80,7 @@
 		<div class="modal-box">
 			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" data-close-dialog="#createRegattaModal">✕</button>
 			<h3 class="font-bold text-lg mb-4">{{ 'regatta.modal.create_title'|trans }}</h3>
-			<form id="createRegattaForm" data-action="submit->regatta#submitCreateRegatta">
+			<form id="createRegattaForm" method="post" action="{{ path('app_regatta_create') }}" data-controller="regatta" data-regatta-create-url-value="{{ path('app_regatta_create') }}" data-action="submit->regatta#submitCreateRegatta">
 				<div class="form-control mb-4">
 					<label class="label">
 						<span class="label-text">{{ 'regatta.form.name'|trans }}
