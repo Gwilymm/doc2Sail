@@ -1,5 +1,8 @@
+const { docType } = require('./theme/colors');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './app/**/*.{js,jsx,ts,tsx}',
     './components/**/*.{js,jsx,ts,tsx}',
@@ -9,27 +12,54 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Palette DaisyUI-inspired, alignée sur le web doc2sail
-        primary: '#0284c7',
-        'primary-focus': '#0369a1',
-        'primary-content': '#ffffff',
-        secondary: '#7c3aed',
-        'secondary-content': '#ffffff',
-        accent: '#0ea5e9',
-        neutral: '#1f2937',
-        'base-100': '#ffffff',
-        'base-200': '#f3f4f6',
-        'base-300': '#e5e7eb',
-        'base-content': '#1f2937',
-        info: '#0ea5e9',
-        success: '#22c55e',
-        warning: '#f59e0b',
-        error: '#ef4444',
+        // --- M3 semantic tokens (light/dark via CSS vars) ---
+        background:             'var(--color-background)',
+        'on-background':        'var(--color-on-background)',
+
+        surface:                'var(--color-surface)',
+        'on-surface':           'var(--color-on-surface)',
+        'surface-container':    'var(--color-surface-container)',
+        'surface-container-high': 'var(--color-surface-container-high)',
+
+        primary:                'var(--color-primary)',
+        'on-primary':           'var(--color-on-primary)',
+        'primary-container':    'var(--color-primary-container)',
+        'on-primary-container': 'var(--color-on-primary-container)',
+
+        secondary:              'var(--color-secondary)',
+        'on-secondary':         'var(--color-on-secondary)',
+        'secondary-container':  'var(--color-secondary-container)',
+        'on-secondary-container': 'var(--color-on-secondary-container)',
+
+        tertiary:               'var(--color-tertiary)',
+        'on-tertiary':          'var(--color-on-tertiary)',
+        'tertiary-container':   'var(--color-tertiary-container)',
+        'on-tertiary-container': 'var(--color-on-tertiary-container)',
+
+        outline:                'var(--color-outline)',
+        'outline-variant':      'var(--color-outline-variant)',
+
+        error:                  'var(--color-error)',
+        'on-error':             'var(--color-on-error)',
+
+        // --- Document type badges (static) ---
+        'doc-ac-bg':      docType.ac.bg,
+        'doc-ac-text':    docType.ac.text,
+        'doc-ic-bg':      docType.ic.bg,
+        'doc-ic-text':    docType.ic.text,
+        'doc-race-bg':    docType.race.bg,
+        'doc-race-text':  docType.race.text,
+        'doc-result-bg':  docType.result.bg,
+        'doc-result-text': docType.result.text,
+        'doc-jury-bg':    docType.jury.bg,
+        'doc-jury-text':  docType.jury.text,
+        'doc-safety-bg':  docType.safety.bg,
+        'doc-safety-text': docType.safety.text,
       },
       borderRadius: {
-        btn: '8px',
-        card: '12px',
-        badge: '9999px',
+        btn:    '8px',
+        card:   '12px',
+        badge:  '9999px',
       },
     },
   },

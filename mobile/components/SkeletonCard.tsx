@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { View, useWindowDimensions, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,54 +7,80 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import { useTheme } from '../context/ThemeContext';
 
-function SkeletonBlock({ className }: { className: string }) {
-  return <Animated.View className={`bg-gray-200 rounded-md ${className}`} />;
+function Block({ width, height, bg }: { width: ViewStyle['width']; height: number; bg: string }) {
+  return (
+    <View style={{ width, height, borderRadius: 4, backgroundColor: bg }} />
+  );
 }
 
 export function SkeletonCard() {
-  const opacity = useSharedValue(1);
+  const { isDark } = useTheme();
+  const { width: screenWidth } = useWindowDimensions();
+  const shimmerX = useSharedValue(-screenWidth);
+
+  const cardBg   = isDark ? '#082437' : '#FFFFFF';
+  const blockBg  = isDark ? '#143449' : '#E5E7EB';
+  const shimmerBg = isDark ? 'rgba(13,42,63,0.55)' : 'rgba(255,255,255,0.55)';
 
   useEffect(() => {
-    opacity.value = withRepeat(
-      withTiming(0.4, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+    shimmerX.value = withRepeat(
+      withTiming(screenWidth * 1.5, { duration: 1200, easing: Easing.linear }),
       -1,
-      true
+      false
     );
-  }, [opacity]);
+  }, [shimmerX, screenWidth]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
+  const shimmerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: shimmerX.value }, { skewX: '-20deg' }],
   }));
 
   return (
-    <Animated.View
-      style={[
-        animatedStyle,
-        {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.05,
-          shadowRadius: 6,
-          elevation: 1,
-        },
-      ]}
-      className="bg-white rounded-card px-4 py-4 flex-row items-start"
+    <View
+      style={{
+        backgroundColor: cardBg,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 16,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: isDark ? 0 : 0.05,
+        shadowRadius: 6,
+        elevation: isDark ? 0 : 1,
+      }}
     >
-      {/* Icon placeholder */}
-      <View className="w-10 h-10 rounded-full bg-gray-200 mr-3 mt-0.5 shrink-0" />
+      {/* Icône placeholder */}
+      <View
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          backgroundColor: blockBg,
+          marginRight: 12,
+          marginTop: 2,
+          flexShrink: 0,
+        }}
+      />
 
-      {/* Content placeholders */}
-      <View className="flex-1 gap-2">
-        {/* Title */}
-        <SkeletonBlock className="h-5 w-4/5" />
-        {/* Shorter second title line */}
-        <SkeletonBlock className="h-5 w-2/5" />
-        {/* Date */}
-        <SkeletonBlock className="h-3.5 w-3/5 mt-1" />
-        {/* Location */}
-        <SkeletonBlock className="h-3 w-2/5" />
+      {/* Lignes de texte */}
+      <View style={{ flex: 1, gap: 8 }}>
+        <Block width="80%" height={20} bg={blockBg} />
+        <Block width="40%" height={20} bg={blockBg} />
+        <Block width="60%" height={14} bg={blockBg} />
+        <Block width="40%" height={12} bg={blockBg} />
       </View>
-    </Animated.View>
+
+      {/* Shimmer */}
+      <Animated.View
+        style={[
+          { position: 'absolute', top: 0, bottom: 0, width: 80, backgroundColor: shimmerBg },
+          shimmerStyle,
+        ]}
+      />
+    </View>
   );
 }

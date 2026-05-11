@@ -25,6 +25,7 @@ export function useRegattas() {
     setError('');
 
     try {
+      if (__DEV__) await new Promise((r) => setTimeout(r, 1000));
       const res = await apiFetch('/api/regattas');
       if (!res.ok) throw new Error('Erreur lors du chargement');
       const data = await res.json();

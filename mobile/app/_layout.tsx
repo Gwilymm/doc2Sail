@@ -6,8 +6,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { ThemeProvider as AppThemeProvider, useTheme } from '../context/ThemeContext';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -38,6 +38,24 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Lit useTheme() (qui est dans AppThemeProvider) et passe le bon thème à React Navigation
+function ThemedStack() {
+  const { isDark } = useTheme();
+
+  return (
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <AuthGuard>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="public/[token]" options={{ headerShown: false }} />
+          <Stack.Screen name="regattas/new" options={{ presentation: 'modal', title: 'Nouvelle régate' }} />
+        </Stack>
+      </AuthGuard>
+    </ThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -53,24 +71,11 @@ export default function RootLayout() {
 
   if (!loaded) return null;
 
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AuthGuard>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="public/[token]" options={{ headerShown: false }} />
-            <Stack.Screen name="regattas/new" options={{ presentation: 'modal', title: 'Nouvelle régate' }} />
-          </Stack>
-        </AuthGuard>
-      </ThemeProvider>
-    </AuthProvider>
+    <AppThemeProvider>
+      <AuthProvider>
+        <ThemedStack />
+      </AuthProvider>
+    </AppThemeProvider>
   );
 }

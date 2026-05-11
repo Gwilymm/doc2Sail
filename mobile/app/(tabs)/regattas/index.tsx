@@ -4,35 +4,67 @@ import { useRegattas } from '../../../hooks/useRegattas';
 import { RegattaCard } from '../../../components/RegattaCard';
 import { SkeletonCard } from '../../../components/SkeletonCard';
 import { useAuth } from '../../../context/AuthContext';
+import { useTheme } from '../../../context/ThemeContext';
 
 export default function RegattasScreen() {
   const { regattas, loading, refreshing, error, refresh } = useRegattas();
   const { user } = useAuth();
   const router = useRouter();
+  const { isDark } = useTheme();
+
+  const colors = isDark ? {
+    background:       '#061B29',
+    surface:          '#082437',
+    onSurface:        '#EAF7FA',
+    onSurfaceVariant: '#78919A',
+    outlineVariant:   '#31515D',
+  } : {
+    background:       '#F6FAFB',
+    surface:          '#FFFFFF',
+    onSurface:        '#071D2B',
+    onSurfaceVariant: '#4A6572',
+    outlineVariant:   '#D3E0E4',
+  };
 
   return (
-    <View className="flex-1 bg-base-200">
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
-      <View className="bg-white px-4 pt-14 pb-4 border-b border-gray-100"
-        style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 2 }}
+      <View
+        style={{
+          backgroundColor: colors.surface,
+          paddingHorizontal: 16,
+          paddingTop: 56,
+          paddingBottom: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.outlineVariant,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: isDark ? 0 : 0.05,
+          shadowRadius: 3,
+          elevation: isDark ? 0 : 2,
+        }}
       >
-        <Text className="text-2xl font-bold text-base-content">Régates</Text>
+        <Text style={{ fontSize: 24, fontWeight: '700', color: colors.onSurface }}>Régates</Text>
         {user?.displayName ? (
-          <Text className="text-sm text-gray-400 mt-0.5">Bonjour, {user.displayName} 👋</Text>
+          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 2 }}>
+            Bonjour, {user.displayName} 👋
+          </Text>
         ) : null}
       </View>
 
       {loading ? (
-        <View className="p-4 gap-3">
+        <View style={{ padding: 16, gap: 12 }}>
           <SkeletonCard />
           <SkeletonCard />
           <SkeletonCard />
         </View>
       ) : error ? (
-        <View className="flex-1 items-center justify-center px-8">
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
           <Text style={{ fontSize: 40 }}>⚠️</Text>
-          <Text className="text-base-content font-semibold text-lg mt-4 text-center">Erreur de chargement</Text>
-          <Text className="text-gray-400 text-sm mt-1 text-center">{error}</Text>
+          <Text style={{ fontSize: 18, fontWeight: '600', color: colors.onSurface, marginTop: 16, textAlign: 'center' }}>
+            Erreur de chargement
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4, textAlign: 'center' }}>{error}</Text>
         </View>
       ) : (
         <FlatList
@@ -51,16 +83,20 @@ export default function RegattasScreen() {
             />
           )}
           ListEmptyComponent={
-            <View className="flex-1 items-center justify-center py-20">
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 80 }}>
               <Text style={{ fontSize: 48 }}>⛵</Text>
-              <Text className="text-base-content font-semibold text-lg mt-4">Aucune régate</Text>
-              <Text className="text-gray-400 text-sm mt-1 text-center px-8">
+              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.onSurface, marginTop: 16 }}>Aucune régate</Text>
+              <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4, textAlign: 'center', paddingHorizontal: 32 }}>
                 Créez votre première régate depuis le menu +.
               </Text>
             </View>
           }
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#0284c7" />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              tintColor={isDark ? '#8BD3E8' : '#0B4F6C'}
+            />
           }
         />
       )}
