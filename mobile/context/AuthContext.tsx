@@ -15,6 +15,7 @@ type AuthContextType = {
   user: AuthUser | null;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
+  updateDisplayName: (name: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -59,12 +60,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateDisplayName = useCallback(async (name: string) => {
+    const res = await apiFetch('/api/me', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ displayName: name.trim() || null }),
+    });
+    if (!res.ok) throw new Error('Erreur lors de la mise à jour');
+    const data = await res.json();
+    setUser((prev) => prev ? { ...prev, displayName: data.displayName } : prev);
+  }, []);
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
   return (
-    <AuthContext.Provider value={{ isLoading, isAuthenticated, user, checkAuth, logout }}>
+    <AuthContext.Provider value={{ isLoading, isAuthenticated, user, checkAuth, logout, updateDisplayName }}>
       {children}
     </AuthContext.Provider>
   );

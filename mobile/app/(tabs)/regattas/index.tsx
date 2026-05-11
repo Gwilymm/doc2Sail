@@ -1,4 +1,4 @@
-import { View, Text, FlatList, RefreshControl, Platform } from 'react-native';
+import { View, Text, FlatList, RefreshControl, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useRegattas } from '../../../hooks/useRegattas';
 import { RegattaCard } from '../../../components/RegattaCard';
@@ -7,7 +7,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
 
 export default function RegattasScreen() {
-  const { regattas, loading, refreshing, error, refresh } = useRegattas();
+  const { regattas, loading, refreshing, loadingMore, hasMore, error, refresh, loadMore } = useRegattas();
   const { user } = useAuth();
   const router = useRouter();
   const { isDark } = useTheme();
@@ -90,6 +90,15 @@ export default function RegattasScreen() {
                 Créez votre première régate depuis le menu +.
               </Text>
             </View>
+          }
+          onEndReached={hasMore ? loadMore : undefined}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={{ paddingVertical: 24, alignItems: 'center' }}>
+                <ActivityIndicator color={isDark ? '#8BD3E8' : '#0B4F6C'} />
+              </View>
+            ) : null
           }
           refreshControl={
             <RefreshControl
