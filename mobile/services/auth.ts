@@ -9,19 +9,20 @@ export async function requestMagicLink(email: string): Promise<void> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? 'Erreur lors de l\'envoi du lien');
+    throw new Error(body.error ?? 'Erreur lors de l\'envoi du code');
   }
 }
 
-export async function verifyMagicLink(token: string): Promise<{ token: string; refresh_token: string }> {
+export async function verifyCode(code: string): Promise<{ token: string; refresh_token: string }> {
   const res = await fetch(`${API_BASE_URL}/api/auth/verify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ code: code.trim().toUpperCase() }),
   });
 
   if (!res.ok) {
-    throw new Error('Token invalide ou expiré');
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? 'Code invalide ou expiré');
   }
 
   const data = await res.json();
@@ -34,8 +35,8 @@ export async function logout(): Promise<void> {
   await clearTokens();
 }
 
-// Dev only — obtenir un magic link sans email
-export async function devMagicLink(email: string): Promise<string> {
+// Dev only — obtenir un short code sans email
+export async function devGetCode(email: string): Promise<string> {
   if (!__DEV__) throw new Error('Dev only');
   const res = await fetch(`${API_BASE_URL}/api/auth/dev/magic`, {
     method: 'POST',
@@ -43,5 +44,5 @@ export async function devMagicLink(email: string): Promise<string> {
     body: JSON.stringify({ email }),
   });
   const data = await res.json();
-  return data.token;
+  return data.shortCode;
 }

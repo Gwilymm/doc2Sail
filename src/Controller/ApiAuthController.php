@@ -6,6 +6,7 @@ use App\Entity\MagicLink;
 use App\Repository\MagicLinkRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,6 +26,7 @@ class ApiAuthController extends AbstractController
 		private UserRepository $userRepository,
 		private MagicLinkRepository $magicLinkRepo,
 		private JWTTokenManagerInterface $jwtManager,
+		private RefreshTokenManagerInterface $refreshTokenManager,
 		private MailerInterface $mailer,
 		private ParameterBagInterface $params,
 		#[Autowire(service: 'limiter.magic_link_request_by_email')]
@@ -152,8 +154,16 @@ class ApiAuthController extends AbstractController
 		// Générer JWT + refresh token
 		$jwt = $this->jwtManager->create($user);
 
+		$expiry = new \DateTime('+30 days');
+		$refreshToken = $this->refreshTokenManager->create();
+		$refreshToken->setUsername($user->getUserIdentifier());
+		$refreshToken->setRefreshToken();
+		$refreshToken->setValid($expiry);
+		$this->refreshTokenManager->save($refreshToken);
+
 		return $this->json([
 			'token' => $jwt,
+			'refresh_token' => $refreshToken->getRefreshToken(),
 			'user' => [
 				'id' => $user->getId(),
 				'displayName' => $user->getDisplayName(),
