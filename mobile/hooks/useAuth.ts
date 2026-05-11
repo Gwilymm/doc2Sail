@@ -1,10 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getToken, clearTokens, apiFetch } from '../services/api';
 
+export type AuthUser = {
+  id: number;
+  displayName: string | null;
+  roles: string[];
+  regattasCount: number;
+  sharedRegattasCount: number;
+};
+
 type AuthState = {
   isLoading: boolean;
   isAuthenticated: boolean;
-  user: { email: string; id: number } | null;
+  user: AuthUser | null;
 };
 
 export function useAuth() {
