@@ -50,6 +50,7 @@ function ThemedStack() {
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="public/[token]" options={{ headerShown: false }} />
           <Stack.Screen name="regattas/new" options={{ presentation: 'modal', title: 'Nouvelle régate' }} />
+          <Stack.Screen name="regattas/[id]/upload" options={{ presentation: 'modal', title: 'Ajouter un fichier' }} />
         </Stack>
       </AuthGuard>
     </ThemeProvider>

@@ -60,7 +60,7 @@ export async function clearTokens(): Promise<void> {
   await SecureStore.deleteItemAsync(REFRESH_KEY);
 }
 
-async function refreshJwt(): Promise<string | null> {
+export async function refreshJwt(): Promise<string | null> {
   const refreshToken = await getRefreshToken();
   if (!refreshToken) return null;
 

@@ -41,13 +41,15 @@
 
 | Jour | Durée | Statut | Tâche | Fichiers cibles |
 |------|-------|--------|-------|-----------------|
-| J11 | 2h | ⬜ | Upload document avec `expo-document-picker` → `POST /api/documents` | `mobile/app/regattas/[id]/upload.tsx` |
-| J12 | 2h | ⬜ | Progress bar upload, gestion erreurs (taille, format MIME) | `mobile/components/UploadProgress.tsx` |
+| J11 | 2h | ✅ | Upload document avec `expo-document-picker` → `POST /api/documents` | `mobile/app/regattas/[id]/upload.tsx`, `mobile/services/documents.ts`, `src/Api/DocumentUploadController.php` |
+| J12 | 2h | ✅ | Progress bar upload intégrée, gestion erreurs taille/MIME, retry après refresh JWT | `mobile/app/regattas/[id]/upload.tsx`, `mobile/services/documents.ts` |
 | J13 | 2h | ⬜ | Vue publique `/r/{token}` sans auth (deep link + écran dédié) | `mobile/app/public/[token].tsx` |
 | J14 | 2h | ⬜ | Visionneuse PDF (`expo-web-browser` ou `react-native-pdf`) | `mobile/components/PdfViewer.tsx` |
 | J15 | 2h | ⬜ | QR code share : affichage (`react-native-qrcode-svg`) + partage natif (`expo-sharing`) | `mobile/components/QRShare.tsx` |
 
-**Livrable :** Upload fonctionnel, accès public, PDF consultable
+**Réalisé :** endpoint API multipart `POST /api/documents`, contrôle `REGATTA_EDIT`, upload via `DocumentUploader`, sélection fichier native, catégories, description, progress bar et refresh du détail au retour du modal.
+
+**Livrable restant :** accès public, PDF consultable, QR code share
 
 ---
 
@@ -109,7 +111,7 @@ mobile/
 │   │   │   └── [id].tsx         ← Détail régate
 │   │   └── profile.tsx
 │   ├── regattas/
-│   │   ├── [id]/upload.tsx      ← Upload document
+│   │   ├── [id]/upload.tsx      ← Upload document ✅
 │   │   └── new.tsx              ← Créer régate
 │   ├── public/
 │   │   └── [token].tsx          ← Vue publique /r/{token}
@@ -122,14 +124,14 @@ mobile/
 │   ├── navigation/
 │   │   └── CustomTabBar.tsx     ✅ (FAB flottant, speed dial contextuel)
 │   ├── PdfViewer.tsx
-│   ├── QRShare.tsx
-│   └── UploadProgress.tsx
+│   └── QRShare.tsx
 ├── context/
 │   ├── AuthContext.tsx          ✅
 │   └── ThemeContext.tsx         ✅ (M3, dark/light)
 ├── services/
 │   ├── api.ts                   ✅
 │   ├── auth.ts                  ✅
+│   ├── documents.ts             ✅ (upload multipart, progress, validation MIME/taille)
 │   ├── notifications.ts
 │   └── mercure.ts
 ├── hooks/

@@ -31,6 +31,9 @@ use Symfony\Component\Serializer\Attribute\Groups;
 			provider: \App\State\RegattaDocumentsProvider::class
 		),
 		new Post(
+			controller: \App\Api\DocumentUploadController::class,
+			deserialize: false,
+			inputFormats: ['multipart' => ['multipart/form-data']],
 			security: "is_granted('ROLE_USER')"
 		),
 		new Delete(

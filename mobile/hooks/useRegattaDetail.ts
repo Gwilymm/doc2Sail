@@ -56,12 +56,14 @@ export function useRegattaDetail(id: string | number) {
     load();
   }, [load]);
 
+  const refresh = useCallback(() => load(true), [load]);
+
   return {
     regatta,
     documents,
     loading,
     refreshing,
     error,
-    refresh: () => load(true),
+    refresh,
   };
 }
