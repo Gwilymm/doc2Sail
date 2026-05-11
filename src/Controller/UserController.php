@@ -22,13 +22,12 @@ class UserController extends AbstractController
 
 		return new JsonResponse([
 			'id' => $user->getId(),
-			'email' => $user->getUserIdentifier(), // Retourne l'ID pour l'instant
 			'displayName' => $user->getDisplayName(),
-			'firstName' => $user->getDisplayName(),
-			'lastName' => null,
 			'roles' => $user->getRoles(),
 			'createdAt' => $user->getCreatedAt()?->format(\DateTimeInterface::ATOM),
 			'lastLoginAt' => $user->getLastLoginAt()?->format(\DateTimeInterface::ATOM),
+			'regattasCount' => $user->getRegattas()->count(),
+			'sharedRegattasCount' => $user->getSharedRegattas()->count(),
 		]);
 	}
 }

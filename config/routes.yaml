@@ -10,6 +10,7 @@ api_controllers:
         path: ../src/Api/
         namespace: App\Api
     type: attribute
+    prefix: /
 
 controllers:
     resource:
@@ -22,9 +23,15 @@ controllers:
     #    _locale: "fr"
     requirements:
         _locale: en|fr
-    exclude: ../src/Controller/ApiAuthController.php
+    exclude:
+        - ../src/Controller/ApiAuthController.php
+        - ../src/Controller/UserController.php
 
-# API Auth sans préfixe locale (routes directes /api/...)
+# Contrôleurs API sans préfixe locale (routes directes /api/...)
 auth_api_no_locale:
     resource: ../src/Controller/ApiAuthController.php
+    type: attribute
+
+user_api_no_locale:
+    resource: ../src/Controller/UserController.php
     type: attribute

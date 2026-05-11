@@ -1,4 +1,5 @@
-import { TextInput, View, Text, forwardRef } from 'react-native';
+import { forwardRef } from 'react';
+import { TextInput, View, Text } from 'react-native';
 import type { TextInputProps } from 'react-native';
 
 type Props = TextInputProps & {
