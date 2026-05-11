@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { requestMagicLink, verifyCode, devGetCode } from '../../services/auth';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 
 type Step = 'email' | 'code';
 

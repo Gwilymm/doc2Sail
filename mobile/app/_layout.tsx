@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { useAuth } from '../hooks/useAuth';
+import { AuthProvider, useAuth } from '../context/AuthContext';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -60,16 +60,18 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AuthGuard>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="public/[token]" options={{ headerShown: false }} />
-          <Stack.Screen name="regattas/[id]" options={{ headerShown: true, title: '' }} />
-          <Stack.Screen name="regattas/new" options={{ presentation: 'modal', title: 'Nouvelle régate' }} />
-        </Stack>
-      </AuthGuard>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AuthGuard>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="public/[token]" options={{ headerShown: false }} />
+            <Stack.Screen name="regattas/[id]" options={{ headerShown: true, title: '' }} />
+            <Stack.Screen name="regattas/new" options={{ presentation: 'modal', title: 'Nouvelle régate' }} />
+          </Stack>
+        </AuthGuard>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
