@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { requestMagicLink, verifyCode, devGetCode } from '../../services/auth';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
 type Step = 'email' | 'code';
 
@@ -17,6 +18,21 @@ export default function LoginScreen() {
   const codeInputRef = useRef<TextInput>(null);
   const { checkAuth } = useAuth();
   const router = useRouter();
+  const { isDark } = useTheme();
+
+  const colors = isDark ? {
+    background: '#061B29',
+    surface:    '#082437',
+    onSurface:  '#EAF7FA',
+    onSurfaceVariant: '#78919A',
+    primary:    '#8BD3E8',
+  } : {
+    background: '#F6FAFB',
+    surface:    '#FFFFFF',
+    onSurface:  '#071D2B',
+    onSurfaceVariant: '#4A6572',
+    primary:    '#0B4F6C',
+  };
 
   async function handleRequestLink() {
     if (!email.trim()) return;
@@ -65,16 +81,35 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
       <ScrollView
         contentContainerStyle={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 }}
-        className="bg-base-200"
+        style={{ backgroundColor: colors.background }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="bg-base-100 rounded-card p-8 w-full max-w-sm items-center shadow">
-          <Text className="text-5xl mb-2">⛵</Text>
-          <Text className="text-3xl font-bold text-base-content mb-1">Doc2Sail</Text>
-          <Text className="text-sm text-base-content/60 mb-6">
+        <View
+          style={{
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            padding: 32,
+            width: '100%',
+            maxWidth: 360,
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: isDark ? 0 : 0.08,
+            shadowRadius: 12,
+            elevation: isDark ? 0 : 4,
+          }}
+        >
+          <Text style={{ fontSize: 48, marginBottom: 8 }}>⛵</Text>
+          <Text style={{ fontSize: 28, fontWeight: '700', color: colors.onSurface, marginBottom: 4 }}>
+            Doc2Sail
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginBottom: 24 }}>
             {step === 'email' ? 'Connexion sans mot de passe' : 'Vérification'}
           </Text>
 
@@ -92,7 +127,7 @@ export default function LoginScreen() {
                 returnKeyType="send"
                 error={error}
               />
-              <View className="mt-4 w-full gap-2">
+              <View style={{ marginTop: 16, width: '100%', gap: 8 }}>
                 <Button onPress={handleRequestLink} loading={loading} fullWidth>
                   Recevoir le code par email
                 </Button>
@@ -105,10 +140,11 @@ export default function LoginScreen() {
             </>
           ) : (
             <>
-              <Text className="text-sm text-center text-base-content/70 mb-1">
-                Code envoyé à <Text className="font-semibold text-primary">{email}</Text>
+              <Text style={{ fontSize: 14, textAlign: 'center', color: colors.onSurfaceVariant, marginBottom: 4 }}>
+                Code envoyé à{' '}
+                <Text style={{ fontWeight: '600', color: colors.primary }}>{email}</Text>
               </Text>
-              <Text className="text-xs text-center text-base-content/50 mb-4">
+              <Text style={{ fontSize: 12, textAlign: 'center', color: colors.onSurfaceVariant, marginBottom: 16 }}>
                 Saisissez le code à 6 caractères reçu par email
               </Text>
               <Input
@@ -125,7 +161,7 @@ export default function LoginScreen() {
                 error={error}
                 className="text-center text-2xl tracking-widest font-mono"
               />
-              <View className="mt-4 w-full gap-2">
+              <View style={{ marginTop: 16, width: '100%', gap: 8 }}>
                 <Button onPress={handleVerifyCode} loading={loading} fullWidth disabled={code.length < 4}>
                   Se connecter
                 </Button>

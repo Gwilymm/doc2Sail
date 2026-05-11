@@ -1,3 +1,57 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* M3 Light */
+    --color-background:              #F6FAFB;
+    --color-on-background:           #071D2B;
+    --color-surface:                 #FFFFFF;
+    --color-on-surface:              #071D2B;
+    --color-surface-container:       #EAF3F5;
+    --color-surface-container-high:  #E2ECEF;
+    --color-primary:                 #0B4F6C;
+    --color-on-primary:              #FFFFFF;
+    --color-primary-container:       #C7EAF3;
+    --color-on-primary-container:    #001F2A;
+    --color-secondary:               #2A6F7E;
+    --color-on-secondary:            #FFFFFF;
+    --color-secondary-container:     #CDECF1;
+    --color-on-secondary-container:  #062127;
+    --color-tertiary:                #F2B544;
+    --color-on-tertiary:             #3E2E00;
+    --color-tertiary-container:      #FFE3A6;
+    --color-on-tertiary-container:   #261A00;
+    --color-outline:                 #B7C8CE;
+    --color-outline-variant:         #D3E0E4;
+    --color-error:                   #BA1A1A;
+    --color-on-error:                #FFFFFF;
+  }
+
+  .dark {
+    /* M3 Dark */
+    --color-background:              #061B29;
+    --color-on-background:           #EAF7FA;
+    --color-surface:                 #082437;
+    --color-on-surface:              #EAF7FA;
+    --color-surface-container:       #0D2A3F;
+    --color-surface-container-high:  #143449;
+    --color-primary:                 #8BD3E8;
+    --color-on-primary:              #003543;
+    --color-primary-container:       #0B4F6C;
+    --color-on-primary-container:    #C7EAF3;
+    --color-secondary:               #9DD7E1;
+    --color-on-secondary:            #07363F;
+    --color-secondary-container:     #245B67;
+    --color-on-secondary-container:  #CDECF1;
+    --color-tertiary:                #FFD285;
+    --color-on-tertiary:             #432C00;
+    --color-tertiary-container:      #6A4700;
+    --color-on-tertiary-container:   #FFE3A6;
+    --color-outline:                 #78919A;
+    --color-outline-variant:         #31515D;
+    --color-error:                   #FFB4AB;
+    --color-on-error:                #690005;
+  }
+}

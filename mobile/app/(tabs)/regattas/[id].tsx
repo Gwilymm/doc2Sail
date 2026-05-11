@@ -1,26 +1,25 @@
-import { ScrollView, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, RefreshControl, TouchableOpacity, TextInput, Pressable } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRegattaDetail } from '../../../hooks/useRegattaDetail';
 import { DocumentRow } from '../../../components/DocumentRow';
-import { SkeletonCard } from '../../../components/SkeletonCard';
+import { FilterBottomSheet, SortKey } from '../../../components/FilterBottomSheet';
+import { CenteredLoader } from '../../../components/ui/CircularLoadingIndicator';
+import { useTheme } from '../../../context/ThemeContext';
 
 // --- Date helpers ---
 
 function formatDateRange(startIso: string, endIso: string): string {
   const start = new Date(startIso);
   const end = new Date(endIso);
-
   const startDay = start.getDate();
   const endDay = end.getDate();
   const startMonth = start.toLocaleDateString('fr-FR', { month: 'long' });
   const endMonth = end.toLocaleDateString('fr-FR', { month: 'long' });
   const year = end.getFullYear();
 
-  if (
-    start.getMonth() === end.getMonth() &&
-    start.getFullYear() === end.getFullYear()
-  ) {
+  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
     return `${startDay} – ${endDay} ${endMonth} ${year}`;
   }
   return `${startDay} ${startMonth} – ${endDay} ${endMonth} ${year}`;
@@ -30,49 +29,96 @@ function formatDateRange(startIso: string, endIso: string): string {
 
 export default function RegattaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { regatta, documents, loading, refreshing, error, refresh } =
-    useRegattaDetail(id);
-  const [activeCategory, setActiveCategory] = useState<string>('Tous');
+  const { regatta, documents, loading, refreshing, error, refresh } = useRegattaDetail(id);
+  const { isDark } = useTheme();
+
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
+  const [activeSort, setActiveSort] = useState<SortKey>('recent');
+  const [search, setSearch] = useState('');
+  const searchRef = useRef<TextInput>(null);
+
+  const colors = isDark ? {
+    background:         '#061B29',
+    surface:            '#082437',
+    surfaceContainerHigh: '#143449',
+    onSurface:          '#EAF7FA',
+    onSurfaceVariant:   '#78919A',
+    primary:            '#8BD3E8',
+    outlineVariant:     '#31515D',
+    searchBg:           '#0D2A3F',
+    searchIcon:         '#78919A',
+    searchText:         '#EAF7FA',
+    filterActive:       '#0B4F6C',
+    filterActiveBorder: '#8BD3E8',
+    filterActiveText:   '#C7EAF3',
+    chipBg:             '#0B4F6C',
+    chipText:           '#C7EAF3',
+    divider:            '#143449',
+  } : {
+    background:         '#F6FAFB',
+    surface:            '#FFFFFF',
+    surfaceContainerHigh: '#E2ECEF',
+    onSurface:          '#071D2B',
+    onSurfaceVariant:   '#4A6572',
+    primary:            '#0B4F6C',
+    outlineVariant:     '#D3E0E4',
+    searchBg:           '#EFEFEF',
+    searchIcon:         '#49454F',
+    searchText:         '#1C1B1F',
+    filterActive:       '#E0F2FE',
+    filterActiveBorder: '#0284C7',
+    filterActiveText:   '#0284C7',
+    chipBg:             '#E0F2FE',
+    chipText:           '#0369A1',
+    divider:            '#F3F4F6',
+  };
 
   const categories = useMemo(() => {
     const seen = new Set<string>();
     documents.forEach((d) => seen.add(d.category));
-    return ['Tous', ...Array.from(seen)];
+    return Array.from(seen);
   }, [documents]);
 
-  const filteredDocs = useMemo(
-    () =>
-      activeCategory === 'Tous'
-        ? documents
-        : documents.filter((d) => d.category === activeCategory),
-    [documents, activeCategory]
-  );
+  const filteredDocs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const filtered = documents.filter((d) => {
+      if (activeCategories.length > 0 && !activeCategories.includes(d.category)) return false;
+      if (q && !d.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
 
-  // Loading state
+    filtered.sort((a, b) => {
+      if (activeSort === 'name') return a.name.localeCompare(b.name, 'fr');
+      const dateA = new Date(a.uploadedAt).getTime();
+      const dateB = new Date(b.uploadedAt).getTime();
+      return activeSort === 'recent' ? dateB - dateA : dateA - dateB;
+    });
+
+    return filtered;
+  }, [documents, activeCategories, activeSort, search]);
+
+  const hasActiveFilter = activeCategories.length > 0;
+
   if (loading) {
     return (
       <>
         <Stack.Screen options={{ title: 'Chargement…' }} />
-        <ScrollView className="flex-1 bg-gray-50" contentContainerClassName="p-4 gap-3">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </ScrollView>
+        <CenteredLoader size={48} />
       </>
     );
   }
 
-  // Error state
   if (error) {
     return (
       <>
         <Stack.Screen options={{ title: 'Erreur' }} />
-        <View className="flex-1 bg-gray-50 items-center justify-center px-8 gap-3">
+        <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 12 }}>
           <Text style={{ fontSize: 36 }}>⚠️</Text>
-          <Text className="text-gray-800 font-semibold text-center text-base">
+          <Text style={{ fontSize: 16, fontWeight: '600', color: colors.onSurface, textAlign: 'center' }}>
             Impossible de charger la régate
           </Text>
-          <Text className="text-gray-500 text-sm text-center">{error}</Text>
+          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, textAlign: 'center' }}>{error}</Text>
         </View>
       </>
     );
@@ -87,161 +133,237 @@ export default function RegattaDetailScreen() {
       <Stack.Screen options={{ title: regatta.name }} />
 
       <ScrollView
-        className="flex-1 bg-gray-50"
-        contentContainerClassName="pb-10"
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={{ paddingBottom: 40 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor="#0284c7"
-            colors={['#0284c7']}
+            tintColor={isDark ? '#8BD3E8' : '#0B4F6C'}
+            colors={[isDark ? '#8BD3E8' : '#0B4F6C']}
           />
         }
       >
         {/* Header card */}
         <View
-          className="bg-white px-5 py-5 gap-3"
           style={{
+            backgroundColor: colors.surface,
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+            gap: 12,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.06,
+            shadowOpacity: isDark ? 0 : 0.06,
             shadowRadius: 6,
-            elevation: 2,
+            elevation: isDark ? 0 : 2,
           }}
         >
-          {/* Accent + title */}
-          <View className="flex-row items-start gap-3">
-            <View className="w-11 h-11 rounded-full bg-sky-50 items-center justify-center shrink-0 mt-0.5">
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: colors.surfaceContainerHigh,
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                marginTop: 2,
+              }}
+            >
               <Text style={{ fontSize: 22, lineHeight: 26 }}>⛵</Text>
             </View>
-            <View className="flex-1">
-              <Text className="text-gray-900 font-bold text-xl leading-snug">
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 20, fontWeight: '700', color: colors.onSurface, lineHeight: 26 }}>
                 {regatta.name}
               </Text>
-              <Text className="text-sky-600 text-sm mt-0.5">{dateRange}</Text>
+              <Text style={{ fontSize: 14, color: colors.primary, marginTop: 2 }}>{dateRange}</Text>
             </View>
           </View>
 
-          {/* Owner */}
-          <View className="flex-row items-center gap-1.5">
-            <Text className="text-gray-400 text-xs">Organisé par</Text>
-            <Text className="text-gray-700 text-xs font-semibold">
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>Organisé par</Text>
+            <Text style={{ fontSize: 12, fontWeight: '600', color: colors.onSurface }}>
               {regatta.owner.displayName ?? `Utilisateur #${regatta.owner.id}`}
             </Text>
           </View>
 
-          {/* Description */}
           {regatta.description ? (
-            <Text className="text-gray-600 text-sm leading-relaxed">
+            <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, lineHeight: 20 }}>
               {regatta.description}
             </Text>
           ) : null}
         </View>
 
-        {/* M3 Secondary Tabs */}
+        {/* M3 Search bar */}
         {documents.length > 0 && (
-          <View
+          <Pressable
+            onPress={() => searchRef.current?.focus()}
             style={{
               marginTop: 16,
-              backgroundColor: '#FFFFFF',
-              borderBottomWidth: 1,
-              borderBottomColor: 'rgba(28,27,31,0.12)',
+              marginHorizontal: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: colors.searchBg,
+              paddingLeft: 16,
+              paddingRight: 12,
+              gap: 16,
             }}
           >
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ flexDirection: 'row' }}
-            >
-              {categories.map((cat) => {
-                const active = cat === activeCategory;
-                return (
-                  <TouchableOpacity
-                    key={cat}
-                    onPress={() => setActiveCategory(cat)}
-                    activeOpacity={0.82}
-                    style={{
-                      height: 48,
-                      paddingHorizontal: 16,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        fontWeight: '500',
-                        letterSpacing: 0.1,
-                        color: active ? '#0284C7' : '#49454F',
-                      }}
-                    >
-                      {cat}
-                    </Text>
-                    {active && (
-                      <View
-                        style={{
-                          position: 'absolute',
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          height: 2,
-                          backgroundColor: '#0284C7',
-                        }}
-                      />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
+            <FontAwesome name="search" size={24} color={colors.searchIcon} />
+            <TextInput
+              ref={searchRef}
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Rechercher un document…"
+              placeholderTextColor={colors.searchIcon}
+              returnKeyType="search"
+              style={{
+                flex: 1,
+                fontSize: 16,
+                letterSpacing: 0.5,
+                color: colors.searchText,
+                paddingVertical: 0,
+              }}
+            />
+            {search.length > 0 && (
+              <TouchableOpacity
+                onPress={() => { setSearch(''); searchRef.current?.focus(); }}
+                hitSlop={8}
+                activeOpacity={0.7}
+                style={{ padding: 4 }}
+              >
+                <FontAwesome name="times-circle" size={20} color={colors.searchIcon} />
+              </TouchableOpacity>
+            )}
+          </Pressable>
         )}
 
-        {/* Documents section label */}
-        <View className="mt-3 px-4 mb-2">
-          <Text className="text-gray-500 text-xs font-semibold uppercase tracking-wide">
-            {filteredDocs.length} document{filteredDocs.length !== 1 ? 's' : ''}
-          </Text>
+        {/* Documents header row */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 20,
+            paddingHorizontal: 16,
+            marginBottom: 8,
+          }}
+        >
+          {/* Count + active filter chips */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: '500',
+                letterSpacing: 0.5,
+                color: colors.onSurfaceVariant,
+                textTransform: 'uppercase',
+              }}
+            >
+              {filteredDocs.length} document{filteredDocs.length !== 1 ? 's' : ''}
+            </Text>
+
+            {activeCategories.map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                onPress={() => setActiveCategories((prev) => prev.filter((c) => c !== cat))}
+                activeOpacity={0.7}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                  height: 24,
+                  paddingHorizontal: 10,
+                  borderRadius: 12,
+                  backgroundColor: colors.chipBg,
+                }}
+              >
+                <Text style={{ fontSize: 12, fontWeight: '500', color: colors.chipText }}>{cat}</Text>
+                <Text style={{ fontSize: 12, color: colors.chipText }}>×</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Filter button */}
+          {documents.length > 0 && (
+            <TouchableOpacity
+              onPress={() => setSheetVisible(true)}
+              activeOpacity={0.7}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                height: 32,
+                paddingHorizontal: 12,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: hasActiveFilter ? colors.filterActiveBorder : colors.outlineVariant,
+                backgroundColor: hasActiveFilter ? colors.filterActive : 'transparent',
+              }}
+            >
+              <Text style={{ fontSize: 16, lineHeight: 20 }}>⚙</Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '500',
+                  letterSpacing: 0.1,
+                  color: hasActiveFilter ? colors.filterActiveText : colors.onSurfaceVariant,
+                }}
+              >
+                Filtrer
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
+        {/* Documents list */}
         {documents.length === 0 ? (
-          /* Empty state */
           <View
-            className="mx-4 bg-white rounded-card py-10 items-center gap-2"
             style={{
+              marginHorizontal: 16,
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              paddingVertical: 40,
+              alignItems: 'center',
+              gap: 8,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.04,
+              shadowOpacity: isDark ? 0 : 0.04,
               shadowRadius: 4,
-              elevation: 1,
+              elevation: isDark ? 0 : 1,
             }}
           >
             <Text style={{ fontSize: 32 }}>📂</Text>
-            <Text className="text-gray-500 text-sm font-medium">Aucun document</Text>
-            <Text className="text-gray-400 text-xs text-center px-8">
+            <Text style={{ fontSize: 14, fontWeight: '500', color: colors.onSurfaceVariant }}>Aucun document</Text>
+            <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, textAlign: 'center', paddingHorizontal: 32 }}>
               Les documents partagés pour cette régate apparaîtront ici.
             </Text>
           </View>
         ) : filteredDocs.length === 0 ? (
-          /* Empty filtered state */
-          <View className="mx-4 py-8 items-center gap-1">
-            <Text className="text-gray-400 text-sm">Aucun document dans cette catégorie</Text>
+          <View style={{ marginHorizontal: 16, paddingVertical: 32, alignItems: 'center', gap: 4 }}>
+            <Text style={{ fontSize: 14, color: colors.onSurfaceVariant }}>Aucun document dans cette catégorie</Text>
           </View>
         ) : (
-          /* Documents list */
           <View
-            className="mx-4 bg-white rounded-card overflow-hidden"
             style={{
+              marginHorizontal: 16,
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              overflow: 'hidden',
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.06,
+              shadowOpacity: isDark ? 0 : 0.06,
               shadowRadius: 6,
-              elevation: 2,
+              elevation: isDark ? 0 : 2,
             }}
           >
             {filteredDocs.map((doc, index) => (
               <View key={doc.id}>
                 {index > 0 && (
-                  <View className="h-px bg-gray-100 mx-4" />
+                  <View style={{ height: 1, backgroundColor: colors.divider, marginHorizontal: 16 }} />
                 )}
                 <DocumentRow
                   document={doc}
@@ -254,6 +376,19 @@ export default function RegattaDetailScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Filter bottom sheet */}
+      <FilterBottomSheet
+        visible={sheetVisible}
+        categories={categories}
+        activeCategories={activeCategories}
+        activeSort={activeSort}
+        onApply={(cats, sort) => {
+          setActiveCategories(cats);
+          setActiveSort(sort);
+        }}
+        onClose={() => setSheetVisible(false)}
+      />
     </>
   );
 }

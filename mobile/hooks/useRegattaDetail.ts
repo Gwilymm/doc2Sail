@@ -26,6 +26,7 @@ export function useRegattaDetail(id: string | number) {
       setError('');
 
       try {
+        if (__DEV__) await new Promise((r) => setTimeout(r, 1000));
         const [regattaRes, docsRes] = await Promise.all([
           apiFetch(`/api/regattas/${id}`),
           apiFetch(`/api/regattas/${id}/documents`),
