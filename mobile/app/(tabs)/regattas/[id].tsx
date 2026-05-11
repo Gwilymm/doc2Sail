@@ -1,6 +1,6 @@
 import { ScrollView, View, Text, RefreshControl, TouchableOpacity, TextInput, Pressable } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
-import { useState, useMemo, useRef } from 'react';
+import { useFocusEffect, useLocalSearchParams, Stack } from 'expo-router';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRegattaDetail } from '../../../hooks/useRegattaDetail';
 import { DocumentRow } from '../../../components/DocumentRow';
@@ -37,6 +37,17 @@ export default function RegattaDetailScreen() {
   const [activeSort, setActiveSort] = useState<SortKey>('recent');
   const [search, setSearch] = useState('');
   const searchRef = useRef<TextInput>(null);
+  const didFocusOnce = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (didFocusOnce.current) {
+        refresh();
+      } else {
+        didFocusOnce.current = true;
+      }
+    }, [refresh])
+  );
 
   const colors = isDark ? {
     background:         '#061B29',

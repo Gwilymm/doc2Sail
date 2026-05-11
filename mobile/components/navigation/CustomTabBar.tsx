@@ -5,9 +5,9 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
+import { usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../../context/ThemeContext';
 
 // --- Layout constants ---
@@ -23,9 +23,15 @@ const LABEL_SIZE = 12;
 const TOP_PADDING = 10;
 const ICON_TO_LABEL = 4;
 const FADE_DURATION = 500;
+const DIAL_TOUCH_AREA = 260;
 
 // --- Speed dial action type ---
 type DialAction = { key: string; label: string; icon: React.ComponentProps<typeof FontAwesome>['name'] };
+type TabBarProps = {
+  state: any;
+  descriptors: Record<string, any>;
+  navigation: { navigate: (name: string, params?: object) => void };
+};
 
 const ACTIONS_REGATTAS_LIST: DialAction[] = [
   { key: 'new-regatta', label: 'Ajouter une régate', icon: 'flag' },
@@ -65,8 +71,10 @@ function PillIndicator({ x, color }: { x: number; color: string }) {
 }
 
 // --- Main tab bar ---
-export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
   const { isDark } = useTheme();
+  const router = useRouter();
+  const pathname = usePathname();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [fabOpen, setFabOpen] = useState(false);
@@ -89,9 +97,25 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   // Detect active nested screen to pick FAB actions
   const activeTabRoute = state.routes[state.index];
   const nestedState = activeTabRoute.state as { routes: { name: string }[]; index?: number } | undefined;
-  const nestedRouteName = nestedState?.routes[nestedState.index ?? 0]?.name;
+  const nestedRoute = nestedState?.routes[nestedState.index ?? 0] as { name: string; params?: { id?: string } } | undefined;
+  const nestedRouteName = nestedRoute?.name;
   const isOnDetail = activeTabRoute.name === 'regattas' && nestedRouteName === '[id]';
   const dialActions = isOnDetail ? ACTIONS_REGATTA_DETAIL : ACTIONS_REGATTAS_LIST;
+  const pathnameRegattaId = pathname.match(/\/regattas\/([^/]+)/)?.[1];
+
+  function handleDialAction(action: DialAction) {
+    setFabOpen(false);
+    if (action.key === 'new-regatta') {
+      router.push('/regattas/new');
+      return;
+    }
+    if (action.key === 'upload') {
+      const regattaId = nestedRoute?.params?.id ?? pathnameRegattaId;
+      if (regattaId) {
+        router.push(`/regattas/${encodeURIComponent(regattaId)}/upload`);
+      }
+    }
+  }
 
   // Split routes left / right
   const half = Math.ceil(state.routes.length / 2);
@@ -144,7 +168,17 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   }
 
   return (
-    <View style={{ height: barH, overflow: 'visible' }}>
+    <View
+      pointerEvents="box-none"
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: barH + DIAL_TOUCH_AREA,
+        overflow: 'visible',
+      }}
+    >
 
       {/* Speed dial */}
       {fabOpen && (
@@ -155,10 +189,17 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             alignSelf: 'center',
             alignItems: 'flex-end',
             gap: 12,
+            zIndex: 30,
+            elevation: 30,
           }}
         >
           {dialActions.map((action) => (
-            <View key={action.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <TouchableOpacity
+              key={action.key}
+              onPress={() => handleDialAction(action)}
+              activeOpacity={0.82}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+            >
               <View
                 style={{
                   backgroundColor: DIAL_LABEL_BG,
@@ -176,9 +217,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                   {action.label}
                 </Text>
               </View>
-              <TouchableOpacity
-                onPress={() => setFabOpen(false)}
-                activeOpacity={0.82}
+              <View
                 style={{
                   width: DIAL_SIZE,
                   height: DIAL_SIZE,
@@ -194,8 +233,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                 }}
               >
                 <FontAwesome name={action.icon} size={16} color={DIAL_ICON} />
-              </TouchableOpacity>
-            </View>
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
       )}
@@ -203,13 +242,14 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
       {/* Scrim */}
       {fabOpen && (
         <Pressable
-          style={{ position: 'absolute', top: -800, left: -width, right: -width, bottom: barH, zIndex: 0 }}
+          style={{ position: 'absolute', top: -800, left: -width, right: -width, bottom: barH, zIndex: 10, elevation: 10 }}
           onPress={() => setFabOpen(false)}
         />
       )}
 
       {/* Flat bar */}
       <View
+        pointerEvents="box-none"
         style={{
           position: 'absolute',
           bottom: 0,
@@ -248,7 +288,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         activeOpacity={0.85}
         style={{
           position: 'absolute',
-          top: -FAB_PROTRUSION,
+          bottom: barH - FAB_SIZE + FAB_PROTRUSION,
           left: cx - FAB_SIZE / 2,
           width: FAB_SIZE,
           height: FAB_SIZE,
