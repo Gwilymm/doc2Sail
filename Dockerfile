@@ -61,6 +61,8 @@ COPY --from=composer-builder /app/vendor ./vendor
 COPY . .
 COPY --from=assets-builder /app/public/build ./public/build
 
+RUN php bin/console asset-map:compile
+
 RUN mkdir -p var/cache var/log var/tmp public/uploads && \
     chown -R www-data:www-data var public/uploads && \
     chmod -R 775 var public/uploads && \

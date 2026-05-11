@@ -15,7 +15,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: RegattaRepository::class)]
 #[ApiResource(
@@ -25,6 +25,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Get(normalizationContext: ['groups' => ['regatta:read', 'regatta:read:details']]),
         new GetCollection(
+            normalizationContext: ['groups' => ['regatta:read']],
             paginationEnabled: true,
             paginationItemsPerPage: 20,
             paginationMaximumItemsPerPage: 100

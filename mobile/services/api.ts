@@ -1,8 +1,20 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+
+// In Expo Go on a physical device, localhost = the phone itself.
+// Constants.expoConfig.hostUri gives the Metro server host (= dev machine IP).
+function getDevBaseUrl(): string {
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) {
+    const host = hostUri.split(':')[0]; // strip Metro port
+    return `http://${host}:8000`;
+  }
+  return 'http://localhost:8000'; // simulator fallback
+}
 
 export const API_BASE_URL = __DEV__
-  ? 'http://localhost:8000'
+  ? getDevBaseUrl()
   : 'https://doc2sail.com';
 
 const TOKEN_KEY = 'jwt_token';

@@ -6,8 +6,11 @@ export type Regatta = {
   name: string;
   startDate: string;
   endDate: string;
-  description?: string;
-  accessToken: string;
+  description?: string | null;
+  accessToken: string | null;
+  createdAt: string;
+  owner: { id: number; displayName: string | null };
+  coOwners: { id: number; displayName: string | null }[];
 };
 
 export function useRegattas() {
@@ -25,7 +28,7 @@ export function useRegattas() {
       const res = await apiFetch('/api/regattas');
       if (!res.ok) throw new Error('Erreur lors du chargement');
       const data = await res.json();
-      setRegattas(data['hydra:member'] ?? data);
+      setRegattas(data['member'] ?? data['hydra:member'] ?? data);
     } catch (e: any) {
       setError(e.message ?? 'Erreur réseau');
     } finally {

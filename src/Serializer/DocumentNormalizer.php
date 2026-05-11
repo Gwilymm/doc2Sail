@@ -12,7 +12,8 @@ class DocumentNormalizer implements NormalizerInterface, NormalizerAwareInterfac
 {
 	use NormalizerAwareTrait;
 
-	private const ALREADY_CALLED = 'DOCUMENT_NORMALIZER_ALREADY_CALLED';
+	/** @var array<int, true> IDs currently being normalized (prevents recursion) */
+	private static array $normalizing = [];
 
 	public function __construct(
 		private UrlGeneratorInterface $urlGenerator
@@ -21,18 +22,25 @@ class DocumentNormalizer implements NormalizerInterface, NormalizerAwareInterfac
 	public function normalize($object, ?string $format = null, array $context = []): array
 	{
 		/** @var Document $object */
-		$context[self::ALREADY_CALLED] = true;
+		$id = $object->getId();
+		self::$normalizing[$id] = true;
 
 		$data = $this->normalizer->normalize($object, $format, $context);
 
-		// Ajouter le lien de téléchargement
-		$data['downloadUrl'] = $this->urlGenerator->generate(
-			'api_documents_download',
-			['id' => $object->getId()],
-			UrlGeneratorInterface::ABSOLUTE_URL
-		);
+		unset(self::$normalizing[$id]);
 
-		// Ajouter la taille formatée
+		if ($object->getId() !== null) {
+			try {
+				$data['downloadUrl'] = $this->urlGenerator->generate(
+					'api_documents_download',
+					['id' => $id],
+					UrlGeneratorInterface::ABSOLUTE_URL
+				);
+			} catch (\Exception) {
+				// route non disponible dans ce contexte
+			}
+		}
+
 		$data['formattedSize'] = $object->getFormattedSize();
 
 		return $data;
@@ -40,18 +48,19 @@ class DocumentNormalizer implements NormalizerInterface, NormalizerAwareInterfac
 
 	public function supportsNormalization($data, ?string $format = null, array $context = []): bool
 	{
-		// Éviter la récursion infinie
-		if (isset($context[self::ALREADY_CALLED])) {
+		if (!$data instanceof Document) {
 			return false;
 		}
 
-		return $data instanceof Document;
+		$id = $data->getId();
+
+		return $id === null || !isset(self::$normalizing[$id]);
 	}
 
 	public function getSupportedTypes(?string $format): array
 	{
 		return [
-			Document::class => true,
+			Document::class => false, // false = not cacheable (stateful guard)
 		];
 	}
 }

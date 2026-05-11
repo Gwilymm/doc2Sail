@@ -106,92 +106,12 @@ document.documentElement.setAttribute( 'data-theme', theme );
 			{# Footer partial included on every page (sticky bottom via flex layout) #}
 			{% include 'partials/footer.html.twig' %}
 
-			<!-- Service Worker Registration -->
+			<!-- Désinstalle l'ancien service worker si encore présent -->
 				<script nonce="{{ csp_nonce('script') }}">
-
-					if ( 'serviceWorker' in navigator )
-{
-
-
-
-
-
-window.addEventListener( 'load', () => {
-
-
-
-
-
-const isPublicPage = window.location.pathname.startsWith( '/r/' );
-if ( isPublicPage )
-{
-
-
-
-
-
-console.log( '📍 Page publique détectée, SW spécifique sera chargé' );
-return;
-
-
-
-
-
-}
-navigator.serviceWorker.getRegistrations().then( regs => regs.forEach( reg => reg.update() ) );
-navigator.serviceWorker.register( '/sw.js' ).then( reg => {
-
-
-
-
-
-console.log( '✅ Service Worker enregistré', reg );
-window.addEventListener( 'beforeinstallprompt', e => {
-
-
-
-
-
-console.log( '💾 PWA peut être installée' );
-window.deferredPrompt = e;
-
-
-
-
-
-} );
-
-
-
-
-
-} ).catch( err => console.warn( '⚠️ Service Worker error:', err ) );
-
-
-
-
-
-} );
-
-
-
-
-
-}
-else
-{
-
-
-
-
-
-console.log( '❌ Service Worker non supporté par ce navigateur' );
-
-
-
-
-
-}
+					if ('serviceWorker' in navigator) {
+						navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+					}
 				</script>
 		</body>
 	</html>
+

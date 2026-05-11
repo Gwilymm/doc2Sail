@@ -26,6 +26,7 @@ controllers:
     exclude:
         - ../src/Controller/ApiAuthController.php
         - ../src/Controller/UserController.php
+        - ../src/Controller/DevTokenController.php
 
 # Contrôleurs API sans préfixe locale (routes directes /api/...)
 auth_api_no_locale:
@@ -34,4 +35,8 @@ auth_api_no_locale:
 
 user_api_no_locale:
     resource: ../src/Controller/UserController.php
+    type: attribute
+
+dev_api_no_locale:
+    resource: ../src/Controller/DevTokenController.php
     type: attribute

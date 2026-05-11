@@ -94,6 +94,8 @@ COPY . .
 # Copier les assets compilés par Node (public/build/)
 COPY --from=assets-builder /app/public/build ./public/build
 
+RUN php bin/console asset-map:compile --env=prod
+
 # Créer les répertoires nécessaires et définir les permissions
 RUN mkdir -p var/cache var/log var/tmp public/uploads && \
     chown -R www-data:www-data var public/uploads && \

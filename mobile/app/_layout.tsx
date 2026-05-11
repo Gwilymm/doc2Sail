@@ -67,7 +67,6 @@ function RootLayoutNav() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="public/[token]" options={{ headerShown: false }} />
-            <Stack.Screen name="regattas/[id]" options={{ headerShown: true, title: '' }} />
             <Stack.Screen name="regattas/new" options={{ presentation: 'modal', title: 'Nouvelle régate' }} />
           </Stack>
         </AuthGuard>

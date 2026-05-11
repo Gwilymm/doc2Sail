@@ -1,0 +1,5 @@
+stimulus:
+    # Local Stimulus controllers are bundled by Webpack Encore via controllers.json.
+    # AssetMapper is only used here for vendor bundle assets.
+    controller_paths:
+        - "%kernel.project_dir%/config/asset_mapper/controllers"
