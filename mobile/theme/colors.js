@@ -1,76 +1,173 @@
-const m3 = {
+// theme/colors.js
+
+const palette = {
+  primary: {
+    a0: '#0b4f6c',
+    a10: '#2a5f7a',
+    a20: '#437088',
+    a30: '#5a8197',
+    a40: '#7092a5',
+    a50: '#87a4b4',
+    a60: '#9fb5c3',
+    a70: '#b6c7d1',
+    a80: '#cedae1',
+    a90: '#e6ecf0',
+  },
+
+  surface: {
+    app: '#050a14',
+    a0: '#121212',
+    a10: '#252525',
+    a20: '#393939',
+    a30: '#4f4f4f',
+    a40: '#666666',
+    a50: '#7d7d7d',
+    a60: '#969696',
+    a70: '#afafaf',
+  },
+
+  tonal: {
+    a0: '#151d22',
+    a10: '#283035',
+    a20: '#3c4448',
+    a30: '#52585d',
+    a40: '#686e72',
+    a50: '#808588',
+    a60: '#989c9f',
+    a70: '#b1b4b6',
+  },
+
+  success: {
+    a0: '#22946e',
+    a10: '#5ba989',
+    a20: '#86bfa6',
+  },
+
+  warning: {
+    a0: '#a87a2a',
+    a10: '#ba945a',
+    a20: '#cbae84',
+  },
+
+  danger: {
+    a0: '#9c2121',
+    a10: '#b4544c',
+    a20: '#ca7f77',
+  },
+
+  info: {
+    a0: '#21498a',
+    a10: '#4b6ca2',
+    a20: '#7590ba',
+  },
+};
+
+const themeVars = {
   light: {
-    background: '#F6FAFB',
-    onBackground: '#071D2B',
+    '--color-background': palette.primary.a90,
+    '--color-on-background': palette.surface.a0,
 
-    surface: '#FFFFFF',
-    onSurface: '#071D2B',
+    '--color-surface': '#ffffff',
+    '--color-on-surface': palette.surface.a0,
 
-    surfaceContainer: '#EAF3F5',
-    surfaceContainerHigh: '#E2ECEF',
+    '--color-surface-container': '#f7fafb',
+    '--color-surface-container-high': palette.primary.a80,
 
-    primary: '#0B4F6C',
-    onPrimary: '#FFFFFF',
-    primaryContainer: '#C7EAF3',
-    onPrimaryContainer: '#001F2A',
+    '--color-primary': palette.primary.a0,
+    '--color-on-primary': '#ffffff',
 
-    secondary: '#2A6F7E',
-    onSecondary: '#FFFFFF',
-    secondaryContainer: '#CDECF1',
-    onSecondaryContainer: '#062127',
+    '--color-primary-container': palette.primary.a80,
+    '--color-on-primary-container': palette.surface.a0,
 
-    tertiary: '#F2B544',
-    onTertiary: '#3E2E00',
-    tertiaryContainer: '#FFE3A6',
-    onTertiaryContainer: '#261A00',
+    '--color-secondary': palette.primary.a20,
+    '--color-on-secondary': '#ffffff',
 
-    outline: '#B7C8CE',
-    outlineVariant: '#D3E0E4',
+    '--color-secondary-container': palette.primary.a80,
+    '--color-on-secondary-container': palette.surface.a0,
 
-    error: '#BA1A1A',
-    onError: '#FFFFFF',
+    '--color-tertiary': palette.warning.a0,
+    '--color-on-tertiary': '#ffffff',
+
+    '--color-tertiary-container': palette.warning.a20,
+    '--color-on-tertiary-container': '#241800',
+
+    '--color-outline': palette.primary.a70,
+    '--color-outline-variant': palette.primary.a80,
+
+    '--color-error': palette.danger.a0,
+    '--color-on-error': '#ffffff',
   },
 
   dark: {
-    background: '#061B29',
-    onBackground: '#EAF7FA',
+    '--color-background': palette.surface.app,
+    '--color-on-background': palette.primary.a90,
 
-    surface: '#082437',
-    onSurface: '#EAF7FA',
+    '--color-surface': palette.surface.a0,
+    '--color-on-surface': palette.primary.a90,
 
-    surfaceContainer: '#0D2A3F',
-    surfaceContainerHigh: '#143449',
+    '--color-surface-container': palette.tonal.a0,
+    '--color-surface-container-high': palette.tonal.a10,
 
-    primary: '#8BD3E8',
-    onPrimary: '#003543',
-    primaryContainer: '#0B4F6C',
-    onPrimaryContainer: '#C7EAF3',
+    '--color-primary': palette.primary.a70,
+    '--color-on-primary': palette.surface.app,
 
-    secondary: '#9DD7E1',
-    onSecondary: '#07363F',
-    secondaryContainer: '#245B67',
-    onSecondaryContainer: '#CDECF1',
+    '--color-primary-container': palette.primary.a0,
+    '--color-on-primary-container': palette.primary.a90,
 
-    tertiary: '#FFD285',
-    onTertiary: '#432C00',
-    tertiaryContainer: '#6A4700',
-    onTertiaryContainer: '#FFE3A6',
+    '--color-secondary': palette.primary.a50,
+    '--color-on-secondary': palette.surface.app,
 
-    outline: '#78919A',
-    outlineVariant: '#31515D',
+    '--color-secondary-container': palette.primary.a10,
+    '--color-on-secondary-container': palette.primary.a90,
 
-    error: '#FFB4AB',
-    onError: '#690005',
+    '--color-tertiary': palette.warning.a20,
+    '--color-on-tertiary': '#241800',
+
+    '--color-tertiary-container': palette.warning.a0,
+    '--color-on-tertiary-container': '#fff2d2',
+
+    '--color-outline': palette.tonal.a20,
+    '--color-outline-variant': palette.tonal.a10,
+
+    '--color-error': palette.danger.a20,
+    '--color-on-error': '#3a0505',
   },
 };
 
 const docType = {
-  ac:     { bg: '#C7EAF3', text: '#003543' },
-  ic:     { bg: '#E0E7FF', text: '#253060' },
-  race:   { bg: '#DDF7ED', text: '#0F5138' },
-  result: { bg: '#E9F8D8', text: '#365314' },
-  jury:   { bg: '#FFE3A6', text: '#5A3B00' },
-  safety: { bg: '#FFDAD6', text: '#690005' },
+  ac: {
+    bg: palette.primary.a80,
+    text: palette.primary.a0,
+  },
+
+  ic: {
+    bg: palette.info.a20,
+    text: '#0f2347',
+  },
+
+  race: {
+    bg: palette.success.a20,
+    text: '#063325',
+  },
+
+  result: {
+    bg: '#dcebc9',
+    text: '#2f3f1f',
+  },
+
+  jury: {
+    bg: palette.warning.a20,
+    text: '#3a2700',
+  },
+
+  safety: {
+    bg: palette.danger.a20,
+    text: '#4a0808',
+  },
 };
 
-module.exports = { m3, docType };
+module.exports = {
+  palette,
+  themeVars,
+  docType,
+};
