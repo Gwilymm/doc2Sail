@@ -22,10 +22,8 @@
 	</div>
 
 	<!-- Header -->
-	<div
-		class="mb-8" data-controller="native-share" data-native-share-title-value="{{ regatta.name|e('html_attr') }}" data-native-share-text-value="Documents de régate {{ regatta.name|e('html_attr') }}" data-native-share-url-value="{{ app.request.uri|e('html_attr') }}">
+	<div class="mb-8">
 		<!-- Banner de téléchargement hors ligne -->
-		{% if not ux_is_native() %}
 		<div id="offlineBanner" class="alert alert-info mb-4 hidden">
 			<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewbox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -79,7 +77,6 @@
 				</div>
 			</div>
 		</div>
-		{% endif %}
 
 		<div class="flex items-center gap-3">
 
@@ -92,11 +89,6 @@
 					<p class="text-sm text-base-content/60 mt-2">{{ regatta.description }}</p>
 				{% endif %}
 			</div>
-			{% if ux_is_native() %}
-				<button type="button" class="btn btn-primary btn-sm" data-action="click->native-share#share">
-					Partager
-				</button>
-			{% endif %}
 		</div>
 	</div>
 
@@ -238,15 +230,13 @@
 			<button>Fermer</button>
 		</form>
 	</dialog>
-	{% if not ux_is_native() %}
-		<!-- Install PWA Button -->
-		<div>
-			<button id="installBtn" class="btn btn-primary fixed bottom-4 right-4 hidden shadow-lg">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-				</svg>
-				Installer l'app
-			</button>
-		</div>
-	{% endif %}
+	<!-- Install PWA Button -->
+	<div>
+		<button id="installBtn" class="btn btn-primary fixed bottom-4 right-4 hidden shadow-lg">
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+			</svg>
+			Installer l'app
+		</button>
+	</div>
 {% endblock %}

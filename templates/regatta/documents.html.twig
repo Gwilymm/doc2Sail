@@ -9,7 +9,7 @@
 	{% include '_navbar.html.twig' %}
 
 	<div
-		class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document native-share" data-document-regatta-id-value="{{ regatta.id }}" data-document-default-category-value="{{ defaultCategory }}" data-native-share-title-value="{{ regatta.name|e('html_attr') }}" data-native-share-text-value="Documents de régate {{ regatta.name|e('html_attr') }}" data-native-share-url-value="{{ url('app_regatta_public', {token: regatta.accessToken}) }}">
+		class="container mx-auto px-4 py-8 max-w-7xl" data-controller="document" data-document-regatta-id-value="{{ regatta.id }}" data-document-default-category-value="{{ defaultCategory }}">
 		<!-- Header -->
 		<div class="mb-8">
 			<div class="flex items-center justify-between mb-4">
@@ -21,11 +21,6 @@
 							-
 							{{ regatta.endDate|date('d/m/Y') }}</p>
 					</div>
-					{% if ux_is_native() %}
-						<button type="button" class="btn btn-primary btn-sm" data-action="click->native-share#share">
-							Partager
-						</button>
-					{% endif %}
 				</div>
 
 				<!-- Desktop buttons - hidden on mobile -->
