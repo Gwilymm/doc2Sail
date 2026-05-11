@@ -1,8 +1,9 @@
 framework:
     asset_mapper:
-        # The paths to make available to the asset mapper.
-        paths:
-            - assets/
+        # Application assets are built with Webpack Encore.
+        # Keep AssetMapper for bundle assets, including API Platform Swagger UI.
+        paths: []
+        importmap_path: "%kernel.project_dir%/config/importmap.php"
         missing_import_mode: strict
 
 when@prod:

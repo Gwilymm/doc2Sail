@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,32 +18,22 @@ class DevTokenController extends AbstractController
 	public function getToken(
 		EntityManagerInterface $em,
 		JWTTokenManagerInterface $jwtManager,
+		RefreshTokenGeneratorInterface $refreshTokenGenerator,
 		RefreshTokenManagerInterface $refreshTokenManager
 	): JsonResponse {
-		// En développement seulement !
 		if ($_ENV['APP_ENV'] !== 'dev') {
 			return new JsonResponse(['error' => 'Only available in dev environment'], 403);
 		}
 
-		// Récupère le premier utilisateur
 		$user = $em->getRepository(User::class)->findOneBy([]);
 
 		if (!$user) {
 			return new JsonResponse(['error' => 'No user found'], 404);
 		}
 
-		// Génère le JWT
 		$token = $jwtManager->create($user);
 
-		// Génère le refresh token
-		$datetime = new \DateTime();
-		$datetime->modify('+2592000 seconds'); // 30 jours
-
-		$refreshToken = $refreshTokenManager->create();
-		$refreshToken->setUsername($user->getUserIdentifier());
-		$refreshToken->setRefreshToken();
-		$refreshToken->setValid($datetime);
-
+		$refreshToken = $refreshTokenGenerator->createForUserWithTtl($user, 2592000);
 		$refreshTokenManager->save($refreshToken);
 
 		return new JsonResponse([

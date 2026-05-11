@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"/home/gwilym/Documents/Perso/doc2Sail/mobile/app/\\(tabs\\)/regattas\" && \\\\ *)",
+      "Bash(sed -i \"s|from '../../hooks/|from '../../../hooks/|g; s|from '../../components/|from '../../../components/|g; s|from '../../context/|from '../../../context/|g; s|from '../../services/|from '../../../services/|g\" \"/home/gwilym/Documents/Perso/doc2Sail/mobile/app/\\(tabs\\)/regattas/[id].tsx\")",
+      "Bash(curl -s -I -X OPTIONS http://localhost:8000/api/regattas/8 -H 'Origin: http://localhost:8081' -H 'Access-Control-Request-Method: GET')",
+      "Bash(python3 -c ' *)"
+    ],
+    "additionalDirectories": [
+      "/home/gwilym/Documents/Perso/doc2Sail/mobile/app/regattas",
+      "/home/gwilym/Documents/Perso/doc2Sail/mobile/app/(tabs)/regattas"
+    ]
+  }
+}

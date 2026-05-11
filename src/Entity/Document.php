@@ -11,7 +11,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Delete;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: DocumentRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -22,6 +22,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 	operations: [
 		new Get(normalizationContext: ['groups' => ['document:read', 'document:read:details']]),
 		new GetCollection(
+			normalizationContext: ['groups' => ['document:read']],
 			uriTemplate: '/regattas/{regattaId}/documents',
 			uriVariables: ['regattaId'],
 			paginationEnabled: true,

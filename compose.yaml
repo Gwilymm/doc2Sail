@@ -10,6 +10,7 @@ services:
       - "443:443/udp"
     volumes:
       - .:/app
+      - public_assets:/app/public/assets
     environment:
       APP_ENV: dev
       APP_SECRET: ${APP_SECRET:-changeme}
@@ -59,6 +60,7 @@ services:
   ###< symfony/mercure ###
 
 volumes:
+  public_assets:
   mercure_data:
   mercure_config:
 ###< symfony/mercure-bundle ###
