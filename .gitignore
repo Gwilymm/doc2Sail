@@ -35,3 +35,5 @@ CLAUDE.md
 /assets/vendor/
 ###< symfony/asset-mapper ###
 android/
+Docs/SECURITY_AUDIT_RECOMMANDATIONS.md
+Docs/SECURITY_REVIEW_2026-05-12.md
