@@ -33,7 +33,9 @@ class ApiAuthController extends AbstractController
 		private ParameterBagInterface $params,
 		#[Autowire(service: 'limiter.magic_link_request_by_email')]
 		private RateLimiterFactoryInterface $magicLinkLimiter,
-		private LoggerInterface $logger
+		private LoggerInterface $logger,
+		#[Autowire('%env(APP_SECRET)%')]
+		private string $appSecret,
 	) {}
 
 	/**
@@ -107,7 +109,7 @@ class ApiAuthController extends AbstractController
 		// Créer le magic link
 		$magicLink = new MagicLink();
 		$magicLink->setUser($user);
-		$magicLink->setEmailHash(hash('sha256', $email)); // Hash SHA-256 de l'email
+		$magicLink->setEmailHash($this->hashMagicLinkEmail($email));
 		$magicLink->setIpAddress($request->getClientIp());
 		$magicLink->setUserAgent($request->headers->get('User-Agent'));
 
@@ -246,6 +248,7 @@ class ApiAuthController extends AbstractController
 
 		$magic = new MagicLink();
 		$magic->setUser($user);
+		$magic->setEmailHash($this->hashMagicLinkEmail($email));
 		$this->em->persist($magic);
 		$this->em->flush();
 
@@ -254,5 +257,10 @@ class ApiAuthController extends AbstractController
 			'shortCode' => $magic->getPlainShortCode(),
 			'expiresAt' => $magic->getExpiresAt()->format(DATE_ATOM)
 		]);
+	}
+
+	private function hashMagicLinkEmail(string $email): string
+	{
+		return hash_hmac('sha256', trim(strtolower($email)), $this->appSecret);
 	}
 }

@@ -8,6 +8,9 @@ use App\Entity\User;
 use App\Repository\MagicLinkRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -48,20 +51,30 @@ class ApiAuthControllerTest extends TestCase
 		?UserRepository $userRepo = null,
 		?MagicLinkRepository $magicLinkRepo = null,
 		?JWTTokenManagerInterface $jwtManager = null,
+		?RefreshTokenGeneratorInterface $refreshTokenGenerator = null,
+		?RefreshTokenManagerInterface $refreshTokenManager = null,
 		?MailerInterface $mailer = null,
 		?ParameterBagInterface $params = null,
 		?RateLimiterFactoryInterface $rateLimiter = null,
-		?LoggerInterface $logger = null
+		?LoggerInterface $logger = null,
+		string $appSecret = 'test-secret'
 	): ApiAuthController {
+		$defaultRefreshToken = $this->createMock(RefreshTokenInterface::class);
+		$defaultRefreshTokenGenerator = $this->createMock(RefreshTokenGeneratorInterface::class);
+		$defaultRefreshTokenGenerator->method('createForUserWithTtl')->willReturn($defaultRefreshToken);
+
 		$controller = new ApiAuthController(
 			$em ?? $this->createMock(EntityManagerInterface::class),
 			$userRepo ?? $this->createMock(UserRepository::class),
 			$magicLinkRepo ?? $this->createMock(MagicLinkRepository::class),
 			$jwtManager ?? $this->createMock(JWTTokenManagerInterface::class),
+			$refreshTokenGenerator ?? $defaultRefreshTokenGenerator,
+			$refreshTokenManager ?? $this->createMock(RefreshTokenManagerInterface::class),
 			$mailer ?? $this->createMock(MailerInterface::class),
 			$params ?? $this->createMock(ParameterBagInterface::class),
 			$rateLimiter ?? $this->createAcceptingRateLimiter(),
-			$logger ?? $this->createMock(LoggerInterface::class)
+			$logger ?? $this->createMock(LoggerInterface::class),
+			$appSecret
 		);
 
 		// Injecter un container avec Twig pour renderView()
@@ -102,7 +115,9 @@ class ApiAuthControllerTest extends TestCase
 			->willReturn(0); // Pas de liens actifs
 
 		$em = $this->createMock(EntityManagerInterface::class);
-		$em->expects($this->once())->method('persist')->with($this->isInstanceOf(MagicLink::class));
+		$em->expects($this->once())->method('persist')->with($this->callback(
+			fn (MagicLink $magicLink): bool => $magicLink->getEmailHash() === hash_hmac('sha256', $email, 'test-secret')
+		));
 		$em->expects($this->once())->method('flush');
 
 		$mailer = $this->createMock(MailerInterface::class);
@@ -116,7 +131,14 @@ class ApiAuthControllerTest extends TestCase
 
 		$rateLimiter = $this->createAcceptingRateLimiter();
 
-		$controller = $this->createController($em, $userRepo, $magicLinkRepo, null, $mailer, $params, null, $rateLimiter);
+		$controller = $this->createController(
+			em: $em,
+			userRepo: $userRepo,
+			magicLinkRepo: $magicLinkRepo,
+			mailer: $mailer,
+			params: $params,
+			rateLimiter: $rateLimiter
+		);
 
 		$response = $controller->request($request);
 
@@ -166,7 +188,7 @@ class ApiAuthControllerTest extends TestCase
 	{
 		$email = 'test@example.com';
 		$code = 'ABC123';
-		$emailHash = hash('sha256', $email);
+		$emailHash = hash_hmac('sha256', $email, 'test-secret');
 
 		$request = new Request([], [], [], [], [], [], json_encode(['email' => $email, 'code' => $code]));
 		$request->setMethod('POST');
@@ -258,7 +280,7 @@ class ApiAuthControllerTest extends TestCase
 		$email = 'attacker@evil.com';
 		$correctEmail = 'victim@example.com';
 		$code = 'ABC123';
-		$correctEmailHash = hash('sha256', $correctEmail);
+		$correctEmailHash = hash_hmac('sha256', $correctEmail, 'test-secret');
 
 		$request = new Request([], [], [], [], [], [], json_encode(['email' => $email, 'code' => $code]));
 		$request->setMethod('POST');
