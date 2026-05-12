@@ -7,6 +7,7 @@ use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
+use App\Repository\DocumentRepository;
 use App\Repository\RegattaRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,10 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class QRCodeController extends AbstractController
 {
-    public function __construct(private RegattaRepository $regattaRepository) {}
+    public function __construct(
+        private RegattaRepository $regattaRepository,
+        private DocumentRepository $documentRepository,
+    ) {}
     #[Route('/qrcode/generate', name: 'app_qrcode_generate')]
     public function generate(): Response
     {
@@ -58,7 +62,7 @@ class QRCodeController extends AbstractController
         if ($type === 'document') {
             if ($id) {
                 try {
-                    $url = $this->generateUrl('app_document_view', ['id' => $id], UrlGeneratorInterface::ABSOLUTE_URL);
+                    $url = $this->generateDocumentQrUrl((int) $id);
                 } catch (RouteNotFoundException $e) {
                     $routeMissing = true;
                     $missingRoute = 'app_document_view';
@@ -172,7 +176,7 @@ class QRCodeController extends AbstractController
         if ($type === 'document') {
             if ($id) {
                 try {
-                    $url = $this->generateUrl('app_document_view', ['id' => $id], UrlGeneratorInterface::ABSOLUTE_URL);
+                    $url = $this->generateDocumentQrUrl((int) $id);
                 } catch (RouteNotFoundException $e) {
                     $url = $this->generateUrl('app_home', [], UrlGeneratorInterface::ABSOLUTE_URL);
                 }
@@ -245,5 +249,20 @@ class QRCodeController extends AbstractController
                 'Content-Disposition' => 'inline; filename="qrcode.png"'
             ]
         );
+    }
+
+    private function generateDocumentQrUrl(int $documentId): string
+    {
+        $document = $this->documentRepository->find($documentId);
+        $regatta = $document?->getRegatta();
+
+        if ($document && $regatta?->getAccessToken()) {
+            return $this->generateUrl('app_document_public_view', [
+                'token' => $regatta->getAccessToken(),
+                'id' => $document->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+
+        return $this->generateUrl('app_document_view', ['id' => $documentId], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 }

@@ -19,6 +19,13 @@ class DocumentViewerController extends AbstractController
 			throw $this->createNotFoundException('Document not found');
 		}
 
+		$regatta = $document->getRegatta();
+		if (! $regatta) {
+			throw $this->createNotFoundException('Document not found');
+		}
+
+		$this->denyAccessUnlessGranted('REGATTA_VIEW', $regatta);
+
 		// The PDF URL is passed as a query parameter `file` (encoded)
 		$file = $request->query->get('file');
 		if (! $file) {

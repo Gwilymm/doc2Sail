@@ -149,80 +149,49 @@ class DocumentController extends AbstractController
 	#[Route('/document/{id}/download', name: 'app_document_download')]
 	public function download(Document $document): BinaryFileResponse
 	{
-		$filePath = $this->getParameter('kernel.project_dir') . '/public/' . $document->getFilePath();
+		$this->denyAccessUnlessGranted('REGATTA_VIEW', $this->getDocumentRegatta($document));
 
-		if (!file_exists($filePath)) {
-			throw $this->createNotFoundException('Fichier non trouvé');
-		}
-
-
-
-		return $this->file($filePath, $document->getName());
+		return $this->downloadDocument($document);
 	}
 
 	#[Route('/document/{id}/file', name: 'app_document_file')]
 	public function serveInline(Document $document): BinaryFileResponse
 	{
-		$filePath = $this->getParameter('kernel.project_dir') . '/public/' . $document->getFilePath();
+		$this->denyAccessUnlessGranted('REGATTA_VIEW', $this->getDocumentRegatta($document));
 
-		if (!file_exists($filePath)) {
-			throw $this->createNotFoundException('Fichier non trouvé');
-		}
-
-		// Retourner en inline pour l'iframe / viewer
-		return parent::file($filePath)->setContentDisposition('inline', $document->getName());
+		return $this->serveDocumentInline($document);
 	}
 
 	#[Route('/document/{id}/view', name: 'app_document_view')]
 	public function view(Document $document): Response
 	{
-		// URLs publiques
-		$fileUrl = $this->generateUrl(
-			'app_document_file',
-			['id' => $document->getId()],
-			UrlGeneratorInterface::ABSOLUTE_URL
-		);
+		$this->denyAccessUnlessGranted('REGATTA_VIEW', $this->getDocumentRegatta($document));
 
-		$downloadUrl = $this->generateUrl(
-			'app_document_download',
-			['id' => $document->getId()],
-			UrlGeneratorInterface::ABSOLUTE_URL
-		);
+		return $this->renderDocumentView($document, 'app_document_file', 'app_document_download');
+	}
 
-		// Types détectés
-		$mime = (string) $document->getMimeType();
-		$extension = strtolower(pathinfo($document->getFilename(), PATHINFO_EXTENSION));
+	#[Route('/r/{token}/document/{id}/download', name: 'app_document_public_download')]
+	public function publicDownload(string $token, Document $document): BinaryFileResponse
+	{
+		$this->denyPublicDocumentAccess($token, $document);
 
-		$isImage  = str_starts_with($mime, 'image/');
-		$isPdf    = $mime === 'application/pdf';
-		$isOffice = in_array($extension, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
-		$isTxt    = in_array($extension, ['txt', 'md', 'json', 'csv', 'log']);
+		return $this->downloadDocument($document);
+	}
 
-		// Lecture TXT
-		$txtContent = null;
-		if ($isTxt) {
-			// Construction du chemin physique EXACT
-			$absolutePath = $_SERVER['DOCUMENT_ROOT']
-				. '/uploads/documents/'
-				. $document->getId()
-				. '/'
-				. $document->getFilename();
+	#[Route('/r/{token}/document/{id}/file', name: 'app_document_public_file')]
+	public function publicServeInline(string $token, Document $document): BinaryFileResponse
+	{
+		$this->denyPublicDocumentAccess($token, $document);
 
-			if (is_readable($absolutePath)) {
-				$txtContent = file_get_contents($absolutePath);
-			}
-		}
+		return $this->serveDocumentInline($document);
+	}
 
-		return $this->render('document/view.html.twig', [
-			'document'     => $document,
-			'fileUrl'      => $fileUrl,
-			'downloadUrl'  => $downloadUrl,
-			'isImage'      => $isImage,
-			'isPdf'        => $isPdf,
-			'isOffice'     => $isOffice,
-			'isTxt'        => $isTxt,
-			'txtContent'   => $txtContent,
-		]);
+	#[Route('/r/{token}/document/{id}/view', name: 'app_document_public_view')]
+	public function publicView(string $token, Document $document): Response
+	{
+		$this->denyPublicDocumentAccess($token, $document);
+
+		return $this->renderDocumentView($document, 'app_document_public_file', 'app_document_public_download', ['token' => $token]);
 	}
 
 
@@ -232,7 +201,9 @@ class DocumentController extends AbstractController
 	public function delete(Document $document): JsonResponse
 	{
 		try {
-			$regattaId = $document->getRegatta() ? $document->getRegatta()->getId() : null;
+			$regatta = $this->getDocumentRegatta($document);
+			$this->denyAccessUnlessGranted('REGATTA_EDIT', $regatta);
+			$regattaId = $regatta->getId();
 
 			// Supprimer le fichier physique
 			$this->documentUploader->delete($document->getFilename(), $regattaId);
@@ -245,6 +216,8 @@ class DocumentController extends AbstractController
 				'success' => true,
 				'message' => 'Document supprimé avec succès'
 			]);
+		} catch (AccessDeniedException $e) {
+			throw $e;
 		} catch (\Exception $e) {
 			return new JsonResponse(['error' => $e->getMessage()], 500);
 		}
@@ -274,5 +247,84 @@ class DocumentController extends AbstractController
 		}, $documents);
 
 		return new JsonResponse($result);
+	}
+
+	private function getDocumentRegatta(Document $document): Regatta
+	{
+		$regatta = $document->getRegatta();
+		if (!$regatta) {
+			throw $this->createNotFoundException('Document non trouvé');
+		}
+
+		return $regatta;
+	}
+
+	private function denyPublicDocumentAccess(string $token, Document $document): void
+	{
+		$regatta = $this->getDocumentRegatta($document);
+		if (!hash_equals((string) $regatta->getAccessToken(), $token)) {
+			throw $this->createNotFoundException('Document non trouvé');
+		}
+	}
+
+	private function downloadDocument(Document $document): BinaryFileResponse
+	{
+		$filePath = $this->getDocumentPath($document);
+
+		return $this->file($filePath, $document->getName());
+	}
+
+	private function serveDocumentInline(Document $document): BinaryFileResponse
+	{
+		$filePath = $this->getDocumentPath($document);
+
+		return parent::file($filePath)->setContentDisposition('inline', $document->getName());
+	}
+
+	private function getDocumentPath(Document $document): string
+	{
+		$filePath = $this->getParameter('kernel.project_dir') . '/public/' . $document->getFilePath();
+
+		if (!file_exists($filePath)) {
+			throw $this->createNotFoundException('Fichier non trouvé');
+		}
+
+		return $filePath;
+	}
+
+	private function renderDocumentView(
+		Document $document,
+		string $fileRoute,
+		string $downloadRoute,
+		array $routeParameters = [],
+	): Response {
+		$routeParameters['id'] = $document->getId();
+
+		$fileUrl = $this->generateUrl($fileRoute, $routeParameters, UrlGeneratorInterface::ABSOLUTE_URL);
+		$downloadUrl = $this->generateUrl($downloadRoute, $routeParameters, UrlGeneratorInterface::ABSOLUTE_URL);
+
+		$mime = (string) $document->getMimeType();
+		$extension = strtolower(pathinfo($document->getFilename(), PATHINFO_EXTENSION));
+
+		$isImage  = str_starts_with($mime, 'image/');
+		$isPdf    = $mime === 'application/pdf';
+		$isOffice = in_array($extension, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
+		$isTxt    = in_array($extension, ['txt', 'md', 'json', 'csv', 'log']);
+
+		$txtContent = null;
+		if ($isTxt && is_readable($this->getDocumentPath($document))) {
+			$txtContent = file_get_contents($this->getDocumentPath($document));
+		}
+
+		return $this->render('document/view.html.twig', [
+			'document'     => $document,
+			'fileUrl'      => $fileUrl,
+			'downloadUrl'  => $downloadUrl,
+			'isImage'      => $isImage,
+			'isPdf'        => $isPdf,
+			'isOffice'     => $isOffice,
+			'isTxt'        => $isTxt,
+			'txtContent'   => $txtContent,
+		]);
 	}
 }

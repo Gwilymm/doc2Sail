@@ -33,6 +33,8 @@ class ApiAuthController extends AbstractController
 		private ParameterBagInterface $params,
 		#[Autowire(service: 'limiter.magic_link_request_by_email')]
 		private RateLimiterFactoryInterface $magicLinkLimiter,
+		#[Autowire(service: 'limiter.magic_link_verify')]
+		private RateLimiterFactoryInterface $verifyLimiter,
 		private LoggerInterface $logger,
 		#[Autowire('%env(APP_SECRET)%')]
 		private string $appSecret,
@@ -141,6 +143,17 @@ class ApiAuthController extends AbstractController
 			return $this->json(['error' => 'Code requis'], 400);
 		}
 
+		$code = trim(strtoupper((string) $code));
+		$limiter = $this->verifyLimiter->create($request->getClientIp() ?? 'noip');
+		$limit = $limiter->consume(1);
+
+		if (!$limit->isAccepted()) {
+			return $this->json([
+				'error' => 'Trop de tentatives. Veuillez réessayer plus tard.',
+				'retryAfter' => $limit->getRetryAfter()?->getTimestamp()
+			], 429);
+		}
+
 		// Trouver le magic link par code court
 		$magicLink = $this->magicLinkRepo->findByShortCode($code);
 
@@ -228,35 +241,6 @@ class ApiAuthController extends AbstractController
 
 		$jwt = $this->jwtManager->create($user);
 		return $this->json(['token' => $jwt]);
-	}
-
-	#[Route('/api/auth/dev/magic', name: 'api_auth_dev_magic', methods: ['POST'])]
-	public function generateDevMagic(Request $request): JsonResponse
-	{
-		// Only allowed in dev
-		if ($this->getParameter('kernel.environment') !== 'dev') {
-			return $this->json(['error' => 'Not allowed'], 403);
-		}
-
-		$data = json_decode($request->getContent(), true);
-		$email = $data['email'] ?? null;
-		if (!$email) {
-			return $this->json(['error' => 'Email missing'], 400);
-		}
-
-		$user = $this->userRepository->findOrCreateByEmail($email);
-
-		$magic = new MagicLink();
-		$magic->setUser($user);
-		$magic->setEmailHash($this->hashMagicLinkEmail($email));
-		$this->em->persist($magic);
-		$this->em->flush();
-
-		return $this->json([
-			'token' => $magic->getToken(),
-			'shortCode' => $magic->getPlainShortCode(),
-			'expiresAt' => $magic->getExpiresAt()->format(DATE_ATOM)
-		]);
 	}
 
 	private function hashMagicLinkEmail(string $email): string

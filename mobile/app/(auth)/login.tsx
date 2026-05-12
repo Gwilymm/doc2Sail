@@ -3,7 +3,7 @@ import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput } fro
 import { useRouter } from 'expo-router';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { requestMagicLink, verifyCode, devGetCode } from '../../services/auth';
+import { requestMagicLink, verifyCode } from '../../services/auth';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -64,22 +64,6 @@ export default function LoginScreen() {
     }
   }
 
-  async function handleDevLogin() {
-    setLoading(true);
-    setError('');
-    try {
-      const devEmail = email.trim() || 'marin.davies@gmail.com';
-      const shortCode = await devGetCode(devEmail);
-      await verifyCode(shortCode);
-      await checkAuth();
-      router.replace('/(tabs)/regattas');
-    } catch (e: any) {
-      setError(e.message ?? 'Erreur dev login');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -131,11 +115,6 @@ export default function LoginScreen() {
                 <Button onPress={handleRequestLink} loading={loading} fullWidth>
                   Recevoir le code par email
                 </Button>
-                {__DEV__ && (
-                  <Button onPress={handleDevLogin} variant="ghost" fullWidth loading={loading}>
-                    ⚡ Dev : connexion directe
-                  </Button>
-                )}
               </View>
             </>
           ) : (

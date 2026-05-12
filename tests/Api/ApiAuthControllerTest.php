@@ -56,6 +56,7 @@ class ApiAuthControllerTest extends TestCase
 		?MailerInterface $mailer = null,
 		?ParameterBagInterface $params = null,
 		?RateLimiterFactoryInterface $rateLimiter = null,
+		?RateLimiterFactoryInterface $verifyLimiter = null,
 		?LoggerInterface $logger = null,
 		string $appSecret = 'test-secret'
 	): ApiAuthController {
@@ -73,6 +74,7 @@ class ApiAuthControllerTest extends TestCase
 			$mailer ?? $this->createMock(MailerInterface::class),
 			$params ?? $this->createMock(ParameterBagInterface::class),
 			$rateLimiter ?? $this->createAcceptingRateLimiter(),
+			$verifyLimiter ?? $this->createAcceptingRateLimiter(),
 			$logger ?? $this->createMock(LoggerInterface::class),
 			$appSecret
 		);
@@ -219,15 +221,13 @@ class ApiAuthControllerTest extends TestCase
 			->with($user)
 			->willReturn('fake.jwt.token');
 
-		$rateLimiter = $this->createAcceptingRateLimiter();
-
 		$controller = $this->createController(
 			em: $em,
 			magicLinkRepo: $magicLinkRepo,
 			jwtManager: $jwtManager
 		);
 
-		$response = $controller->verify($request, $rateLimiter);
+		$response = $controller->verify($request);
 
 		$this->assertEquals(200, $response->getStatusCode());
 
@@ -273,6 +273,27 @@ class ApiAuthControllerTest extends TestCase
 		$this->assertEquals(401, $response->getStatusCode());
 		$data = json_decode($response->getContent(), true);
 		$this->assertStringContainsString('Code invalide ou expiré', $data['error']);
+	}
+
+	public function testVerifyMagicLinkRateLimitExceeded(): void
+	{
+		$request = new Request([], [], [], [], [], [], json_encode(['code' => 'ABC123']));
+		$request->setMethod('POST');
+
+		$magicLinkRepo = $this->createMock(MagicLinkRepository::class);
+		$magicLinkRepo->expects($this->never())->method('findByShortCode');
+
+		$controller = $this->createController(
+			magicLinkRepo: $magicLinkRepo,
+			verifyLimiter: $this->createBlockingRateLimiter()
+		);
+
+		$response = $controller->verify($request);
+
+		$this->assertEquals(429, $response->getStatusCode());
+		$data = json_decode($response->getContent(), true);
+		$this->assertArrayHasKey('error', $data);
+		$this->assertArrayHasKey('retryAfter', $data);
 	}
 
 	public function testVerifyMagicLinkWithWrongEmail(): void

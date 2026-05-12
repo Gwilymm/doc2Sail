@@ -47,7 +47,7 @@ security:
                 secret: "%env(APP_SECRET)%"
                 lifetime: 86400 # 1 jour (24h)
                 path: "/"
-                always_remember_me: true # RGPD: seulement avec consentement
+                always_remember_me: false # RGPD: seulement avec consentement
 
             logout:
                 path: app_logout
@@ -66,7 +66,6 @@ security:
         - { path: ^/api/auth/request, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/verify, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/token, roles: PUBLIC_ACCESS }
-        - { path: ^/api/auth/dev/magic, roles: PUBLIC_ACCESS }
 
         # Documentation API Platform (Swagger)
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
@@ -75,10 +74,8 @@ security:
         # Partage public des régates par token opaque (liens / QR codes)
         - { path: "^/(?:[a-z]{2}/)?r/", roles: PUBLIC_ACCESS }
 
-        # Endpoints de développement (dev seulement) - anciennes routes avec locale
-        - { path: "^/(?:[a-z]{2}/)?api/dev", roles: PUBLIC_ACCESS }
+        # Anciennes routes d'authentification API avec locale
         - { path: "^/(?:[a-z]{2}/)?api/auth/token", roles: PUBLIC_ACCESS }
-        - { path: "^/(?:[a-z]{2}/)?api/auth/dev/magic", roles: PUBLIC_ACCESS }
 
         # Toutes les autres routes API nécessitent une authentification
         - { path: ^/api, roles: ROLE_USER }

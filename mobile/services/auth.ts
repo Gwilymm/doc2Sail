@@ -34,15 +34,3 @@ export async function verifyCode(code: string): Promise<{ token: string; refresh
 export async function logout(): Promise<void> {
   await clearTokens();
 }
-
-// Dev only — obtenir un short code sans email
-export async function devGetCode(email: string): Promise<string> {
-  if (!__DEV__) throw new Error('Dev only');
-  const res = await fetch(`${API_BASE_URL}/api/auth/dev/magic`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-  const data = await res.json();
-  return data.shortCode;
-}
