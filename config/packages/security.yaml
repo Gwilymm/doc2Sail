@@ -72,20 +72,20 @@ security:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api$, roles: PUBLIC_ACCESS }
 
+        # Partage public des régates par token opaque (liens / QR codes)
+        - { path: "^/(?:[a-z]{2}/)?r/", roles: PUBLIC_ACCESS }
+
         # Endpoints de développement (dev seulement) - anciennes routes avec locale
         - { path: "^/(?:[a-z]{2}/)?api/dev", roles: PUBLIC_ACCESS }
         - { path: "^/(?:[a-z]{2}/)?api/auth/token", roles: PUBLIC_ACCESS }
         - { path: "^/(?:[a-z]{2}/)?api/auth/dev/magic", roles: PUBLIC_ACCESS }
-
-        # API Platform: GET sur regattas est public, le reste nécessite authentification
-        # La sécurité fine (owner/coOwner) est gérée par les Voters dans l'ApiResource
-        - { path: ^/api/regattas, roles: PUBLIC_ACCESS, methods: [GET] }
 
         # Toutes les autres routes API nécessitent une authentification
         - { path: ^/api, roles: ROLE_USER }
 
         # Routes web classiques
         - { path: ^/regatta, roles: ROLE_USER }
+        - { path: ^/document, roles: ROLE_USER }
 
 when@test:
     security:

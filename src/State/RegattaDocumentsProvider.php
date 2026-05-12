@@ -8,12 +8,14 @@ use App\Entity\Document;
 use App\Entity\Regatta;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
-use ApiPlatform\State\Pagination\PaginatorInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class RegattaDocumentsProvider implements ProviderInterface
 {
 	public function __construct(
-		private EntityManagerInterface $entityManager
+		private EntityManagerInterface $entityManager,
+		private AuthorizationCheckerInterface $authorizationChecker,
 	) {}
 
 	public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
@@ -28,6 +30,10 @@ class RegattaDocumentsProvider implements ProviderInterface
 
 		if (!$regatta) {
 			return [];
+		}
+
+		if (!$this->authorizationChecker->isGranted('REGATTA_VIEW', $regatta)) {
+			throw new AccessDeniedException('Vous n\'avez pas accès à cette régate.');
 		}
 
 		$qb = $this->entityManager->getRepository(Document::class)

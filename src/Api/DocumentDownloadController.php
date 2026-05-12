@@ -22,6 +22,13 @@ class DocumentDownloadController extends AbstractController
 			throw new NotFoundHttpException('Document non trouvé');
 		}
 
+		$regatta = $document->getRegatta();
+		if (!$regatta) {
+			throw new NotFoundHttpException('Document non trouvé');
+		}
+
+		$this->denyAccessUnlessGranted('REGATTA_VIEW', $regatta);
+
 		$filePath = $this->getParameter('kernel.project_dir') . '/public/' . $document->getFilePath();
 
 		if (!file_exists($filePath)) {

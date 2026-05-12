@@ -26,19 +26,23 @@ class RegattaVoter extends Voter
 
 		// Si l'utilisateur n'est pas connecté, deny l'accès pour les opérations non-publiques
 		if (!$user instanceof User) {
-			// VIEW est public, donc on autorise
-			return $attribute === self::VIEW;
+			return false;
 		}
 
 		/** @var Regatta $regatta */
 		$regatta = $subject;
 
 		return match ($attribute) {
-			self::VIEW => true, // Tout utilisateur authentifié peut voir
+			self::VIEW => $this->canView($regatta, $user),
 			self::EDIT => $this->canEdit($regatta, $user),
 			self::DELETE => $this->canDelete($regatta, $user),
 			default => false,
 		};
+	}
+
+	private function canView(Regatta $regatta, User $user): bool
+	{
+		return $regatta->canManage($user);
 	}
 
 	private function canEdit(Regatta $regatta, User $user): bool

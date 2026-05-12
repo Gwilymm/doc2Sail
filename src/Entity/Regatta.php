@@ -23,12 +23,18 @@ use Symfony\Component\Serializer\Attribute\Groups;
     denormalizationContext: ['groups' => ['regatta:write']],
     paginationItemsPerPage: 20,
     operations: [
-        new Get(normalizationContext: ['groups' => ['regatta:read', 'regatta:read:details']]),
+        new Get(
+            normalizationContext: ['groups' => ['regatta:read', 'regatta:read:details']],
+            security: "is_granted('REGATTA_VIEW', object)",
+            securityMessage: "Vous n'avez pas accès à cette régate."
+        ),
         new GetCollection(
             normalizationContext: ['groups' => ['regatta:read']],
             paginationEnabled: true,
             paginationItemsPerPage: 20,
-            paginationMaximumItemsPerPage: 100
+            paginationMaximumItemsPerPage: 100,
+            security: "is_granted('ROLE_USER')",
+            provider: \App\State\UserRegattasProvider::class
         ),
         new Post(
             security: "is_granted('ROLE_USER')",
@@ -88,7 +94,6 @@ class Regatta
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(length: 64, unique: true, nullable: true)]
-    #[Groups(['regatta:read'])]
     private ?string $accessToken = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'regattas')]

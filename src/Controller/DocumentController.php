@@ -8,6 +8,7 @@ use App\Repository\DocumentRepository;
 use App\Service\DocumentUploader;
 use App\Service\RegattaNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class DocumentController extends AbstractController
@@ -26,6 +28,7 @@ class DocumentController extends AbstractController
 		private DocumentUploader $documentUploader,
 		private ValidatorInterface $validator,
 		private RegattaNotificationService $notificationService,
+		private LoggerInterface $logger,
 	) {}
 
 	#[Route('/admin', name: 'app_documents_admin')]
@@ -51,8 +54,16 @@ class DocumentController extends AbstractController
 				return new JsonResponse(['error' => 'Aucun fichier fourni'], 400);
 			}
 
+			if (!$regattaId) {
+				return new JsonResponse(['error' => 'La régate est obligatoire'], 400);
+			}
 
+			$regatta = $this->entityManager->getRepository(Regatta::class)->find((int) $regattaId);
+			if (!$regatta) {
+				return new JsonResponse(['error' => 'Régate introuvable'], 404);
+			}
 
+			$this->denyAccessUnlessGranted('REGATTA_EDIT', $regatta);
 
 			// Créer l'entité Document
 			$document = new Document();
@@ -61,14 +72,8 @@ class DocumentController extends AbstractController
 			// Si la catégorie est vide, utiliser la valeur par défaut
 			$document->setCategory($category ?: Document::DEFAULT_CATEGORY);
 			$document->setFile($file);
-			// Associer à une régate si spécifié
-			if ($regattaId) {
-				$regatta = $this->entityManager->getRepository(Regatta::class)->find($regattaId);
-				if ($regatta) {
-					$document->setRegatta($regatta);
-					error_log("Document linked to regatta: " . $regatta->getName());
-				}
-			}
+			$document->setRegatta($regatta);
+			error_log("Document linked to regatta: " . $regatta->getName());
 
 
 
@@ -130,12 +135,13 @@ class DocumentController extends AbstractController
 					'category' => $document->getCategory(),
 				]
 			]);
+		} catch (AccessDeniedException $e) {
+			throw $e;
 		} catch (\Exception $e) {
-			error_log("UPLOAD ERROR: " . $e->getMessage());
-			error_log("Stack trace: " . $e->getTraceAsString());
+			$this->logger->error('Upload failed', ['exception' => $e]);
+
 			return new JsonResponse([
-				'error' => $e->getMessage(),
-				'trace' => $e->getTraceAsString()
+				'error' => 'Une erreur est survenue lors de l\'upload du document.'
 			], 500);
 		}
 	}
