@@ -73,7 +73,9 @@ class DocumentController extends AbstractController
 			$document->setCategory($category ?: Document::DEFAULT_CATEGORY);
 			$document->setFile($file);
 			$document->setRegatta($regatta);
-			error_log("Document linked to regatta: " . $regatta->getName());
+			$this->logger->debug('Document linked to regatta before upload.', [
+				'regatta_id' => $regatta->getId(),
+			]);
 
 
 
@@ -85,29 +87,39 @@ class DocumentController extends AbstractController
 				foreach ($errors as $error) {
 					$errorMessages[] = $error->getMessage();
 				}
-				error_log("Validation errors: " . implode(', ', $errorMessages));
+				$this->logger->debug('Document upload validation failed.', [
+					'regatta_id' => $regatta->getId(),
+					'errors_count' => count($errorMessages),
+				]);
 				return new JsonResponse(['error' => implode(', ', $errorMessages)], 400);
 			}
 
-			error_log("Validation passed");
+			$this->logger->debug('Document upload validation passed.', [
+				'regatta_id' => $regatta->getId(),
+			]);
 
 			// Upload du fichier
-			error_log("Starting file upload...");
+			$this->logger->debug('Document file upload started.', [
+				'regatta_id' => $regatta->getId(),
+			]);
 			$uploadResult = $this->documentUploader->upload($file, $regattaId ? (int)$regattaId : null);
-			error_log("File uploaded: " . $uploadResult['filename']);
+			$this->logger->debug('Document file upload completed.', [
+				'regatta_id' => $regatta->getId(),
+			]);
 
 			$document->setFilename($uploadResult['filename']);
 			$document->setMimeType($uploadResult['mimeType']);
 			$document->setSize($uploadResult['size']);
 
-			error_log("About to persist entity...");
 			// Sauvegarder en BDD
 			$this->entityManager->persist($document);
 
-			error_log("About to flush...");
 			$this->entityManager->flush();
 
-			error_log("Document saved with ID: " . $document->getId());
+			$this->logger->info('document_uploaded', [
+				'regatta_id' => $regatta->getId(),
+				'document_id' => $document->getId(),
+			]);
 
 			// Envoyer la notification Mercure si le document est lié à une régate
 			if ($document->getRegatta()) {
@@ -117,9 +129,14 @@ class DocumentController extends AbstractController
 						$document->getName(),
 						$document->getCategory()
 					);
-					error_log("Notification sent for regatta: " . $document->getRegatta()->getAccessToken());
+					$this->logger->info('notification_sent', [
+						'regatta_id' => $regatta->getId(),
+					]);
 				} catch (\Exception $e) {
-					error_log("Notification error: " . $e->getMessage());
+					$this->logger->warning('notification_failed', [
+						'regatta_id' => $regatta->getId(),
+						'exception' => $e,
+					]);
 					// On ne bloque pas l'upload si la notification échoue
 				}
 			}

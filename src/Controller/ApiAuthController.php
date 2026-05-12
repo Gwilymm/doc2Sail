@@ -79,7 +79,11 @@ class ApiAuthController extends AbstractController
 		}
 
 		// Trouver ou créer l'utilisateur
-		$displayName = $data['displayName'] ?? null;
+		$displayName = $this->normalizeDisplayName($data['displayName'] ?? null);
+		if ($displayName === false) {
+			return $this->json(['error' => 'Nom d\'affichage invalide'], 400);
+		}
+
 		$user = $this->userRepository->findOrCreateByEmail($email, $displayName);
 
 		// Anti-spam : max 3 magic links actifs par utilisateur
@@ -246,5 +250,27 @@ class ApiAuthController extends AbstractController
 	private function hashMagicLinkEmail(string $email): string
 	{
 		return hash_hmac('sha256', trim(strtolower($email)), $this->appSecret);
+	}
+
+	private function normalizeDisplayName(mixed $displayName): string|false|null
+	{
+		if ($displayName === null) {
+			return null;
+		}
+
+		if (!is_string($displayName)) {
+			return false;
+		}
+
+		$displayName = trim($displayName);
+		if ($displayName === '') {
+			return null;
+		}
+
+		if (mb_strlen($displayName) > 100 || preg_match('/[\x00-\x1F\x7F]/u', $displayName)) {
+			return false;
+		}
+
+		return $displayName;
 	}
 }

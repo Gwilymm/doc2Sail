@@ -186,6 +186,26 @@ class ApiAuthControllerTest extends TestCase
 		$this->assertArrayHasKey('retryAfter', $data);
 	}
 
+	public function testRequestMagicLinkRejectsInvalidDisplayName(): void
+	{
+		$request = new Request([], [], [], [], [], [], json_encode([
+			'email' => 'test@example.com',
+			'displayName' => str_repeat('a', 101),
+		]));
+		$request->setMethod('POST');
+
+		$userRepo = $this->createMock(UserRepository::class);
+		$userRepo->expects($this->never())->method('findOrCreateByEmail');
+
+		$controller = $this->createController(userRepo: $userRepo);
+
+		$response = $controller->request($request);
+
+		$this->assertEquals(400, $response->getStatusCode());
+		$data = json_decode($response->getContent(), true);
+		$this->assertStringContainsString('Nom d\'affichage invalide', $data['error']);
+	}
+
 	public function testVerifyMagicLinkSuccess(): void
 	{
 		$email = 'test@example.com';

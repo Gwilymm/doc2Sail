@@ -82,8 +82,13 @@ if (!$limit->isAccepted()) {
         // ]);
 
         // 4) Trouver ou créer l'utilisateur (si tu veux éviter la création auto, change le repo)
-        $displayName = trim((string) $request->request->get('display_name', ''));
-        $user = $this->userRepository->findOrCreateByEmail($email, $displayName ?: null);
+        $displayName = $this->normalizeDisplayName($request->request->get('display_name'));
+        if ($displayName === false) {
+            $this->addFlash('error', 'Nom d\'affichage invalide.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $user = $this->userRepository->findOrCreateByEmail($email, $displayName);
 
         // 5) Générer le login link selon la config security.yaml (lifetime/max_uses…)
         $loginLinkDetails = $loginLinkHandler->createLoginLink($user);
@@ -141,5 +146,27 @@ if (!$limit->isAccepted()) {
     {
         // Intercepté par Security
         throw new \LogicException('This code should never be reached');
+    }
+
+    private function normalizeDisplayName(mixed $displayName): string|false|null
+    {
+        if ($displayName === null) {
+            return null;
+        }
+
+        if (!is_string($displayName)) {
+            return false;
+        }
+
+        $displayName = trim($displayName);
+        if ($displayName === '') {
+            return null;
+        }
+
+        if (mb_strlen($displayName) > 100 || preg_match('/[\x00-\x1F\x7F]/u', $displayName)) {
+            return false;
+        }
+
+        return $displayName;
     }
 }

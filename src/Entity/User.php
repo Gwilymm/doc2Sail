@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -23,11 +24,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 	#[ORM\Column(length: 255, unique: true)]
 	private ?string $emailHash = null; // Email hashé (Argon2id)
 
+	#[ORM\Column(length: 64, unique: true, nullable: true)]
+	private ?string $emailLookupHash = null; // HMAC déterministe pour lookup O(1), jamais l'email clair
+
 	#[ORM\Column(type: 'json')]
 	#[Groups(['user:read'])]
 	private array $roles = [];
 
 	#[ORM\Column(length: 100, nullable: true)]
+	#[Assert\Length(max: 100)]
+	#[Assert\Regex(
+		pattern: '/^[^\x00-\x1F\x7F]*$/u',
+		message: 'Le nom d\'affichage ne peut pas contenir de caractères de contrôle.'
+	)]
 	#[Groups(['user:read', 'regatta:read'])]
 	private ?string $displayName = null; // Nom d'affichage optionnel (ex: "Skipper Alpha")
 
@@ -72,6 +81,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 	public function setEmailHash(string $emailHash): static
 	{
 		$this->emailHash = $emailHash;
+		return $this;
+	}
+
+	public function getEmailLookupHash(): ?string
+	{
+		return $this->emailLookupHash;
+	}
+
+	public function setEmailLookupHash(?string $emailLookupHash): static
+	{
+		$this->emailLookupHash = $emailLookupHash;
 		return $this;
 	}
 

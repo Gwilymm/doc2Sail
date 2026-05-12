@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -12,7 +13,8 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 class UserProvider implements UserProviderInterface
 {
 	public function __construct(
-		private UserRepository $userRepository
+		private UserRepository $userRepository,
+		private LoggerInterface $logger,
 	) {}
 
 	/**
@@ -49,21 +51,14 @@ class UserProvider implements UserProviderInterface
 	 */
 	public function loadUserByIdentifier(string $identifier): UserInterface
 	{
-		dump('=== UserProvider::loadUserByIdentifier CALLED ===');
-		dump('Identifier: ' . $identifier);
-
 		$user = $this->userRepository->find($identifier);
 
 		if (!$user) {
-			dump('USER NOT FOUND!');
+			$this->logger->debug('User provider could not load user by identifier.');
 			throw new UserNotFoundException(sprintf('User with identifier "%s" not found.', $identifier));
 		}
 
-		dump('User loaded:', [
-			'id' => $user->getId(),
-			'roles' => $user->getRoles(),
-			'identifier' => $user->getUserIdentifier()
-		]);
+		$this->logger->debug('User provider loaded user by identifier.');
 
 		return $user;
 	}
