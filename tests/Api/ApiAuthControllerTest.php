@@ -169,6 +169,23 @@ class ApiAuthControllerTest extends TestCase
 		// Message neutre pour éviter énumération
 	}
 
+	public function testRequestMagicLinkGetReturnsMethodNotAllowedForApiClients(): void
+	{
+		$request = new Request();
+		$request->setMethod('GET');
+		$request->headers->set('Accept', 'application/json');
+
+		$controller = $this->createController();
+
+		$response = $controller->request($request);
+
+		$this->assertEquals(405, $response->getStatusCode());
+		$this->assertEquals('POST', $response->headers->get('Allow'));
+
+		$data = json_decode($response->getContent(), true);
+		$this->assertStringContainsString('Utilisez POST', $data['error']);
+	}
+
 	public function testRequestMagicLinkRateLimitExceeded(): void
 	{
 		$request = new Request([], [], [], [], [], [], json_encode(['email' => 'test@example.com']));

@@ -3,6 +3,8 @@
 namespace App\Api;
 
 use App\Dto\UserMeDto;
+use App\Entity\User;
+use App\Repository\RegattaShareRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,13 +14,17 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class MeController extends AbstractController
 {
+	public function __construct(
+		private RegattaShareRepository $regattaShareRepository,
+	) {}
+
 	#[Route('/api/me', name: 'api_me', methods: ['GET'])]
 	#[IsGranted('ROLE_USER')]
 	public function me(): JsonResponse
 	{
 		$user = $this->getUser();
 
-		if (!$user) {
+		if (!$user instanceof User) {
 			return $this->json(['error' => 'Non authentifié'], 401);
 		}
 
@@ -29,7 +35,7 @@ class MeController extends AbstractController
 		$dto->createdAt = $user->getCreatedAt();
 		$dto->lastLoginAt = $user->getLastLoginAt();
 		$dto->regattasCount = $user->getRegattas()->count();
-		$dto->sharedRegattasCount = $user->getSharedRegattas()->count();
+		$dto->sharedRegattasCount = $user->getSharedRegattas()->count() + $this->regattaShareRepository->countForUser($user);
 
 		return $this->json($dto);
 	}
@@ -40,7 +46,7 @@ class MeController extends AbstractController
 	{
 		$user = $this->getUser();
 
-		if (!$user) {
+		if (!$user instanceof User) {
 			return $this->json(['error' => 'Non authentifié'], 401);
 		}
 

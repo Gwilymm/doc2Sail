@@ -94,6 +94,7 @@ class Regatta
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(length: 64, unique: true, nullable: true)]
+    #[Groups(['regatta:read'])]
     private ?string $accessToken = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'regattas')]

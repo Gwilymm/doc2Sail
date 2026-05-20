@@ -5,11 +5,16 @@ import { Regatta } from './useRegattas';
 export type Document = {
   id: number;
   name: string;
+  description?: string | null;
   filename: string;
   mimeType: string;
   size: number;
   category: string;
   uploadedAt: string;
+  formattedSize?: string;
+  downloadUrl?: string;
+  viewUrl?: string;
+  fileUrl?: string;
 };
 
 export function useRegattaDetail(id: string | number) {

@@ -1,53 +1,20 @@
 import { useState } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Platform, Alert } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
+import { useAppTheme } from '../../theme/useAppTheme';
 import { Button } from '../../components/ui/Button';
 import { M3Switch } from '../../components/ui/M3Switch';
+import { AppHeader } from '../../components/AppHeader';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function ProfileScreen() {
   const { user, logout, updateDisplayName } = useAuth();
-  const { isDark, setTheme } = useTheme();
+  const { isDark, setTheme, colors } = useAppTheme();
   const dark = isDark;
 
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [saving, setSaving] = useState(false);
-
-  const colors = dark
-    ? {
-        background:           '#061B29',
-        surface:              '#082437',
-        surfaceContainerHigh: '#143449',
-        onSurface:            '#EAF7FA',
-        onSurfaceVariant:     '#78919A',
-        primary:              '#8BD3E8',
-        outlineVariant:       '#31515D',
-        inputBg:              '#0D2A3F',
-        inputBorder:          '#31515D',
-        inputBorderFocus:     '#8BD3E8',
-        trackOn:              '#8BD3E8',
-        thumbOn:              '#003543',
-        trackBorder:          '#78919A',
-        thumbOff:             '#78919A',
-      }
-    : {
-        background:           '#F6FAFB',
-        surface:              '#FFFFFF',
-        surfaceContainerHigh: '#E2ECEF',
-        onSurface:            '#071D2B',
-        onSurfaceVariant:     '#4A6572',
-        primary:              '#0B4F6C',
-        outlineVariant:       '#D3E0E4',
-        inputBg:              '#F0F7F9',
-        inputBorder:          '#D3E0E4',
-        inputBorderFocus:     '#0B4F6C',
-        trackOn:              '#0B4F6C',
-        thumbOn:              '#FFFFFF',
-        trackBorder:          '#B7C8CE',
-        thumbOff:             '#B7C8CE',
-      };
 
   function startEdit() {
     setDraftName(user?.displayName ?? '');
@@ -73,19 +40,21 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{
-        flexGrow: 1,
-        justifyContent: 'center',
-        padding: 16,
-        paddingBottom: 32,
-        maxWidth: Platform.OS === 'web' ? 480 : undefined,
-        alignSelf: Platform.OS === 'web' ? 'center' : undefined,
-        width: '100%',
-      }}
-      keyboardShouldPersistTaps="handled"
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <AppHeader title="Profil" subtitle={user?.displayName ?? 'Compte et préférences'} icon="user" />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          padding: 16,
+          paddingBottom: 32,
+          maxWidth: Platform.OS === 'web' ? 480 : undefined,
+          alignSelf: Platform.OS === 'web' ? 'center' : undefined,
+          width: '100%',
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
       {/* Avatar + identity card */}
       <View
         style={{
@@ -95,7 +64,7 @@ export default function ProfileScreen() {
           paddingHorizontal: 20,
           alignItems: 'center',
           marginBottom: 12,
-          shadowColor: '#000',
+          shadowColor: colors.shadow,
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: dark ? 0 : 0.06,
           shadowRadius: 6,
@@ -128,7 +97,7 @@ export default function ProfileScreen() {
               backgroundColor: colors.primary,
             }}
           >
-            <Text style={{ fontSize: 11, fontWeight: '600', color: dark ? '#003543' : '#FFFFFF', letterSpacing: 0.5 }}>
+            <Text style={{ fontSize: 11, fontWeight: '600', color: colors.onPrimary, letterSpacing: 0.5 }}>
               ADMIN
             </Text>
           </View>
@@ -144,7 +113,7 @@ export default function ProfileScreen() {
           flexDirection: 'row',
           justifyContent: 'space-around',
           marginBottom: 12,
-          shadowColor: '#000',
+          shadowColor: colors.shadow,
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: dark ? 0 : 0.06,
           shadowRadius: 6,
@@ -173,7 +142,7 @@ export default function ProfileScreen() {
           borderRadius: 16,
           marginBottom: 12,
           overflow: 'hidden',
-          shadowColor: '#000',
+          shadowColor: colors.shadow,
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: dark ? 0 : 0.06,
           shadowRadius: 6,
@@ -236,8 +205,8 @@ export default function ProfileScreen() {
                   }}
                 >
                   {saving
-                    ? <ActivityIndicator size="small" color={dark ? '#003543' : '#FFFFFF'} />
-                    : <Text style={{ fontSize: 14, fontWeight: '600', color: dark ? '#003543' : '#FFFFFF' }}>Enregistrer</Text>
+                    ? <ActivityIndicator size="small" color={colors.onPrimary} />
+                    : <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onPrimary }}>Enregistrer</Text>
                   }
                 </TouchableOpacity>
               </View>
@@ -270,10 +239,10 @@ export default function ProfileScreen() {
           <M3Switch
             value={dark}
             onValueChange={(v) => setTheme(v ? 'dark' : 'light')}
-            trackOnColor={colors.trackOn}
-            thumbOnColor={colors.thumbOn}
-            trackOffBorder={colors.trackBorder}
-            thumbOffColor={colors.thumbOff}
+            trackOnColor={colors.primary}
+            thumbOnColor={colors.onPrimary}
+            trackOffBorder={colors.outline}
+            thumbOffColor={colors.outline}
           />
         </View>
       </View>
@@ -284,7 +253,7 @@ export default function ProfileScreen() {
           backgroundColor: colors.surface,
           borderRadius: 16,
           overflow: 'hidden',
-          shadowColor: '#000',
+          shadowColor: colors.shadow,
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: dark ? 0 : 0.06,
           shadowRadius: 6,
@@ -295,6 +264,7 @@ export default function ProfileScreen() {
           Se déconnecter
         </Button>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

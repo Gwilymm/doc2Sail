@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { useTheme } from '../context/ThemeContext';
+import { useAppTheme } from '../theme/useAppTheme';
 
 function Block({ width, height, bg }: { width: ViewStyle['width']; height: number; bg: string }) {
   return (
@@ -16,13 +16,13 @@ function Block({ width, height, bg }: { width: ViewStyle['width']; height: numbe
 }
 
 export function SkeletonCard() {
-  const { isDark } = useTheme();
+  const { isDark, colors } = useAppTheme();
   const { width: screenWidth } = useWindowDimensions();
   const shimmerX = useSharedValue(-screenWidth);
 
-  const cardBg   = isDark ? '#082437' : '#FFFFFF';
-  const blockBg  = isDark ? '#143449' : '#E5E7EB';
-  const shimmerBg = isDark ? 'rgba(13,42,63,0.55)' : 'rgba(255,255,255,0.55)';
+  const cardBg = colors.surface;
+  const blockBg = colors.surfaceContainerHigh;
+  const shimmerBg = isDark ? 'rgba(177,180,182,0.08)' : 'rgba(255,255,255,0.55)';
 
   useEffect(() => {
     shimmerX.value = withRepeat(
@@ -46,7 +46,7 @@ export function SkeletonCard() {
         flexDirection: 'row',
         alignItems: 'flex-start',
         overflow: 'hidden',
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: isDark ? 0 : 0.05,
         shadowRadius: 6,

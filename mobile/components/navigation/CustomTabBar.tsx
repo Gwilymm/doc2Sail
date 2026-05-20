@@ -8,13 +8,16 @@ import Animated, {
 import { usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useTheme } from '../../context/ThemeContext';
+import Svg, { Path } from 'react-native-svg';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 // --- Layout constants ---
-const BAR_HEIGHT = 72;
-const FAB_SIZE = 52;
-const FAB_PROTRUSION = 16;        // how much FAB sticks above the bar top edge
-const FAB_CENTER_GAP = 72;        // width of the empty center zone reserved for FAB
+const BAR_HEIGHT = 76;
+const FAB_SIZE = 62;
+const FAB_PROTRUSION = 30;        // how much FAB sticks above the bar top edge
+const FAB_CENTER_GAP = 100;       // width of the empty center zone reserved for FAB
+const NOTCH_WIDTH = 112;
+const NOTCH_DEPTH = 38;
 const DIAL_SIZE = 40;
 const INDICATOR_W = 64;
 const INDICATOR_H = 32;
@@ -35,10 +38,12 @@ type TabBarProps = {
 
 const ACTIONS_REGATTAS_LIST: DialAction[] = [
   { key: 'new-regatta', label: 'Ajouter une régate', icon: 'flag' },
+  { key: 'scan',        label: 'Scanner un QR code', icon: 'qrcode' },
 ];
 
 const ACTIONS_REGATTA_DETAIL: DialAction[] = [
   { key: 'upload',  label: 'Ajouter un fichier',     icon: 'file' },
+  { key: 'share',   label: 'Partager le QR code',     icon: 'qrcode' },
   { key: 'offline', label: 'Télécharger hors ligne',  icon: 'download' },
 ];
 
@@ -72,27 +77,39 @@ function PillIndicator({ x, color }: { x: number; color: string }) {
 
 // --- Main tab bar ---
 export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
-  const { isDark } = useTheme();
+  const { isDark, colors } = useAppTheme();
   const router = useRouter();
   const pathname = usePathname();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [fabOpen, setFabOpen] = useState(false);
 
-  const SURFACE              = isDark ? '#082437' : '#FFFFFF';
-  const ACTIVE_INDICATOR     = isDark ? '#0B4F6C' : '#C7EAF3';
-  const ON_PRIMARY_CONTAINER = isDark ? '#C7EAF3' : '#001F2A';
-  const ON_SURFACE_VARIANT   = isDark ? '#78919A' : '#4A6572';
-  const FAB_COLOR            = isDark ? '#8BD3E8' : '#0B4F6C';
-  const FAB_ICON             = isDark ? '#003543' : '#FFFFFF';
-  const DIAL_BG              = isDark ? '#0B4F6C' : '#C7EAF3';
-  const DIAL_ICON            = isDark ? '#C7EAF3' : '#001F2A';
-  const DIAL_LABEL_BG        = isDark ? '#E6E1E5' : '#1C1B1F';
-  const DIAL_LABEL_TEXT      = isDark ? '#1C1B1F' : '#FFFFFF';
+  const SURFACE              = colors.surface;
+  const ACTIVE_INDICATOR     = colors.primaryContainer;
+  const ON_PRIMARY_CONTAINER = colors.onPrimaryContainer;
+  const ON_SURFACE_VARIANT   = colors.onSurfaceVariant;
+  const FAB_COLOR            = colors.primary;
+  const FAB_ICON             = colors.onPrimary;
+  const DIAL_BG              = colors.primaryContainer;
+  const DIAL_ICON            = colors.onPrimaryContainer;
+  const DIAL_LABEL_BG        = colors.labelBg;
+  const DIAL_LABEL_TEXT      = colors.labelText;
 
   const barH = BAR_HEIGHT + insets.bottom;
   const cx   = width / 2;
   const sideW = (width - FAB_CENTER_GAP) / 2;
+  const notchStart = cx - NOTCH_WIDTH / 2;
+  const notchEnd = cx + NOTCH_WIDTH / 2;
+  const barPath = [
+    `M0 0`,
+    `H${notchStart}`,
+    `C${notchStart + 18} 0 ${cx - 44} ${NOTCH_DEPTH} ${cx} ${NOTCH_DEPTH}`,
+    `C${cx + 44} ${NOTCH_DEPTH} ${notchEnd - 18} 0 ${notchEnd} 0`,
+    `H${width}`,
+    `V${barH}`,
+    `H0`,
+    `Z`,
+  ].join(' ');
 
   // Detect active nested screen to pick FAB actions
   const activeTabRoute = state.routes[state.index];
@@ -109,10 +126,21 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
       router.push('/regattas/new');
       return;
     }
+    if (action.key === 'scan') {
+      router.push('/regattas/scan');
+      return;
+    }
     if (action.key === 'upload') {
       const regattaId = nestedRoute?.params?.id ?? pathnameRegattaId;
       if (regattaId) {
         router.push(`/regattas/${encodeURIComponent(regattaId)}/upload`);
+      }
+      return;
+    }
+    if (action.key === 'share') {
+      const regattaId = nestedRoute?.params?.id ?? pathnameRegattaId;
+      if (regattaId) {
+        router.push(`/regattas/${encodeURIComponent(regattaId)}/share`);
       }
     }
   }
@@ -206,7 +234,7 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
                   borderRadius: 6,
                   paddingHorizontal: 12,
                   paddingVertical: 6,
-                  shadowColor: '#000',
+                  shadowColor: colors.shadow,
                   shadowOffset: { width: 0, height: 1 },
                   shadowOpacity: 0.2,
                   shadowRadius: 3,
@@ -225,7 +253,7 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
                   backgroundColor: DIAL_BG,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  shadowColor: '#000',
+                  shadowColor: colors.shadow,
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.18,
                   shadowRadius: 4,
@@ -247,7 +275,7 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
         />
       )}
 
-      {/* Flat bar */}
+      {/* Bottom bar with central notch */}
       <View
         pointerEvents="box-none"
         style={{
@@ -256,14 +284,23 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
           left: 0,
           right: 0,
           height: barH,
-          backgroundColor: SURFACE,
-          shadowColor: '#000',
+          shadowColor: colors.shadow,
           shadowOffset: { width: 0, height: -1 },
           shadowOpacity: isDark ? 0.25 : 0.06,
           shadowRadius: 4,
           elevation: 8,
         }}
       >
+        <Svg
+          width={width}
+          height={barH}
+          viewBox={`0 0 ${width} ${barH}`}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
+          pointerEvents="none"
+        >
+          <Path d={barPath} fill={SURFACE} />
+        </Svg>
+
         <PillIndicator x={pillX} color={ACTIVE_INDICATOR} />
 
         <View style={{ flexDirection: 'row', height: BAR_HEIGHT }}>

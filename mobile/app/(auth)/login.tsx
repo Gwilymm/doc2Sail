@@ -5,7 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { requestMagicLink, verifyCode } from '../../services/auth';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 type Step = 'email' | 'code';
 
@@ -18,21 +18,7 @@ export default function LoginScreen() {
   const codeInputRef = useRef<TextInput>(null);
   const { checkAuth } = useAuth();
   const router = useRouter();
-  const { isDark } = useTheme();
-
-  const colors = isDark ? {
-    background: '#061B29',
-    surface:    '#082437',
-    onSurface:  '#EAF7FA',
-    onSurfaceVariant: '#78919A',
-    primary:    '#8BD3E8',
-  } : {
-    background: '#F6FAFB',
-    surface:    '#FFFFFF',
-    onSurface:  '#071D2B',
-    onSurfaceVariant: '#4A6572',
-    primary:    '#0B4F6C',
-  };
+  const { isDark, colors } = useAppTheme();
 
   async function handleRequestLink() {
     if (!email.trim()) return;
@@ -82,7 +68,7 @@ export default function LoginScreen() {
             width: '100%',
             maxWidth: 360,
             alignItems: 'center',
-            shadowColor: '#000',
+            shadowColor: colors.shadow,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: isDark ? 0 : 0.08,
             shadowRadius: 12,

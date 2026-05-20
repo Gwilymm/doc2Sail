@@ -6,7 +6,9 @@ import { useRegattaDetail } from '../../../hooks/useRegattaDetail';
 import { DocumentRow } from '../../../components/DocumentRow';
 import { FilterBottomSheet, SortKey } from '../../../components/FilterBottomSheet';
 import { CenteredLoader } from '../../../components/ui/CircularLoadingIndicator';
-import { useTheme } from '../../../context/ThemeContext';
+import { useAppTheme } from '../../../theme/useAppTheme';
+import { openDocumentUrl } from '../../../components/PdfViewer';
+import { getPublicDocumentFileUrl } from '../../../services/publicRegattas';
 
 // --- Date helpers ---
 
@@ -30,7 +32,7 @@ function formatDateRange(startIso: string, endIso: string): string {
 export default function RegattaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { regatta, documents, loading, refreshing, error, refresh } = useRegattaDetail(id);
-  const { isDark } = useTheme();
+  const { isDark, colors } = useAppTheme();
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
@@ -48,42 +50,6 @@ export default function RegattaDetailScreen() {
       }
     }, [refresh])
   );
-
-  const colors = isDark ? {
-    background:         '#061B29',
-    surface:            '#082437',
-    surfaceContainerHigh: '#143449',
-    onSurface:          '#EAF7FA',
-    onSurfaceVariant:   '#78919A',
-    primary:            '#8BD3E8',
-    outlineVariant:     '#31515D',
-    searchBg:           '#0D2A3F',
-    searchIcon:         '#78919A',
-    searchText:         '#EAF7FA',
-    filterActive:       '#0B4F6C',
-    filterActiveBorder: '#8BD3E8',
-    filterActiveText:   '#C7EAF3',
-    chipBg:             '#0B4F6C',
-    chipText:           '#C7EAF3',
-    divider:            '#143449',
-  } : {
-    background:         '#F6FAFB',
-    surface:            '#FFFFFF',
-    surfaceContainerHigh: '#E2ECEF',
-    onSurface:          '#071D2B',
-    onSurfaceVariant:   '#4A6572',
-    primary:            '#0B4F6C',
-    outlineVariant:     '#D3E0E4',
-    searchBg:           '#EFEFEF',
-    searchIcon:         '#49454F',
-    searchText:         '#1C1B1F',
-    filterActive:       '#E0F2FE',
-    filterActiveBorder: '#0284C7',
-    filterActiveText:   '#0284C7',
-    chipBg:             '#E0F2FE',
-    chipText:           '#0369A1',
-    divider:            '#F3F4F6',
-  };
 
   const categories = useMemo(() => {
     const seen = new Set<string>();
@@ -150,8 +116,8 @@ export default function RegattaDetailScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor={isDark ? '#8BD3E8' : '#0B4F6C'}
-            colors={[isDark ? '#8BD3E8' : '#0B4F6C']}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
       >
@@ -162,7 +128,7 @@ export default function RegattaDetailScreen() {
             paddingHorizontal: 20,
             paddingVertical: 20,
             gap: 12,
-            shadowColor: '#000',
+            shadowColor: colors.shadow,
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: isDark ? 0 : 0.06,
             shadowRadius: 6,
@@ -340,7 +306,7 @@ export default function RegattaDetailScreen() {
               paddingVertical: 40,
               alignItems: 'center',
               gap: 8,
-              shadowColor: '#000',
+              shadowColor: colors.shadow,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: isDark ? 0 : 0.04,
               shadowRadius: 4,
@@ -364,7 +330,7 @@ export default function RegattaDetailScreen() {
               backgroundColor: colors.surface,
               borderRadius: 12,
               overflow: 'hidden',
-              shadowColor: '#000',
+              shadowColor: colors.shadow,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: isDark ? 0 : 0.06,
               shadowRadius: 6,
@@ -379,7 +345,13 @@ export default function RegattaDetailScreen() {
                 <DocumentRow
                   document={doc}
                   onPress={() => {
-                    // TODO S3 : ouvrir / télécharger le document
+                    const url = regatta.accessToken
+                      ? getPublicDocumentFileUrl(regatta.accessToken, doc.id)
+                      : doc.fileUrl ?? doc.downloadUrl;
+
+                    if (url) {
+                      openDocumentUrl(url, { title: doc.name, mimeType: doc.mimeType, controlsColor: colors.primary });
+                    }
                   }}
                 />
               </View>

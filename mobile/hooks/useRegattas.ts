@@ -69,6 +69,8 @@ export function useRegattas() {
     load();
   }, [load]);
 
+  const refresh = useCallback(() => load(true), [load]);
+
   return {
     regattas,
     loading,
@@ -76,7 +78,7 @@ export function useRegattas() {
     loadingMore,
     hasMore: nextUrl !== null,
     error,
-    refresh: () => load(true),
+    refresh,
     loadMore,
   };
 }

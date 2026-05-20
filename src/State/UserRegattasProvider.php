@@ -32,7 +32,8 @@ class UserRegattasProvider implements ProviderInterface
 		$qb = $this->entityManager->getRepository(Regatta::class)
 			->createQueryBuilder('r')
 			->leftJoin('r.coOwners', 'coOwner')
-			->where('r.owner = :user OR coOwner = :user')
+			->leftJoin(\App\Entity\RegattaShare::class, 'share', 'WITH', 'share.regatta = r AND share.user = :user')
+			->where('r.owner = :user OR coOwner = :user OR share.user = :user')
 			->setParameter('user', $user)
 			->orderBy('r.startDate', 'DESC')
 			->distinct();

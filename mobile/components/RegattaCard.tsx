@@ -1,10 +1,11 @@
 import { TouchableOpacity, View, Text } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import { useAppTheme } from '../theme/useAppTheme';
 import type { Regatta } from '../hooks/useRegattas';
 
 type Props = {
   regatta: Regatta;
   onPress: () => void;
+  ownership?: 'owner' | 'shared';
 };
 
 function formatDateRange(startIso: string, endIso: string): string {
@@ -23,25 +24,12 @@ function formatDateRange(startIso: string, endIso: string): string {
   return `${startDay} ${startMonth} – ${endDay} ${endMonth} ${endYear}`;
 }
 
-export function RegattaCard({ regatta, onPress }: Props) {
-  const { isDark } = useTheme();
+export function RegattaCard({ regatta, onPress, ownership = 'owner' }: Props) {
+  const { isDark, colors } = useAppTheme();
   const dateRange = formatDateRange(regatta.startDate, regatta.endDate);
-
-  const colors = isDark ? {
-    surface:          '#082437',
-    onSurface:        '#EAF7FA',
-    onSurfaceVariant: '#78919A',
-    accent:           '#0D2A3F',
-    primary:          '#8BD3E8',
-    chevron:          '#31515D',
-  } : {
-    surface:          '#FFFFFF',
-    onSurface:        '#071D2B',
-    onSurfaceVariant: '#4A6572',
-    accent:           '#EAF3F5',
-    primary:          '#0B4F6C',
-    chevron:          '#D3E0E4',
-  };
+  const badge = ownership === 'owner'
+    ? { label: 'Ma régate', icon: '●', bg: colors.primaryContainer, text: colors.onPrimaryContainer }
+    : { label: 'Partagée', icon: '◆', bg: colors.secondaryContainer, text: colors.onSecondaryContainer };
 
   return (
     <TouchableOpacity
@@ -54,7 +42,7 @@ export function RegattaCard({ regatta, onPress }: Props) {
         paddingVertical: 16,
         flexDirection: 'row',
         alignItems: 'flex-start',
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: isDark ? 0 : 0.07,
         shadowRadius: 6,
@@ -80,6 +68,23 @@ export function RegattaCard({ regatta, onPress }: Props) {
 
       {/* Content */}
       <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+              paddingHorizontal: 8,
+              paddingVertical: 3,
+              borderRadius: 999,
+              backgroundColor: badge.bg,
+            }}
+          >
+            <Text style={{ color: badge.text, fontSize: 9, lineHeight: 12 }}>{badge.icon}</Text>
+            <Text style={{ color: badge.text, fontSize: 11, fontWeight: '700' }}>{badge.label}</Text>
+          </View>
+        </View>
+
         <Text
           style={{ fontSize: 18, fontWeight: '700', color: colors.onSurface, lineHeight: 24 }}
           numberOfLines={2}

@@ -5,6 +5,7 @@ import Animated, {
   withSpring,
   interpolateColor,
 } from 'react-native-reanimated';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 // M3 Switch specs
 const TRACK_W = 52;
@@ -31,11 +32,16 @@ type Props = {
 export function M3Switch({
   value,
   onValueChange,
-  trackOnColor   = '#0B4F6C',
-  trackOffBorder = '#B7C8CE',
-  thumbOnColor   = '#FFFFFF',
-  thumbOffColor  = '#B7C8CE',
+  trackOnColor,
+  trackOffBorder,
+  thumbOnColor,
+  thumbOffColor,
 }: Props) {
+  const { colors } = useAppTheme();
+  const trackOn = trackOnColor ?? colors.primary;
+  const trackBorder = trackOffBorder ?? colors.outline;
+  const thumbOn = thumbOnColor ?? colors.onPrimary;
+  const thumbOff = thumbOffColor ?? colors.outline;
   const progress = useSharedValue(value ? 1 : 0);
 
   function toggle() {
@@ -53,10 +59,10 @@ export function M3Switch({
     backgroundColor: interpolateColor(
       progress.value,
       [0, 1],
-      ['transparent', trackOnColor],
+      ['transparent', trackOn],
     ),
     borderWidth: 2 - progress.value * 2, // 2dp border when off, 0 when on
-    borderColor: trackOffBorder,
+    borderColor: trackBorder,
   }));
 
   // Thumb: size and position interpolated
@@ -75,9 +81,9 @@ export function M3Switch({
       backgroundColor: interpolateColor(
         progress.value,
         [0, 1],
-        [thumbOffColor, thumbOnColor],
+        [thumbOff, thumbOn],
       ),
-      shadowColor: '#000',
+      shadowColor: colors.shadow,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.2,
       shadowRadius: 2,

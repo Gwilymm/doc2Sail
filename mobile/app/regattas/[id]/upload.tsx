@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Platform, ScrollView, Text, TextInput, Toucha
 import * as DocumentPicker from 'expo-document-picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useTheme } from '../../../context/ThemeContext';
+import { useAppTheme } from '../../../theme/useAppTheme';
 import {
   DOCUMENT_CATEGORIES,
   MAX_DOCUMENT_SIZE,
@@ -29,7 +29,7 @@ function formatSize(bytes?: number | null): string {
 export default function UploadDocumentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { isDark } = useTheme();
+  const { colors } = useAppTheme();
   const [file, setFile] = useState<PickedFile | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -37,30 +37,6 @@ export default function UploadDocumentScreen() {
   const [progress, setProgress] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-
-  const colors = isDark ? {
-    background: '#061B29',
-    surface: '#082437',
-    surfaceHigh: '#143449',
-    onSurface: '#EAF7FA',
-    onSurfaceVariant: '#78919A',
-    primary: '#8BD3E8',
-    onPrimary: '#003543',
-    outline: '#31515D',
-    danger: '#FFB4AB',
-    input: '#0D2A3F',
-  } : {
-    background: '#F6FAFB',
-    surface: '#FFFFFF',
-    surfaceHigh: '#E2ECEF',
-    onSurface: '#071D2B',
-    onSurfaceVariant: '#4A6572',
-    primary: '#0B4F6C',
-    onPrimary: '#FFFFFF',
-    outline: '#D3E0E4',
-    danger: '#BA1A1A',
-    input: '#FFFFFF',
-  };
 
   const canSubmit = useMemo(() => !!file && title.trim().length > 0 && !submitting, [file, title, submitting]);
 
@@ -196,7 +172,7 @@ export default function UploadDocumentScreen() {
               borderRadius: 10,
               borderWidth: 1,
               borderColor: colors.outline,
-              backgroundColor: colors.input,
+              backgroundColor: colors.inputBg,
               color: colors.onSurface,
               paddingHorizontal: 14,
               fontSize: 16,
@@ -248,7 +224,7 @@ export default function UploadDocumentScreen() {
               borderRadius: 10,
               borderWidth: 1,
               borderColor: colors.outline,
-              backgroundColor: colors.input,
+              backgroundColor: colors.inputBg,
               color: colors.onSurface,
               paddingHorizontal: 14,
               paddingVertical: 12,
@@ -259,7 +235,7 @@ export default function UploadDocumentScreen() {
 
         {submitting ? (
           <View style={{ gap: 8 }}>
-            <View style={{ height: 8, borderRadius: 999, backgroundColor: colors.surfaceHigh, overflow: 'hidden' }}>
+            <View style={{ height: 8, borderRadius: 999, backgroundColor: colors.surfaceContainerHigh, overflow: 'hidden' }}>
               <View style={{ width: `${Math.max(0.04, progress) * 100}%`, height: 8, backgroundColor: colors.primary }} />
             </View>
             <Text style={{ fontSize: 13, color: colors.onSurfaceVariant }}>{Math.round(progress * 100)} %</Text>
@@ -277,7 +253,7 @@ export default function UploadDocumentScreen() {
           style={{
             height: 52,
             borderRadius: 12,
-            backgroundColor: canSubmit ? colors.primary : colors.surfaceHigh,
+            backgroundColor: canSubmit ? colors.primary : colors.surfaceContainerHigh,
             alignItems: 'center',
             justifyContent: 'center',
             marginTop: 4,

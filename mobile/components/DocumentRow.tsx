@@ -1,6 +1,6 @@
 import { TouchableOpacity, View, Text } from 'react-native';
 import { Document } from '../hooks/useRegattaDetail';
-import { useTheme } from '../context/ThemeContext';
+import { getDocCategoryColor, useAppTheme } from '../theme/useAppTheme';
 
 // --- Helpers ---
 
@@ -35,35 +35,6 @@ function formatUploadDate(value: string): string {
   }).format(date);
 }
 
-type CategoryColor = { bg: string; text: string };
-
-const CATEGORY_COLORS: Record<'light' | 'dark', Record<string, CategoryColor>> = {
-  light: {
-    AC:                  { bg: '#C7EAF3', text: '#003543' },
-    IC:                  { bg: '#E0E7FF', text: '#253060' },
-    Modifications:       { bg: '#FFE3A6', text: '#5A3B00' },
-    'Gestion de course': { bg: '#DDF7ED', text: '#0F5138' },
-    Jury:                { bg: '#FFDAD6', text: '#690005' },
-    Résultats:           { bg: '#E9F8D8', text: '#365314' },
-  },
-  dark: {
-    AC:                  { bg: '#003543', text: '#C7EAF3' },
-    IC:                  { bg: '#1E2563', text: '#C5D0FF' },
-    Modifications:       { bg: '#4A3000', text: '#FFD285' },
-    'Gestion de course': { bg: '#0A3525', text: '#8EEEC4' },
-    Jury:                { bg: '#4D0008', text: '#FFB4AB' },
-    Résultats:           { bg: '#253800', text: '#C5E88A' },
-  },
-};
-
-function getCategoryColor(category: string, isDark: boolean): CategoryColor {
-  const palette = CATEGORY_COLORS[isDark ? 'dark' : 'light'];
-  return palette[category] ?? (isDark
-    ? { bg: '#1F2937', text: '#9CA3AF' }
-    : { bg: '#F3F4F6', text: '#4B5563' }
-  );
-}
-
 // --- Component ---
 
 type Props = {
@@ -72,27 +43,11 @@ type Props = {
 };
 
 export function DocumentRow({ document, onPress }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, colors } = useAppTheme();
   const icon = getFileIcon(document.mimeType);
   const size = formatSize(document.size);
   const uploadedAt = formatUploadDate(document.uploadedAt);
-  const catColor = getCategoryColor(document.category, isDark);
-
-  const colors = isDark ? {
-    surface:          '#082437',
-    onSurface:        '#EAF7FA',
-    onSurfaceVariant: '#78919A',
-    iconBg:           '#143449',
-    iconBorder:       '#31515D',
-    chevron:          '#31515D',
-  } : {
-    surface:          '#FFFFFF',
-    onSurface:        '#071D2B',
-    onSurfaceVariant: '#4A6572',
-    iconBg:           '#F9FAFB',
-    iconBorder:       '#F3F4F6',
-    chevron:          '#D3E0E4',
-  };
+  const catColor = getDocCategoryColor(document.category, isDark);
 
   return (
     <TouchableOpacity

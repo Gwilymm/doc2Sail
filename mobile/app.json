@@ -36,6 +36,12 @@
       "expo-secure-store",
       "expo-web-browser",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Autoriser Doc2Sail à scanner les QR codes de régates."
+        }
+      ],
+      [
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",

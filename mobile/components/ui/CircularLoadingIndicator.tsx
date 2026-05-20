@@ -9,6 +9,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -46,9 +47,12 @@ type Props = {
 
 export function M3LoadingIndicator({
   size = 52,
-  color = '#0284c7',
-  containerColor = '#F3F2F6',
+  color,
+  containerColor,
 }: Props) {
+  const { colors } = useAppTheme();
+  const indicatorColor = color ?? colors.primary;
+  const indicatorContainerColor = containerColor ?? colors.surfaceContainerHigh;
   const morph = useSharedValue(0);
   const rotation = useSharedValue(0);
 
@@ -120,13 +124,13 @@ export function M3LoadingIndicator({
           width: size,
           height: size,
           borderRadius: containerRadius,
-          backgroundColor: containerColor,
+          backgroundColor: indicatorContainerColor,
         }}
       />
       {/* Blob rotatif */}
       <Animated.View style={[{ width: size, height: size }, rotStyle]}>
         <Svg width={size} height={size}>
-          <AnimatedPath fill={color} animatedProps={pathProps} />
+          <AnimatedPath fill={indicatorColor} animatedProps={pathProps} />
         </Svg>
       </Animated.View>
     </View>
@@ -135,11 +139,13 @@ export function M3LoadingIndicator({
 
 export function CenteredLoader({
   size = 52,
-  color = '#0284c7',
+  color,
 }: Omit<Props, 'containerColor'>) {
+  const { colors } = useAppTheme();
+
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <M3LoadingIndicator size={size} color={color} />
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+      <M3LoadingIndicator size={size} color={color ?? colors.primary} containerColor={colors.surfaceContainerHigh} />
     </View>
   );
 }

@@ -1,4 +1,5 @@
 import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'error' | 'outline';
 type Size = 'sm' | 'md' | 'lg';
@@ -38,6 +39,7 @@ export function Button({
   fullWidth = false,
   className = '',
 }: Props) {
+  const { colors } = useAppTheme();
   const { btn, text } = variantClasses[variant];
   const { btn: btnSize, text: textSize } = sizeClasses[size];
 
@@ -47,7 +49,7 @@ export function Button({
       disabled={disabled || loading}
       className={`rounded-btn items-center justify-center flex-row gap-2 ${btn} ${btnSize} ${fullWidth ? 'w-full' : ''} ${disabled || loading ? 'opacity-60' : ''} ${className}`}
     >
-      {loading && <ActivityIndicator size="small" color={variant === 'primary' ? '#fff' : '#0284c7'} />}
+      {loading && <ActivityIndicator size="small" color={variant === 'primary' ? colors.onPrimary : colors.primary} />}
       <Text className={`font-semibold ${text} ${textSize}`}>{children}</Text>
     </TouchableOpacity>
   );

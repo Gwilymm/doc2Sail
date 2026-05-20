@@ -1,14 +1,14 @@
 import { Stack } from 'expo-router';
-import { useTheme } from '../../../context/ThemeContext';
+import { useAppTheme } from '../../../theme/useAppTheme';
 
 export default function RegattasLayout() {
-  const { isDark } = useTheme();
+  const { colors } = useAppTheme();
 
   const headerStyle = {
-    backgroundColor: isDark ? '#082437' : '#FFFFFF',
+    backgroundColor: colors.surface,
   } as const;
 
-  const headerTintColor = isDark ? '#8BD3E8' : '#0B4F6C';
+  const headerTintColor = colors.primary;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

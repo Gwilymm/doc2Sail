@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useAppTheme } from '../theme/useAppTheme';
 
 export type SortKey = 'recent' | 'oldest' | 'name';
 
@@ -27,8 +27,10 @@ type SheetColors = {
   onSurfaceVariant: string;
   outlineVariant: string;
   primary: string;
+  onPrimary: string;
   outline: string;
   btnOutlineBorder: string;
+  scrim: string;
 };
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
@@ -67,7 +69,7 @@ function CheckRow({
         }}
       >
         {checked && (
-          <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700', lineHeight: 14 }}>✓</Text>
+          <Text style={{ color: colors.onPrimary, fontSize: 12, fontWeight: '700', lineHeight: 14 }}>✓</Text>
         )}
       </View>
       <Text style={{ fontSize: 16, fontWeight: '400', color: colors.onSurface, letterSpacing: 0.5 }}>
@@ -143,27 +145,21 @@ export function FilterBottomSheet({
   onApply,
   onClose,
 }: Props) {
-  const { isDark } = useTheme();
+  const { colors } = useAppTheme();
   const translateY = useRef(new Animated.Value(600)).current;
   const [localCategories, setLocalCategories] = useState<string[]>(activeCategories);
   const [localSort, setLocalSort] = useState<SortKey>(activeSort);
 
-  const colors: SheetColors = isDark ? {
-    surface:          '#0D2A3F',
-    onSurface:        '#EAF7FA',
-    onSurfaceVariant: '#78919A',
-    outlineVariant:   '#31515D',
-    primary:          '#8BD3E8',
-    outline:          '#78919A',
-    btnOutlineBorder: '#31515D',
-  } : {
-    surface:          '#FFFBFE',
-    onSurface:        '#1C1B1F',
-    onSurfaceVariant: '#49454F',
-    outlineVariant:   '#CAC4D0',
-    primary:          '#0B4F6C',
-    outline:          '#79747E',
-    btnOutlineBorder: '#CAC4D0',
+  const sheetColors: SheetColors = {
+    surface: colors.surfaceContainer,
+    onSurface: colors.onSurface,
+    onSurfaceVariant: colors.onSurfaceVariant,
+    outlineVariant: colors.outlineVariant,
+    primary: colors.primary,
+    onPrimary: colors.onPrimary,
+    outline: colors.outline,
+    btnOutlineBorder: colors.outlineVariant,
+    scrim: colors.scrim,
   };
 
   useEffect(() => {
@@ -199,7 +195,7 @@ export function FilterBottomSheet({
   return (
     <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>
       <Pressable
-        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+        style={{ flex: 1, backgroundColor: sheetColors.scrim }}
         onPress={onClose}
       />
 
@@ -209,7 +205,7 @@ export function FilterBottomSheet({
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: colors.surface,
+          backgroundColor: sheetColors.surface,
           borderTopLeftRadius: 28,
           borderTopRightRadius: 28,
           transform: [{ translateY }],
@@ -218,7 +214,7 @@ export function FilterBottomSheet({
       >
         {/* Handle */}
         <View style={{ alignItems: 'center', paddingTop: 12, paddingBottom: 4 }}>
-          <View style={{ width: 32, height: 4, borderRadius: 2, backgroundColor: colors.outlineVariant }} />
+          <View style={{ width: 32, height: 4, borderRadius: 2, backgroundColor: sheetColors.outlineVariant }} />
         </View>
 
         {/* Title row */}
@@ -232,15 +228,15 @@ export function FilterBottomSheet({
             paddingBottom: 4,
           }}
         >
-          <Text style={{ fontSize: 22, fontWeight: '400', color: colors.onSurface }}>Filtrer</Text>
+          <Text style={{ fontSize: 22, fontWeight: '400', color: sheetColors.onSurface }}>Filtrer</Text>
           <TouchableOpacity onPress={onClose} activeOpacity={0.7} hitSlop={12}>
-            <Text style={{ fontSize: 22, color: colors.onSurfaceVariant }}>✕</Text>
+            <Text style={{ fontSize: 22, color: sheetColors.onSurfaceVariant }}>✕</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView bounces={false}>
           {/* Category — checkboxes */}
-          <SectionLabel colors={colors}>Catégorie</SectionLabel>
+          <SectionLabel colors={sheetColors}>Catégorie</SectionLabel>
           {categories
             .filter((cat) => cat !== 'Tous')
             .map((cat) => (
@@ -249,19 +245,19 @@ export function FilterBottomSheet({
                 label={cat}
                 checked={localCategories.includes(cat)}
                 onPress={() => toggleCategory(cat)}
-                colors={colors}
+                colors={sheetColors}
               />
             ))}
 
           {/* Sort — radio */}
-          <SectionLabel colors={colors}>Trier par</SectionLabel>
+          <SectionLabel colors={sheetColors}>Trier par</SectionLabel>
           {SORT_OPTIONS.map((opt) => (
             <RadioRow
               key={opt.key}
               label={opt.label}
               selected={localSort === opt.key}
               onPress={() => setLocalSort(opt.key)}
-              colors={colors}
+              colors={sheetColors}
             />
           ))}
         </ScrollView>
@@ -276,13 +272,13 @@ export function FilterBottomSheet({
               height: 40,
               borderRadius: 20,
               borderWidth: 1,
-              borderColor: colors.btnOutlineBorder,
+              borderColor: sheetColors.btnOutlineBorder,
               paddingHorizontal: 24,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Text style={{ fontSize: 14, fontWeight: '500', letterSpacing: 0.1, color: colors.onSurfaceVariant }}>
+            <Text style={{ fontSize: 14, fontWeight: '500', letterSpacing: 0.1, color: sheetColors.onSurfaceVariant }}>
               Réinitialiser
             </Text>
           </TouchableOpacity>
@@ -295,12 +291,12 @@ export function FilterBottomSheet({
               flex: 1,
               height: 40,
               borderRadius: 20,
-              backgroundColor: colors.primary,
+              backgroundColor: sheetColors.primary,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Text style={{ fontSize: 14, fontWeight: '500', letterSpacing: 0.1, color: isDark ? '#003543' : '#FFFFFF' }}>
+            <Text style={{ fontSize: 14, fontWeight: '500', letterSpacing: 0.1, color: sheetColors.onPrimary }}>
               Appliquer
             </Text>
           </TouchableOpacity>

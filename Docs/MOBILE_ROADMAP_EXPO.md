@@ -43,13 +43,13 @@
 |------|-------|--------|-------|-----------------|
 | J11 | 2h | ✅ | Upload document avec `expo-document-picker` → `POST /api/documents` | `mobile/app/regattas/[id]/upload.tsx`, `mobile/services/documents.ts`, `src/Api/DocumentUploadController.php` |
 | J12 | 2h | ✅ | Progress bar upload intégrée, gestion erreurs taille/MIME, retry après refresh JWT | `mobile/app/regattas/[id]/upload.tsx`, `mobile/services/documents.ts` |
-| J13 | 2h | ⬜ | Vue publique `/r/{token}` sans auth (deep link + écran dédié) | `mobile/app/public/[token].tsx` |
-| J14 | 2h | ⬜ | Visionneuse PDF (`expo-web-browser` ou `react-native-pdf`) | `mobile/components/PdfViewer.tsx` |
-| J15 | 2h | ⬜ | QR code share : affichage (`react-native-qrcode-svg`) + partage natif (`expo-sharing`) | `mobile/components/QRShare.tsx` |
+| J13 | 2h | ✅ | Vue publique `/r/{token}` sans auth (deep link + écran dédié) | `mobile/app/public/[token].tsx` |
+| J14 | 2h | ✅ | Visionneuse PDF (`expo-web-browser` ou `react-native-pdf`) | `mobile/components/PdfViewer.tsx` |
+| J15 | 2h | ✅ | QR code share : affichage (`react-native-qrcode-svg`) + partage natif (`expo-sharing`) | `mobile/components/QRShare.tsx` |
 
 **Réalisé :** endpoint API multipart `POST /api/documents`, contrôle `REGATTA_EDIT`, upload via `DocumentUploader`, sélection fichier native, catégories, description, progress bar et refresh du détail au retour du modal.
 
-**Livrable restant :** accès public, PDF consultable, QR code share
+**Livrable réalisé :** accès public, PDF consultable, QR code share
 
 ---
 

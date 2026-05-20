@@ -12,6 +12,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -45,9 +46,22 @@ class ApiAuthController extends AbstractController
 	 * POST /api/auth/request {email, displayName?}
 	 * Retourne: {success, expiresIn, message}
 	 */
-	#[Route('/api/auth/request', name: 'api_auth_request', methods: ['POST'])]
-	public function request(Request $request): JsonResponse
+	#[Route('/api/auth/request', name: 'api_auth_request', methods: ['GET', 'POST'])]
+	public function request(Request $request): Response
 	{
+		if ($request->isMethod('GET')) {
+			$accept = $request->headers->get('Accept', '');
+			if (str_contains($accept, 'text/html') || $request->headers->get('Sec-Fetch-Dest') === 'document') {
+				return $this->redirectToRoute('app_login');
+			}
+
+			return $this->json(
+				['error' => 'Méthode non autorisée. Utilisez POST pour demander un code de connexion.'],
+				Response::HTTP_METHOD_NOT_ALLOWED,
+				['Allow' => 'POST']
+			);
+		}
+
 		$data = json_decode($request->getContent(), true);
 		$rawEmail = $data['email'] ?? null;
 

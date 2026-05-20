@@ -1,56 +1,69 @@
-import { View, Text, FlatList, RefreshControl, ActivityIndicator, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
+import { View, Text, FlatList, RefreshControl, ActivityIndicator, Platform, TouchableOpacity } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useRegattas } from '../../../hooks/useRegattas';
 import { RegattaCard } from '../../../components/RegattaCard';
 import { SkeletonCard } from '../../../components/SkeletonCard';
 import { useAuth } from '../../../context/AuthContext';
-import { useTheme } from '../../../context/ThemeContext';
+import { useAppTheme } from '../../../theme/useAppTheme';
+import { AppHeader } from '../../../components/AppHeader';
 
 export default function RegattasScreen() {
   const { regattas, loading, refreshing, loadingMore, hasMore, error, refresh, loadMore } = useRegattas();
   const { user } = useAuth();
   const router = useRouter();
-  const { isDark } = useTheme();
+  const { colors } = useAppTheme();
+  const [activeScope, setActiveScope] = useState<'all' | 'mine' | 'shared'>('all');
 
-  const colors = isDark ? {
-    background:       '#061B29',
-    surface:          '#082437',
-    onSurface:        '#EAF7FA',
-    onSurfaceVariant: '#78919A',
-    outlineVariant:   '#31515D',
-  } : {
-    background:       '#F6FAFB',
-    surface:          '#FFFFFF',
-    onSurface:        '#071D2B',
-    onSurfaceVariant: '#4A6572',
-    outlineVariant:   '#D3E0E4',
-  };
+  const ownershipById = useMemo(() => {
+    const entries = regattas.map((regatta) => [
+      regatta.id,
+      regatta.owner.id === user?.id ? 'owner' : 'shared',
+    ] as const);
+
+    return new Map(entries);
+  }, [regattas, user?.id]);
+
+  const counts = useMemo(() => {
+    let mine = 0;
+    let shared = 0;
+
+    regattas.forEach((regatta) => {
+      if (regatta.owner.id === user?.id) mine += 1;
+      else shared += 1;
+    });
+
+    return { all: regattas.length, mine, shared };
+  }, [regattas, user?.id]);
+
+  const visibleRegattas = useMemo(() => {
+    if (activeScope === 'mine') {
+      return regattas.filter((regatta) => regatta.owner.id === user?.id);
+    }
+    if (activeScope === 'shared') {
+      return regattas.filter((regatta) => regatta.owner.id !== user?.id);
+    }
+    return regattas;
+  }, [activeScope, regattas, user?.id]);
+
+  const scopeOptions = [
+    { key: 'all' as const, label: 'Toutes', count: counts.all },
+    { key: 'mine' as const, label: 'Mes régates', count: counts.mine },
+    { key: 'shared' as const, label: 'Partagées', count: counts.shared },
+  ];
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Header */}
-      <View
-        style={{
-          backgroundColor: colors.surface,
-          paddingHorizontal: 16,
-          paddingTop: 56,
-          paddingBottom: 16,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.outlineVariant,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: isDark ? 0 : 0.05,
-          shadowRadius: 3,
-          elevation: isDark ? 0 : 2,
-        }}
-      >
-        <Text style={{ fontSize: 24, fontWeight: '700', color: colors.onSurface }}>Régates</Text>
-        {user?.displayName ? (
-          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 2 }}>
-            Bonjour, {user.displayName} 👋
-          </Text>
-        ) : null}
-      </View>
+      <AppHeader
+        title="Régates"
+        subtitle={user?.displayName ? `Bonjour, ${user.displayName}` : 'Documents et partages de régates'}
+      />
 
       {loading ? (
         <View style={{ padding: 16, gap: 12 }}>
@@ -68,8 +81,55 @@ export default function RegattasScreen() {
         </View>
       ) : (
         <FlatList
-          data={regattas}
+          data={visibleRegattas}
           keyExtractor={(item) => String(item.id)}
+          ListHeaderComponent={
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              {scopeOptions.map((option) => {
+                const selected = activeScope === option.key;
+
+                return (
+                  <TouchableOpacity
+                    key={option.key}
+                    onPress={() => setActiveScope(option.key)}
+                    activeOpacity={0.75}
+                    style={{
+                      flex: 1,
+                      minHeight: 44,
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: selected ? colors.primary : colors.outlineVariant,
+                      backgroundColor: selected ? colors.primaryContainer : colors.surface,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingHorizontal: 8,
+                      paddingVertical: 8,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: selected ? colors.onPrimaryContainer : colors.onSurface,
+                        fontSize: 13,
+                        fontWeight: '800',
+                      }}
+                      numberOfLines={1}
+                    >
+                      {option.label}
+                    </Text>
+                    <Text
+                      style={{
+                        color: selected ? colors.onPrimaryContainer : colors.onSurfaceVariant,
+                        fontSize: 11,
+                        marginTop: 2,
+                      }}
+                    >
+                      {option.count}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          }
           contentContainerStyle={{
             padding: 16,
             gap: 12,
@@ -79,15 +139,20 @@ export default function RegattasScreen() {
           renderItem={({ item }) => (
             <RegattaCard
               regatta={item}
+              ownership={ownershipById.get(item.id) ?? 'owner'}
               onPress={() => router.push(`/(tabs)/regattas/${item.id}`)}
             />
           )}
           ListEmptyComponent={
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 80 }}>
               <Text style={{ fontSize: 48 }}>⛵</Text>
-              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.onSurface, marginTop: 16 }}>Aucune régate</Text>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.onSurface, marginTop: 16 }}>
+                {activeScope === 'shared' ? 'Aucune régate partagée' : activeScope === 'mine' ? 'Aucune régate à vous' : 'Aucune régate'}
+              </Text>
               <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4, textAlign: 'center', paddingHorizontal: 32 }}>
-                Créez votre première régate depuis le menu +.
+                {activeScope === 'shared'
+                  ? 'Les régates partagées avec vous apparaîtront ici.'
+                  : 'Créez votre première régate depuis le menu +.'}
               </Text>
             </View>
           }
@@ -96,7 +161,7 @@ export default function RegattasScreen() {
           ListFooterComponent={
             loadingMore ? (
               <View style={{ paddingVertical: 24, alignItems: 'center' }}>
-                <ActivityIndicator color={isDark ? '#8BD3E8' : '#0B4F6C'} />
+                <ActivityIndicator color={colors.primary} />
               </View>
             ) : null
           }
@@ -104,7 +169,7 @@ export default function RegattasScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={refresh}
-              tintColor={isDark ? '#8BD3E8' : '#0B4F6C'}
+              tintColor={colors.primary}
             />
           }
         />

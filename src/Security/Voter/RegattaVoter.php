@@ -4,6 +4,7 @@ namespace App\Security\Voter;
 
 use App\Entity\Regatta;
 use App\Entity\User;
+use App\Repository\RegattaShareRepository;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -13,6 +14,10 @@ class RegattaVoter extends Voter
 	public const VIEW = 'REGATTA_VIEW';
 	public const EDIT = 'REGATTA_EDIT';
 	public const DELETE = 'REGATTA_DELETE';
+
+	public function __construct(
+		private RegattaShareRepository $regattaShareRepository,
+	) {}
 
 	protected function supports(string $attribute, mixed $subject): bool
 	{
@@ -42,7 +47,7 @@ class RegattaVoter extends Voter
 
 	private function canView(Regatta $regatta, User $user): bool
 	{
-		return $regatta->canManage($user);
+		return $regatta->canManage($user) || $this->regattaShareRepository->existsFor($user, $regatta);
 	}
 
 	private function canEdit(Regatta $regatta, User $user): bool
