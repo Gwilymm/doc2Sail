@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { createElement, useEffect, useState } from 'react';
+import { ActivityIndicator, Image, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { WebView } from 'react-native-webview';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { openDocumentInBrowser } from '../components/PdfViewer';
-import { API_BASE_URL } from '../services/api';
+import { API_BASE_URL, getToken } from '../services/api';
 import { useAppTheme } from '../theme/useAppTheme';
 
 function getAbsoluteUrl(url: string): string {
@@ -58,6 +58,92 @@ function LoadingView({ colors }: { colors: ReturnType<typeof useAppTheme>['color
       </Text>
     </View>
   );
+}
+
+function WebDocumentFrame({
+  sourceUrl,
+  title,
+  colors,
+}: {
+  sourceUrl: string;
+  title: string;
+  colors: ReturnType<typeof useAppTheme>['colors'];
+}) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl: string | null = null;
+
+    async function loadDocument() {
+      try {
+        const headers: HeadersInit = {};
+        const apiOrigin = new URL(API_BASE_URL).origin;
+        const source = new URL(sourceUrl, API_BASE_URL);
+
+        if (source.origin === apiOrigin && source.pathname.startsWith('/api/')) {
+          const token = await getToken();
+          if (token) {
+            headers.Authorization = `Bearer ${token}`;
+          }
+        }
+
+        const response = await fetch(source.toString(), { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        if (active) {
+          setBlobUrl(objectUrl);
+        }
+      } catch {
+        if (active) {
+          setError('Impossible de charger ce document dans le lecteur interne.');
+        }
+      }
+    }
+
+    loadDocument();
+
+    return () => {
+      active = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [sourceUrl]);
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: colors.background, gap: 12 }}>
+        <FontAwesome name="file-o" size={34} color={colors.onSurfaceVariant} />
+        <Text style={{ color: colors.onSurface, fontSize: 17, fontWeight: '700', textAlign: 'center' }}>
+          Aperçu impossible
+        </Text>
+        <Text style={{ color: colors.onSurfaceVariant, fontSize: 14, lineHeight: 20, textAlign: 'center' }}>
+          {error}
+        </Text>
+      </View>
+    );
+  }
+
+  if (!blobUrl) {
+    return <LoadingView colors={colors} />;
+  }
+
+  return createElement('iframe', {
+    src: blobUrl,
+    title,
+    style: {
+      width: '100%',
+      height: '100%',
+      border: 0,
+      backgroundColor: colors.background,
+    },
+  });
 }
 
 export default function DocumentViewerScreen() {
@@ -158,6 +244,8 @@ export default function DocumentViewerScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+        ) : Platform.OS === 'web' ? (
+          <WebDocumentFrame sourceUrl={sourceUrl} title={title} colors={colors} />
         ) : (
           <WebView
             source={{ uri: viewerUrl }}

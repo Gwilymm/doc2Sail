@@ -8,6 +8,14 @@ nelmio_cors:
         allow_credentials: true # Permet cookies/auth
         max_age: 3600
     paths:
+        # Public document files used by Expo Web internal document viewer
+        "^/r/.+/document/.+/(file|download)$":
+            allow_origin: ["%env(default::CORS_ALLOW_ORIGIN)%"]
+            allow_methods: ["GET", "OPTIONS"]
+            allow_headers: ["Content-Type", "Authorization", "X-Requested-With"]
+            allow_credentials: false
+            max_age: 3600
+
         # API endpoints - CORS strict
         "^/api":
             allow_origin: ["%env(default::CORS_ALLOW_ORIGIN)%"]

@@ -1,4 +1,4 @@
-import { Alert, Platform, Text, TouchableOpacity } from 'react-native';
+import { Alert, Text, TouchableOpacity } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { router } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -18,11 +18,6 @@ type OpenDocumentOptions = {
 
 export async function openDocumentUrl(url: string, options: OpenDocumentOptions = {}): Promise<void> {
   try {
-    if (Platform.OS === 'web') {
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
     router.push({
       pathname: '/document-viewer',
       params: {
