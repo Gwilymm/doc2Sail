@@ -1,16 +1,25 @@
 import { API_BASE_URL, setToken, setRefreshToken, clearTokens } from './api';
 
-export async function requestMagicLink(email: string): Promise<void> {
+export type MagicLinkRequestResponse = {
+  success: boolean;
+  alreadySent?: boolean;
+  expiresIn?: number;
+  message?: string;
+};
+
+export async function requestMagicLink(email: string, options: { force?: boolean } = {}): Promise<MagicLinkRequestResponse> {
   const res = await fetch(`${API_BASE_URL}/api/auth/request`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, ...(options.force ? { force: true } : {}) }),
   });
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error ?? 'Erreur lors de l\'envoi du code');
   }
+
+  return res.json();
 }
 
 export async function verifyCode(code: string): Promise<{ token: string; refresh_token: string }> {

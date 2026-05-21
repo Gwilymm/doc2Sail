@@ -14,7 +14,9 @@ export default function LoginScreen() {
   const [code, setCode] = useState('');
   const [step, setStep] = useState<Step>('email');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const codeInputRef = useRef<TextInput>(null);
   const { checkAuth } = useAuth();
   const router = useRouter();
@@ -24,9 +26,11 @@ export default function LoginScreen() {
     if (!email.trim()) return;
     setLoading(true);
     setError('');
+    setNotice('');
     try {
-      await requestMagicLink(email.trim());
+      const result = await requestMagicLink(email.trim());
       setStep('code');
+      setNotice(result.alreadySent ? 'Un code actif a déjà été envoyé' : 'Code envoyé');
       setTimeout(() => codeInputRef.current?.focus(), 300);
     } catch (e: any) {
       setError(e.message ?? 'Une erreur est survenue');
@@ -35,10 +39,28 @@ export default function LoginScreen() {
     }
   }
 
+  async function handleResendCode() {
+    if (!email.trim()) return;
+    setResending(true);
+    setError('');
+    setNotice('');
+    try {
+      await requestMagicLink(email.trim(), { force: true });
+      setCode('');
+      setNotice('Nouveau code envoyé');
+      setTimeout(() => codeInputRef.current?.focus(), 300);
+    } catch (e: any) {
+      setError(e.message ?? 'Une erreur est survenue');
+    } finally {
+      setResending(false);
+    }
+  }
+
   async function handleVerifyCode() {
     if (code.length < 4) return;
     setLoading(true);
     setError('');
+    setNotice('');
     try {
       await verifyCode(code);
       await checkAuth();
@@ -112,6 +134,11 @@ export default function LoginScreen() {
               <Text style={{ fontSize: 12, textAlign: 'center', color: colors.onSurfaceVariant, marginBottom: 16 }}>
                 Saisissez le code à 6 caractères reçu par email
               </Text>
+              {notice ? (
+                <Text style={{ fontSize: 12, textAlign: 'center', color: colors.primary, marginBottom: 12 }}>
+                  {notice}
+                </Text>
+              ) : null}
               <Input
                 ref={codeInputRef}
                 label="Code de connexion"
@@ -129,6 +156,9 @@ export default function LoginScreen() {
               <View style={{ marginTop: 16, width: '100%', gap: 8 }}>
                 <Button onPress={handleVerifyCode} loading={loading} fullWidth disabled={code.length < 4}>
                   Se connecter
+                </Button>
+                <Button onPress={handleResendCode} loading={resending} variant="ghost" fullWidth>
+                  Renvoyer le code
                 </Button>
                 <Button onPress={() => { setStep('email'); setCode(''); setError(''); }} variant="ghost" fullWidth>
                   ← Changer d'email
