@@ -110,8 +110,6 @@ RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini && \
     echo "upload_max_filesize=50M" > /usr/local/etc/php/conf.d/99-upload-size.ini && \
     echo "post_max_size=50M" >> /usr/local/etc/php/conf.d/99-upload-size.ini
 
-# Générer les configs JSON Hotwire Native
-RUN php bin/console ux-native:dump --env=prod || true
 
 # Warmup cache Symfony
 RUN php bin/console cache:clear --no-warmup --env=prod && php bin/console cache:warmup --env=prod || true
