@@ -14,15 +14,15 @@ Créez/modifiez votre fichier `.env.local` :
 
 ```bash
 # Production
-CORS_ALLOW_ORIGIN=https://doc2sail.com,exp://192.168.1.100:8081
+CORS_ALLOW_ORIGIN='^https://(app\.)?doc2sail\.com$'
 
 # Développement local
-# CORS_ALLOW_ORIGIN=http://localhost:8081,exp://192.168.1.100:8081
+# CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1|192\.168\.1\.100)(:[0-9]+)?$'
 ```
 
 **⚠️ IMPORTANT** :
 - **NE JAMAIS** utiliser `*` (wildcard) en production
-- Lister TOUTES les origines autorisées séparées par des virgules
+- La configuration Symfony actuelle utilise `origin_regex: true` : `CORS_ALLOW_ORIGIN` doit donc être une regex unique, pas une liste séparée par des virgules
 - Inclure le protocole exact (`https://`, `http://`, `exp://`)
 
 ---
@@ -43,9 +43,7 @@ CORS_ALLOW_ORIGIN=https://doc2sail.com,exp://192.168.1.100:8081
 ### 1. Installation dépendances
 
 ```bash
-npm install axios
-# ou
-yarn add axios
+pnpm add axios
 ```
 
 ### 2. Configuration API Client
@@ -350,7 +348,7 @@ if (__DEV__) {
 
 ```bash
 # Production .env
-CORS_ALLOW_ORIGIN=https://app.doc2sail.com
+CORS_ALLOW_ORIGIN='^https://(app\.)?doc2sail\.com$'
 APP_ENV=prod
 APP_DEBUG=0
 ```
@@ -396,6 +394,18 @@ const API_URL = Constants.expoConfig?.extra?.apiUrl;
 ### Test CORS en développement
 
 ```bash
+# Test preflight OPTIONS en production
+curl -X OPTIONS https://doc2sail.com/api/auth/request \
+  -H "Origin: https://app.doc2sail.com" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: Content-Type" \
+  -i
+
+# Doit retourner :
+# Access-Control-Allow-Origin: https://app.doc2sail.com
+# Access-Control-Allow-Methods: POST, OPTIONS
+# Access-Control-Allow-Credentials: true
+
 # Test preflight OPTIONS
 curl -X OPTIONS http://localhost:8000/api/auth/request \
   -H "Origin: http://192.168.1.100:8081" \
@@ -436,9 +446,9 @@ curl -X OPTIONS http://localhost:8000/api/auth/request \
 ## 🆘 Troubleshooting
 
 ### Erreur "CORS policy blocked"
-1. Vérifier IP locale : `ipconfig` (Windows) ou `ifconfig` (Mac/Linux)
-2. Vérifier `.env.local` contient l'IP correcte
-3. Redémarrer serveur Symfony après changement `.env`
+1. Vérifier que `CORS_ALLOW_ORIGIN` autorise exactement l'origine affichée par le navigateur, par exemple `https://app.doc2sail.com`
+2. Si le preflight est `200` mais la requête `fetch` reste en erreur CORS, vérifier aussi les headers de la réponse réelle, pas seulement `OPTIONS`
+3. Redémarrer Symfony / le conteneur après changement d'environnement
 4. Vider cache : `php bin/console cache:clear`
 
 ### Erreur "Network request failed"

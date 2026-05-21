@@ -37,7 +37,7 @@ services:
             VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
             VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
             VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@doc2sail.platypus-home.noho.st}
-            CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^https?://doc2sail\.com$}
+            CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^https://(app\.)?doc2sail\.com$}
         networks:
             - doc2sail-network
         # Limites de ressources pour Raspberry Pi
@@ -63,7 +63,7 @@ services:
             MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_SECRET}
             MERCURE_EXTRA_DIRECTIVES: |
                 anonymous
-                cors_origins https://doc2sail.com  http://localhost:8000
+                cors_origins https://doc2sail.com https://app.doc2sail.com http://localhost:8000
         volumes:
             - mercure-data:/data
             - mercure-config:/config
