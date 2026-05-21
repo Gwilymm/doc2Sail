@@ -14,6 +14,9 @@ export default function ScanRegattaScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [joining, setJoining] = useState(false);
+  const isWeb = Platform.OS === 'web';
+  const isSecureContext = typeof window !== 'undefined' ? window.isSecureContext : true;
+  const canUseWebCamera = !isWeb || isSecureContext;
 
   async function handleScanned(result: BarcodeScanningResult) {
     if (scanned) return;
@@ -62,7 +65,7 @@ export default function ScanRegattaScreen() {
         }}
       />
       <View style={{ flex: 1, backgroundColor: colors.background }}>
-        {hasPermission ? (
+        {hasPermission && canUseWebCamera ? (
           <View style={{ flex: 1 }}>
             <CameraView
               style={{ flex: 1 }}
@@ -111,28 +114,32 @@ export default function ScanRegattaScreen() {
           <View style={{ flex: 1, justifyContent: 'center', padding: 28, gap: 14 }}>
             <FontAwesome name="camera" size={36} color={colors.primary} />
             <Text style={{ color: colors.onSurface, fontSize: 20, fontWeight: '800' }}>
-              Autoriser la caméra
+              {canUseWebCamera ? 'Autoriser la caméra' : 'Caméra indisponible'}
             </Text>
             <Text style={{ color: colors.onSurfaceVariant, fontSize: 14, lineHeight: 20 }}>
-              Doc2Sail utilise la caméra uniquement pour lire les QR codes de partage des régates.
+              {canUseWebCamera
+                ? 'Doc2Sail utilise la caméra uniquement pour lire les QR codes de partage des régates.'
+                : 'Sur le web, l\'accès caméra nécessite une page en HTTPS. Ouvre cette page en HTTPS ou utilise l\'app mobile.'}
             </Text>
-            <TouchableOpacity
-              onPress={requestPermission}
-              disabled={Platform.OS === 'web' && permission?.canAskAgain === false}
-              activeOpacity={0.8}
-              style={{
-                height: 52,
-                borderRadius: 12,
-                backgroundColor: colors.primary,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginTop: 4,
-              }}
-            >
-              <Text style={{ color: colors.onPrimary, fontSize: 15, fontWeight: '700' }}>
-                Autoriser
-              </Text>
-            </TouchableOpacity>
+            {canUseWebCamera && (
+              <TouchableOpacity
+                onPress={requestPermission}
+                disabled={isWeb && permission?.canAskAgain === false}
+                activeOpacity={0.8}
+                style={{
+                  height: 52,
+                  borderRadius: 12,
+                  backgroundColor: colors.primary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 4,
+                }}
+              >
+                <Text style={{ color: colors.onPrimary, fontSize: 15, fontWeight: '700' }}>
+                  Autoriser
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </View>

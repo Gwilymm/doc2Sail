@@ -11,6 +11,7 @@ import { openDocumentUrl } from '../../../components/PdfViewer';
 import { getPublicDocumentFileUrl } from '../../../services/publicRegattas';
 import { apiFetch } from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // --- Date helpers ---
 
@@ -37,6 +38,7 @@ export default function RegattaDetailScreen() {
   const { regatta, documents, loading, refreshing, error, refresh } = useRegattaDetail(id);
   const { user } = useAuth();
   const { isDark, colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
@@ -215,7 +217,7 @@ export default function RegattaDetailScreen() {
 
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 76 + insets.bottom + 24 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
