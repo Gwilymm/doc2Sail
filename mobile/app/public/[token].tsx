@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useAppTheme } from '../../theme/useAppTheme';
@@ -206,11 +206,21 @@ export default function PublicRegattaScreen() {
                         ) : null}
                         <DocumentRow
                           document={document}
-                          onPress={() => openDocumentUrl(document.fileUrl, {
-                            title: document.name,
-                            mimeType: document.mimeType,
-                            controlsColor: colors.primary,
-                          })}
+                          onPress={() => {
+                            if (document.fileExists === false) {
+                              Alert.alert(
+                                'Fichier manquant',
+                                'La fiche existe encore, mais le fichier physique est absent du serveur.'
+                              );
+                              return;
+                            }
+
+                            openDocumentUrl(document.fileUrl, {
+                              title: document.name,
+                              mimeType: document.mimeType,
+                              controlsColor: colors.primary,
+                            });
+                          }}
                         />
                       </View>
                     ))}

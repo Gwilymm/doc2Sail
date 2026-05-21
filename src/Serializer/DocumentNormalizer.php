@@ -3,6 +3,7 @@
 namespace App\Serializer;
 
 use App\Entity\Document;
+use App\Service\DocumentUploader;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
@@ -16,7 +17,8 @@ class DocumentNormalizer implements NormalizerInterface, NormalizerAwareInterfac
 	private static array $normalizing = [];
 
 	public function __construct(
-		private UrlGeneratorInterface $urlGenerator
+		private UrlGeneratorInterface $urlGenerator,
+		private DocumentUploader $documentUploader,
 	) {}
 
 	public function normalize($object, ?string $format = null, array $context = []): array
@@ -42,6 +44,10 @@ class DocumentNormalizer implements NormalizerInterface, NormalizerAwareInterfac
 		}
 
 		$data['formattedSize'] = $object->getFormattedSize();
+		$data['fileExists'] = $this->documentUploader->exists(
+			$object->getFilename(),
+			$object->getRegatta()?->getId()
+		);
 
 		return $data;
 	}

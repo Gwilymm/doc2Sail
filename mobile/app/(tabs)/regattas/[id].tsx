@@ -1,14 +1,16 @@
-import { Platform, ScrollView, View, Text, RefreshControl, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import { Alert, Platform, ScrollView, View, Text, RefreshControl, TouchableOpacity, TextInput, Pressable } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useState, useMemo, useRef, useCallback } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useRegattaDetail } from '../../../hooks/useRegattaDetail';
+import { useRegattaDetail, type Document as RegattaDocument } from '../../../hooks/useRegattaDetail';
 import { DocumentRow } from '../../../components/DocumentRow';
 import { FilterBottomSheet, SortKey } from '../../../components/FilterBottomSheet';
 import { CenteredLoader } from '../../../components/ui/CircularLoadingIndicator';
 import { useAppTheme } from '../../../theme/useAppTheme';
 import { openDocumentUrl } from '../../../components/PdfViewer';
 import { getPublicDocumentFileUrl } from '../../../services/publicRegattas';
+import { apiFetch } from '../../../services/api';
+import { useAuth } from '../../../context/AuthContext';
 
 // --- Date helpers ---
 
@@ -33,12 +35,14 @@ export default function RegattaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { regatta, documents, loading, refreshing, error, refresh } = useRegattaDetail(id);
+  const { user } = useAuth();
   const { isDark, colors } = useAppTheme();
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [activeSort, setActiveSort] = useState<SortKey>('recent');
   const [search, setSearch] = useState('');
+  const [deletingDocumentId, setDeletingDocumentId] = useState<number | null>(null);
   const searchRef = useRef<TextInput>(null);
   const didFocusOnce = useRef(false);
 
@@ -77,6 +81,81 @@ export default function RegattaDetailScreen() {
   }, [documents, activeCategories, activeSort, search]);
 
   const hasActiveFilter = activeCategories.length > 0;
+  const canManage = useMemo(() => {
+    if (!regatta || !user) return false;
+
+    return regatta.owner.id === user.id || (regatta.coOwners ?? []).some((coOwner) => coOwner.id === user.id);
+  }, [regatta, user]);
+
+  const showMessage = useCallback((title: string, message: string) => {
+    if (Platform.OS === 'web') {
+      globalThis.alert?.(`${title}\n\n${message}`);
+      return;
+    }
+
+    Alert.alert(title, message);
+  }, []);
+
+  const confirmDeleteDocument = useCallback((documentName: string): Promise<boolean> => {
+    const message = `Supprimer "${documentName}" ?\n\nCette action supprimera aussi le fichier du serveur.`;
+
+    if (Platform.OS === 'web') {
+      return Promise.resolve(globalThis.confirm?.(message) ?? false);
+    }
+
+    return new Promise((resolve) => {
+      Alert.alert(
+        'Supprimer le document ?',
+        'Cette action supprimera aussi le fichier du serveur.',
+        [
+          { text: 'Annuler', style: 'cancel', onPress: () => resolve(false) },
+          { text: 'Supprimer', style: 'destructive', onPress: () => resolve(true) },
+        ]
+      );
+    });
+  }, []);
+
+  const handleOpenDocument = useCallback((doc: RegattaDocument) => {
+    if (doc.fileExists === false) {
+      showMessage(
+        'Fichier manquant',
+        'La fiche existe encore en base, mais le fichier physique est absent du serveur. Vous pouvez supprimer cette ligne si vous gérez la régate.'
+      );
+      return;
+    }
+
+    const url = regatta?.accessToken
+      ? getPublicDocumentFileUrl(regatta.accessToken, doc.id)
+      : doc.fileUrl ?? doc.downloadUrl;
+
+    if (url) {
+      openDocumentUrl(url, { title: doc.name, mimeType: doc.mimeType, controlsColor: colors.primary });
+    }
+  }, [colors.primary, regatta?.accessToken, showMessage]);
+
+  const handleDeleteDocument = useCallback(async (doc: RegattaDocument) => {
+    const confirmed = await confirmDeleteDocument(doc.name);
+    if (!confirmed) return;
+
+    setDeletingDocumentId(doc.id);
+
+    try {
+      const response = await apiFetch(`/api/documents/${doc.id}/delete`, {
+        method: 'DELETE',
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? 'Impossible de supprimer ce document.');
+      }
+
+      await refresh();
+    } catch (deleteError: any) {
+      showMessage('Suppression impossible', deleteError?.message ?? 'Une erreur est survenue.');
+    } finally {
+      setDeletingDocumentId(null);
+    }
+  }, [confirmDeleteDocument, refresh, showMessage]);
 
   if (loading) {
     return (
@@ -369,15 +448,9 @@ export default function RegattaDetailScreen() {
                 )}
                 <DocumentRow
                   document={doc}
-                  onPress={() => {
-                    const url = regatta.accessToken
-                      ? getPublicDocumentFileUrl(regatta.accessToken, doc.id)
-                      : doc.fileUrl ?? doc.downloadUrl;
-
-                    if (url) {
-                      openDocumentUrl(url, { title: doc.name, mimeType: doc.mimeType, controlsColor: colors.primary });
-                    }
-                  }}
+                  onPress={() => handleOpenDocument(doc)}
+                  onDelete={canManage ? () => handleDeleteDocument(doc) : undefined}
+                  deleting={deletingDocumentId === doc.id}
                 />
               </View>
             ))}

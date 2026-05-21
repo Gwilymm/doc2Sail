@@ -15,6 +15,7 @@ export type Document = {
   downloadUrl?: string;
   viewUrl?: string;
   fileUrl?: string;
+  fileExists?: boolean;
 };
 
 export function useRegattaDetail(id: string | number) {

@@ -1,4 +1,5 @@
-import { TouchableOpacity, View, Text } from 'react-native';
+import { ActivityIndicator, TouchableOpacity, View, Text } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Document } from '../hooks/useRegattaDetail';
 import { getDocCategoryColor, useAppTheme } from '../theme/useAppTheme';
 
@@ -40,14 +41,17 @@ function formatUploadDate(value: string): string {
 type Props = {
   document: Document;
   onPress?: () => void;
+  onDelete?: () => void;
+  deleting?: boolean;
 };
 
-export function DocumentRow({ document, onPress }: Props) {
+export function DocumentRow({ document, onPress, onDelete, deleting = false }: Props) {
   const { isDark, colors } = useAppTheme();
   const icon = getFileIcon(document.mimeType);
   const size = formatSize(document.size);
   const uploadedAt = formatUploadDate(document.uploadedAt);
   const catColor = getDocCategoryColor(document.category, isDark);
+  const fileMissing = document.fileExists === false;
 
   return (
     <TouchableOpacity
@@ -58,7 +62,7 @@ export function DocumentRow({ document, onPress }: Props) {
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: colors.surface,
+        backgroundColor: fileMissing ? `${colors.danger}08` : colors.surface,
       }}
     >
       {/* File icon */}
@@ -69,7 +73,7 @@ export function DocumentRow({ document, onPress }: Props) {
           borderRadius: 12,
           backgroundColor: colors.iconBg,
           borderWidth: 1,
-          borderColor: colors.iconBorder,
+          borderColor: fileMissing ? colors.danger : colors.iconBorder,
           alignItems: 'center',
           justifyContent: 'center',
           marginRight: 12,
@@ -98,8 +102,53 @@ export function DocumentRow({ document, onPress }: Props) {
           {uploadedAt ? (
             <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>{uploadedAt}</Text>
           ) : null}
+          {fileMissing ? (
+            <View
+              style={{
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 999,
+                borderWidth: 1,
+                borderColor: colors.danger,
+                backgroundColor: colors.surface,
+              }}
+            >
+              <Text style={{ fontSize: 12, fontWeight: '600', color: colors.danger }}>
+                Fichier manquant
+              </Text>
+            </View>
+          ) : null}
         </View>
       </View>
+
+      {onDelete ? (
+        <TouchableOpacity
+          onPress={(event) => {
+            event.stopPropagation();
+            if (!deleting) onDelete();
+          }}
+          disabled={deleting}
+          accessibilityRole="button"
+          accessibilityLabel={`Supprimer ${document.name}`}
+          hitSlop={8}
+          activeOpacity={0.7}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 8,
+            opacity: deleting ? 0.7 : 1,
+          }}
+        >
+          {deleting ? (
+            <ActivityIndicator size="small" color={colors.danger} />
+          ) : (
+            <FontAwesome name="trash-o" size={18} color={colors.danger} />
+          )}
+        </TouchableOpacity>
+      ) : null}
 
       {/* Chevron */}
       <Text style={{ fontSize: 20, color: colors.chevron, marginLeft: 8 }}>›</Text>

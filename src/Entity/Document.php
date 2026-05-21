@@ -10,7 +10,6 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Delete;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: DocumentRepository::class)]
@@ -34,9 +33,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 			controller: \App\Api\DocumentUploadController::class,
 			deserialize: false,
 			inputFormats: ['multipart' => ['multipart/form-data']],
-			security: "is_granted('ROLE_USER')"
-		),
-		new Delete(
 			security: "is_granted('ROLE_USER')"
 		),
 	]

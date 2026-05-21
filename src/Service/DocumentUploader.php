@@ -46,11 +46,29 @@ class DocumentUploader
 
 	public function delete(string $filename, ?int $regattaId = null): void
 	{
-		$filePath = $this->getTargetDirectory($regattaId) . '/' . $filename;
+		if ($filename === '') {
+			return;
+		}
 
-		if (file_exists($filePath)) {
+		$filePath = $this->getPath($filename, $regattaId);
+
+		if (is_file($filePath)) {
 			unlink($filePath);
 		}
+	}
+
+	public function exists(?string $filename, ?int $regattaId = null): bool
+	{
+		if ($filename === null || $filename === '') {
+			return false;
+		}
+
+		return is_file($this->getPath($filename, $regattaId));
+	}
+
+	public function getPath(string $filename, ?int $regattaId = null): string
+	{
+		return $this->getTargetDirectory($regattaId) . '/' . $filename;
 	}
 
 	public function deleteRegattaDirectory(int $regattaId): void

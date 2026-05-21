@@ -4,6 +4,7 @@ namespace App\Api;
 
 use App\Entity\Document;
 use App\Repository\RegattaRepository;
+use App\Service\DocumentUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,6 +19,7 @@ class PublicRegattaController extends AbstractController
 	public function __construct(
 		private RegattaRepository $regattaRepository,
 		private UrlGeneratorInterface $urlGenerator,
+		private DocumentUploader $documentUploader,
 	) {}
 
 	#[Route('/r/{token}/data', name: 'api_public_regatta_data', methods: ['GET'])]
@@ -41,6 +43,10 @@ class PublicRegattaController extends AbstractController
 				'formattedSize' => $document->getFormattedSize(),
 				'category' => $document->getCategory(),
 				'uploadedAt' => $document->getUploadedAt()?->format(\DateTimeInterface::ATOM) ?? '',
+				'fileExists' => $this->documentUploader->exists(
+					$document->getFilename(),
+					$document->getRegatta()?->getId()
+				),
 				'viewUrl' => $this->documentUrl('api_public_document_file', $token, $document),
 				'fileUrl' => $this->documentUrl('api_public_document_file', $token, $document),
 				'downloadUrl' => $this->documentUrl('api_public_document_download', $token, $document),
