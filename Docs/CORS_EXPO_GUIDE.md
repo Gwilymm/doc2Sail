@@ -58,7 +58,7 @@ import Constants from 'expo-constants';
 // URL API selon l'environnement
 const API_BASE_URL = __DEV__
   ? 'http://192.168.1.100:8000'  // Votre IP locale en dev
-  : 'https://api.doc2sail.com';   // Production
+  : 'https://doc2sail.com';       // Production
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -363,7 +363,7 @@ eas build --platform ios --profile production
 eas build --platform android --profile production
 
 # Web
-expo build:web
+pnpm exec expo export --platform web
 ```
 
 ### 3. Variables d'environnement Expo
@@ -374,7 +374,7 @@ Créez `app.config.js` :
 export default {
   expo: {
     extra: {
-      apiUrl: process.env.API_URL || 'https://api.doc2sail.com',
+      apiUrl: process.env.API_URL || 'https://doc2sail.com',
     },
   },
 };
@@ -391,7 +391,7 @@ const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
 ## 🧪 Tests
 
-### Test CORS en développement
+### Test CORS
 
 ```bash
 # Test preflight OPTIONS en production
@@ -406,7 +406,7 @@ curl -X OPTIONS https://doc2sail.com/api/auth/request \
 # Access-Control-Allow-Methods: POST, OPTIONS
 # Access-Control-Allow-Credentials: true
 
-# Test preflight OPTIONS
+# Test preflight OPTIONS en développement
 curl -X OPTIONS http://localhost:8000/api/auth/request \
   -H "Origin: http://192.168.1.100:8081" \
   -H "Access-Control-Request-Method: POST" \

@@ -1,7 +1,6 @@
-# Docker Compose lit automatiquement les fichiers .env dans cet ordre :
-# 1. .env
-# 2. .env.docker.local (si présent)
-# Créez un fichier .env.docker.local avec vos secrets pour la production
+# Docker Compose lit automatiquement .env pour l'interpolation.
+# Pour utiliser un autre fichier de prod, lancez explicitement :
+# docker compose --env-file .env.docker.local -f docker-compose.prod.yml up -d
 
 services:
     ###> Application FrankenPHP (Production) ###
