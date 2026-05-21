@@ -23,6 +23,7 @@ services:
         volumes:
             # Seulement les volumes nécessaires en production
             - ./public/uploads:/app/public/uploads
+            - ./var/data.db:/app/var/data.db
         environment:
             APP_ENV: prod
             APP_SECRET: ${APP_SECRET}
