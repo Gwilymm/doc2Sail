@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, Text, View } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useAppTheme } from '../../theme/useAppTheme';
 import { DocumentRow } from '../../components/DocumentRow';
 import { openDocumentUrl } from '../../components/PdfViewer';
 import { QRShare } from '../../components/QRShare';
 import { CenteredLoader } from '../../components/ui/CircularLoadingIndicator';
-import { fetchPublicRegatta, PublicRegatta } from '../../services/publicRegattas';
+import { fetchPublicRegatta, joinPublicRegatta, PublicRegatta } from '../../services/publicRegattas';
+import { useAuth } from '../../context/AuthContext';
 
 function formatDateRange(startIso?: string | null, endIso?: string | null): string {
   if (!startIso || !endIso) return '';
@@ -32,11 +33,15 @@ function formatDateRange(startIso?: string | null, endIso?: string | null): stri
 
 export default function PublicRegattaScreen() {
   const { token } = useLocalSearchParams<{ token: string }>();
+  const router = useRouter();
   const { colors, isDark } = useAppTheme();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [regatta, setRegatta] = useState<PublicRegatta | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState('');
 
   const load = useCallback(async (isRefresh = false) => {
     if (!token) return;
@@ -54,6 +59,21 @@ export default function PublicRegattaScreen() {
       setRefreshing(false);
     }
   }, [token]);
+
+  const handleJoin = useCallback(async () => {
+    if (!token) return;
+    setJoinError('');
+    setJoining(true);
+
+    try {
+      const joined = await joinPublicRegatta(token);
+      await router.replace(`/(tabs)/regattas/${joined.id}`);
+    } catch (e: any) {
+      setJoinError(e?.message ?? 'Impossible d\'ajouter cette régate à vos régates.');
+    } finally {
+      setJoining(false);
+    }
+  }, [router, token]);
 
   useEffect(() => {
     load();
@@ -154,6 +174,45 @@ export default function PublicRegattaScreen() {
 
         <View style={{ paddingHorizontal: 16, paddingTop: 16, gap: 16 }}>
           <QRShare url={regatta.publicUrl} title="Partager la régate" />
+
+          {authLoading ? (
+            <View style={{ padding: 14, borderRadius: 14, backgroundColor: colors.surface }}>
+              <Text style={{ color: colors.onSurfaceVariant, fontSize: 13 }}>Vérification de connexion…</Text>
+            </View>
+          ) : isAuthenticated ? (
+            <View style={{ gap: 10 }}>
+              <TouchableOpacity
+                onPress={handleJoin}
+                disabled={joining}
+                activeOpacity={0.8}
+                style={{
+                  height: 50,
+                  borderRadius: 14,
+                  backgroundColor: joining ? colors.outline : colors.primary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text style={{ color: colors.onPrimary, fontSize: 15, fontWeight: '700' }}>
+                  {joining ? 'Ajout en cours…' : 'Ajouter cette régate à mes régates'}
+                </Text>
+              </TouchableOpacity>
+              {joinError ? (
+                <Text style={{ color: '#ba1a1a', fontSize: 13, textAlign: 'center' }}>
+                  {joinError}
+                </Text>
+              ) : null}
+            </View>
+          ) : (
+            <View style={{ backgroundColor: colors.surface, borderRadius: 14, padding: 14, gap: 8 }}>
+              <Text style={{ color: colors.onSurface, fontSize: 14, fontWeight: '700' }}>
+                Connecte-toi pour ajouter cette régate à ton espace.
+              </Text>
+              <Text style={{ color: colors.onSurfaceVariant, fontSize: 13, lineHeight: 18 }}>
+                Si tu ouvres ce lien depuis le lecteur QR de ton téléphone, connecte-toi puis clique sur le bouton d'ajout.
+              </Text>
+            </View>
+          )}
 
           <View style={{ gap: 8 }}>
             <Text
