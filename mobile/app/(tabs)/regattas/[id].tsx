@@ -1,5 +1,5 @@
 import { ScrollView, View, Text, RefreshControl, TouchableOpacity, TextInput, Pressable } from 'react-native';
-import { useFocusEffect, useLocalSearchParams, Stack } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useState, useMemo, useRef, useCallback } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRegattaDetail } from '../../../hooks/useRegattaDetail';
@@ -31,6 +31,7 @@ function formatDateRange(startIso: string, endIso: string): string {
 
 export default function RegattaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { regatta, documents, loading, refreshing, error, refresh } = useRegattaDetail(id);
   const { isDark, colors } = useAppTheme();
 
@@ -107,7 +108,29 @@ export default function RegattaDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: regatta.name }} />
+      <Stack.Screen
+        options={{
+          title: regatta.name,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.replace('/(tabs)/regattas')}
+              accessibilityRole="button"
+              accessibilityLabel="Retour aux régates"
+              hitSlop={12}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: 8,
+              }}
+            >
+              <FontAwesome name="chevron-left" size={18} color={colors.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}

@@ -119,6 +119,7 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
   const isOnDetail = activeTabRoute.name === 'regattas' && nestedRouteName === '[id]';
   const dialActions = isOnDetail ? ACTIONS_REGATTA_DETAIL : ACTIONS_REGATTAS_LIST;
   const pathnameRegattaId = pathname.match(/\/regattas\/([^/]+)/)?.[1];
+  const isRegattaSubpage = /^\/(?:\(tabs\)\/)?regattas\/.+/.test(pathname);
 
   function handleDialAction(action: DialAction) {
     setFabOpen(false);
@@ -169,7 +170,14 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
     return (
       <TouchableOpacity
         key={route.key}
-        onPress={() => { if (!isFocused) navigation.navigate(route.name, {}); }}
+        onPress={() => {
+          setFabOpen(false);
+          if (route.name === 'regattas' && isRegattaSubpage) {
+            router.replace('/(tabs)/regattas');
+            return;
+          }
+          if (!isFocused) navigation.navigate(route.name, {});
+        }}
         style={{ flex: 1, alignItems: 'center', paddingTop: TOP_PADDING }}
         accessibilityRole="button"
         accessibilityState={isFocused ? { selected: true } : {}}
@@ -210,6 +218,10 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
         key={route.key}
         onPress={() => {
           setFabOpen(false);
+          if (route.name === 'regattas' && isRegattaSubpage) {
+            router.replace('/(tabs)/regattas');
+            return;
+          }
           if (!isFocused) navigation.navigate(route.name, {});
         }}
         style={{ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: BAR_HEIGHT }}
