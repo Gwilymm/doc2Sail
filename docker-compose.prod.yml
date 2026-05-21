@@ -38,6 +38,8 @@ services:
             VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
             VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@doc2sail.platypus-home.noho.st}
             CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^https://(app\.)?doc2sail\.com$}
+            JWT_SECRET_KEY: /app/config/jwt/private.pem
+            JWT_PUBLIC_KEY: /app/config/jwt/public.pem
             JWT_PASSPHRASE: ${JWT_PASSPHRASE}
         command: >
             sh -c "php bin/console doctrine:migrations:migrate --no-interaction
