@@ -37,6 +37,7 @@ services:
             VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
             VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@doc2sail.platypus-home.noho.st}
             CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^https://(app\.)?doc2sail\.com$}
+            JWT_PASSPHRASE: ${JWT_PASSPHRASE}
         networks:
             - doc2sail-network
         # Limites de ressources pour Raspberry Pi
