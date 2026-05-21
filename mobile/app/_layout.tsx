@@ -4,11 +4,13 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { View } from 'react-native';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { ThemeProvider as AppThemeProvider } from '../context/ThemeContext';
 import { useAppTheme } from '../theme/useAppTheme';
+import { darkThemeVars, lightThemeVars } from '../theme/nativewindVars';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -42,9 +44,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
 // Lit useTheme() (qui est dans AppThemeProvider) et passe le bon thème à React Navigation
 function ThemedStack() {
-  const { colors } = useAppTheme();
+  const { colors, theme, isDark } = useAppTheme();
   const navigationTheme = {
-    dark: colors.isDark,
+    dark: isDark,
     colors: {
       primary: colors.primary,
       background: colors.background,
@@ -58,19 +60,27 @@ function ThemedStack() {
 
   return (
     <ThemeProvider value={navigationTheme}>
-      <AuthGuard>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="public/[token]" options={{ headerShown: false }} />
-          <Stack.Screen name="r/[token]" options={{ headerShown: false }} />
-          <Stack.Screen name="document-viewer" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="regattas/new" options={{ presentation: 'modal', title: 'Nouvelle régate' }} />
-          <Stack.Screen name="regattas/scan" options={{ presentation: 'modal', title: 'Scanner' }} />
-          <Stack.Screen name="regattas/[id]/upload" options={{ presentation: 'modal', title: 'Ajouter un fichier' }} />
-          <Stack.Screen name="regattas/[id]/share" options={{ presentation: 'modal', title: 'Partager' }} />
-        </Stack>
-      </AuthGuard>
+      <View
+        className={isDark ? 'dark flex-1' : 'flex-1'}
+        style={[
+          theme === 'dark' ? darkThemeVars : lightThemeVars,
+          { flex: 1, backgroundColor: colors.background },
+        ]}
+      >
+        <AuthGuard>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="public/[token]" options={{ headerShown: false }} />
+            <Stack.Screen name="r/[token]" options={{ headerShown: false }} />
+            <Stack.Screen name="document-viewer" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="regattas/new" options={{ presentation: 'modal', title: 'Nouvelle régate' }} />
+            <Stack.Screen name="regattas/scan" options={{ presentation: 'modal', title: 'Scanner' }} />
+            <Stack.Screen name="regattas/[id]/upload" options={{ presentation: 'modal', title: 'Ajouter un fichier' }} />
+            <Stack.Screen name="regattas/[id]/share" options={{ presentation: 'modal', title: 'Partager' }} />
+          </Stack>
+        </AuthGuard>
+      </View>
     </ThemeProvider>
   );
 }

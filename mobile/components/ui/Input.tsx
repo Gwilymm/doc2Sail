@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { TextInput, View, Text } from 'react-native';
+import { Platform, TextInput, View, Text } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import { useAppTheme } from '../../theme/useAppTheme';
 
@@ -9,21 +9,46 @@ type Props = TextInputProps & {
   className?: string;
 };
 
-export const Input = forwardRef<TextInput, Props>(function Input({ label, error, className = '', ...props }, ref) {
+export const Input = forwardRef<TextInput, Props>(function Input({
+  label,
+  error,
+  className = '',
+  placeholderTextColor,
+  style,
+  ...props
+}, ref) {
   const { colors } = useAppTheme();
 
   return (
-    <View className="gap-1 w-full">
-      {label && <Text className="text-sm font-medium text-base-content">{label}</Text>}
+    <View style={{ gap: 4, width: '100%' }}>
+      {label && (
+        <Text style={{ fontSize: 14, fontWeight: '500', color: colors.onSurface }}>
+          {label}
+        </Text>
+      )}
       <TextInput
         ref={ref}
-        className={`border rounded-btn px-3 py-3 text-base bg-base-200 text-base-content ${
-          error ? 'border-error' : 'border-base-300'
-        } ${className}`}
-        placeholderTextColor={colors.onSurfaceVariant}
+        className={className}
+        placeholderTextColor={placeholderTextColor ?? colors.onSurfaceVariant}
+        selectionColor={colors.primary}
+        cursorColor={colors.primary}
+        style={[
+          {
+            borderWidth: 1,
+            borderRadius: 8,
+            borderColor: error ? colors.error : colors.inputBorder,
+            backgroundColor: colors.inputBg,
+            color: colors.onSurface,
+            fontSize: 16,
+            paddingHorizontal: 12,
+            paddingVertical: 12,
+          },
+          Platform.OS === 'web' ? { outlineStyle: 'none' as any } : null,
+          style,
+        ]}
         {...props}
       />
-      {error && <Text className="text-xs text-error">{error}</Text>}
+      {error && <Text style={{ fontSize: 12, color: colors.error }}>{error}</Text>}
     </View>
   );
 });
