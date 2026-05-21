@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, TouchableOpacity, Text, useWindowDimensions, Pressable } from 'react-native';
+import { Platform, View, TouchableOpacity, Text, useWindowDimensions, Pressable } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -192,6 +192,206 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
           </Text>
         </View>
       </TouchableOpacity>
+    );
+  }
+
+  function renderWebTab(route: (typeof state.routes)[number], routeIndex: number) {
+    const { options } = descriptors[route.key];
+    const isFocused = state.index === routeIndex;
+    const label = (options.title ?? route.name) as string;
+    const icon = options.tabBarIcon?.({
+      color: isFocused ? ON_PRIMARY_CONTAINER : ON_SURFACE_VARIANT,
+      size: ICON_SIZE,
+      focused: isFocused,
+    });
+
+    return (
+      <TouchableOpacity
+        key={route.key}
+        onPress={() => {
+          setFabOpen(false);
+          if (!isFocused) navigation.navigate(route.name, {});
+        }}
+        style={{ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: BAR_HEIGHT }}
+        accessibilityRole="button"
+        accessibilityState={isFocused ? { selected: true } : {}}
+        accessibilityLabel={label}
+      >
+        <View
+          style={{
+            width: INDICATOR_W,
+            height: INDICATOR_H,
+            borderRadius: INDICATOR_H / 2,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: isFocused ? ACTIVE_INDICATOR : 'transparent',
+          }}
+        >
+          {icon}
+        </View>
+        <Text
+          style={{
+            marginTop: ICON_TO_LABEL,
+            fontSize: LABEL_SIZE,
+            fontWeight: isFocused ? '700' : '400',
+            color: isFocused ? ON_PRIMARY_CONTAINER : ON_SURFACE_VARIANT,
+            letterSpacing: 0,
+          }}
+          numberOfLines={1}
+        >
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+
+  if (Platform.OS === 'web') {
+    return (
+      <View
+        pointerEvents="box-none"
+        style={{
+          position: 'fixed' as any,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: barH + DIAL_TOUCH_AREA,
+          zIndex: 1000,
+          overflow: 'visible',
+        }}
+      >
+        {fabOpen && (
+          <Pressable
+            style={{
+              position: 'fixed' as any,
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: barH,
+              zIndex: 10,
+            }}
+            onPress={() => setFabOpen(false)}
+          />
+        )}
+
+        {fabOpen && (
+          <View
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: barH + FAB_PROTRUSION + 8,
+              alignItems: 'center',
+              zIndex: 30,
+            }}
+            pointerEvents="box-none"
+          >
+            <View style={{ alignItems: 'flex-end', gap: 12 }}>
+              {dialActions.map((action) => (
+                <TouchableOpacity
+                  key={action.key}
+                  onPress={() => handleDialAction(action)}
+                  activeOpacity={0.82}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                >
+                  <View
+                    style={{
+                      backgroundColor: DIAL_LABEL_BG,
+                      borderRadius: 6,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      shadowColor: colors.shadow,
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 3,
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: '500', color: DIAL_LABEL_TEXT, letterSpacing: 0 }}>
+                      {action.label}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      width: DIAL_SIZE,
+                      height: DIAL_SIZE,
+                      borderRadius: DIAL_SIZE / 2,
+                      backgroundColor: DIAL_BG,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      shadowColor: colors.shadow,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.18,
+                      shadowRadius: 4,
+                    }}
+                  >
+                    <FontAwesome name={action.icon} size={16} color={DIAL_ICON} />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
+        <View
+          style={{
+            position: 'fixed' as any,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: barH,
+            backgroundColor: SURFACE,
+            borderTopWidth: 1,
+            borderTopColor: colors.outlineVariant,
+            shadowColor: colors.shadow,
+            shadowOffset: { width: 0, height: -1 },
+            shadowOpacity: isDark ? 0.25 : 0.06,
+            shadowRadius: 4,
+            zIndex: 20,
+          }}
+        >
+          <View
+            style={{
+              width: '100%',
+              maxWidth: 560,
+              alignSelf: 'center',
+              flexDirection: 'row',
+              height: BAR_HEIGHT,
+              paddingHorizontal: 8,
+            }}
+          >
+            <View style={{ flex: 1, flexDirection: 'row' }}>
+              {leftRoutes.map((r: (typeof state.routes)[number], i: number) => renderWebTab(r, i))}
+            </View>
+            <View style={{ width: FAB_CENTER_GAP }} />
+            <View style={{ flex: 1, flexDirection: 'row' }}>
+              {rightRoutes.map((r: (typeof state.routes)[number], i: number) => renderWebTab(r, half + i))}
+            </View>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          onPress={() => setFabOpen((v) => !v)}
+          activeOpacity={0.85}
+          style={{
+            position: 'fixed' as any,
+            bottom: barH - FAB_SIZE + FAB_PROTRUSION,
+            left: '50%',
+            marginLeft: -FAB_SIZE / 2,
+            width: FAB_SIZE,
+            height: FAB_SIZE,
+            borderRadius: FAB_SIZE / 2,
+            backgroundColor: FAB_COLOR,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: FAB_COLOR,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.4,
+            shadowRadius: 10,
+            zIndex: 40,
+          }}
+        >
+          <FontAwesome name={fabOpen ? 'times' : 'plus'} size={20} color={FAB_ICON} />
+        </TouchableOpacity>
+      </View>
     );
   }
 
