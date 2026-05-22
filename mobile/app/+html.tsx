@@ -1,5 +1,7 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
 
+const { themeVars } = require('../theme/colors');
+
 // This file is web-only and used to configure the root HTML for every
 // web page during static rendering.
 // The contents of this function only run in Node.js environments and
@@ -19,6 +21,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <ScrollViewStyleReset />
 
         {/* Using raw CSS styles as an escape-hatch to ensure the background color never flickers in dark-mode. */}
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
         <style dangerouslySetInnerHTML={{ __html: responsiveBackground }} />
         {/* Add any additional <head> elements that you want globally available on web... */}
       </head>
@@ -27,12 +30,30 @@ export default function Root({ children }: { children: React.ReactNode }) {
   );
 }
 
+const STORAGE_KEY = '@doc2sail/colorScheme';
+const lightBackground = themeVars.light['--color-background'];
+const darkBackground = themeVars.dark['--color-background'];
+
+const themeBootScript = `
+(function () {
+  try {
+    var theme = window.localStorage.getItem('${STORAGE_KEY}');
+    if (theme !== 'light' && theme !== 'dark') {
+      theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
+  } catch (error) {}
+})();`;
+
 const responsiveBackground = `
-body {
-  background-color: #fff;
+html,
+body,
+#root {
+  background-color: ${lightBackground};
 }
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #000;
-  }
+html.dark,
+html.dark body,
+html.dark #root {
+  background-color: ${darkBackground};
 }`;

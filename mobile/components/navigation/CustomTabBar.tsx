@@ -9,7 +9,7 @@ import { usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Svg, { Path } from 'react-native-svg';
-import { useAppTheme } from '../../theme/useAppTheme';
+import { getAppColors, useAppTheme } from '../../theme/useAppTheme';
 
 // --- Layout constants ---
 const BAR_HEIGHT = 76;
@@ -84,7 +84,8 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
   const [fabOpen, setFabOpen] = useState(false);
 
-  const SURFACE              = colors.surface;
+  const tabBarColors         = isDark ? getAppColors('dark') : getAppColors('light');
+  const SURFACE              = tabBarColors.surface;
   const ACTIVE_INDICATOR     = colors.primaryContainer;
   const ON_PRIMARY_CONTAINER = colors.onPrimaryContainer;
   const ON_SURFACE_VARIANT   = colors.onSurfaceVariant;
@@ -266,7 +267,8 @@ export function CustomTabBar({ state, descriptors, navigation }: TabBarProps) {
           left: 0,
           right: 0,
           bottom: 0,
-          height: barH + DIAL_TOUCH_AREA,
+          height: barH,
+          backgroundColor: SURFACE,
           zIndex: 1000,
           overflow: 'visible',
         }}

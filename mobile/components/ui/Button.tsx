@@ -39,18 +39,26 @@ export function Button({
   fullWidth = false,
   className = '',
 }: Props) {
-  const { colors } = useAppTheme();
+  const { colors, isDark } = useAppTheme();
   const { btn, text } = variantClasses[variant];
   const { btn: btnSize, text: textSize } = sizeClasses[size];
+  const primaryBg = isDark ? colors.primaryContainer : colors.primary;
+  const primaryText = isDark ? colors.onPrimaryContainer : colors.onPrimary;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
       className={`rounded-btn items-center justify-center flex-row gap-2 ${btn} ${btnSize} ${fullWidth ? 'w-full' : ''} ${disabled || loading ? 'opacity-60' : ''} ${className}`}
+      style={variant === 'primary' ? { backgroundColor: primaryBg } : undefined}
     >
-      {loading && <ActivityIndicator size="small" color={variant === 'primary' ? colors.onPrimary : colors.primary} />}
-      <Text className={`font-semibold ${text} ${textSize}`}>{children}</Text>
+      {loading && <ActivityIndicator size="small" color={variant === 'primary' ? primaryText : colors.primary} />}
+      <Text
+        className={`font-semibold ${text} ${textSize}`}
+        style={variant === 'primary' ? { color: primaryText } : undefined}
+      >
+        {children}
+      </Text>
     </TouchableOpacity>
   );
 }

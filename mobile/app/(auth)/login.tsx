@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput } from 'react-native';
+import { ActivityIndicator, View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { requestMagicLink, verifyCode } from '../../services/auth';
@@ -20,7 +21,7 @@ export default function LoginScreen() {
   const codeInputRef = useRef<TextInput>(null);
   const { checkAuth } = useAuth();
   const router = useRouter();
-  const { isDark, colors } = useAppTheme();
+  const { isDark, colors, toggle } = useAppTheme();
 
   async function handleRequestLink() {
     if (!email.trim()) return;
@@ -97,6 +98,32 @@ export default function LoginScreen() {
             elevation: isDark ? 0 : 4,
           }}
         >
+          <TouchableOpacity
+            onPress={toggle}
+            activeOpacity={0.78}
+            accessibilityRole="button"
+            accessibilityLabel={isDark ? 'Passer au thème clair' : 'Passer au thème sombre'}
+            style={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              minHeight: 36,
+              borderRadius: 18,
+              paddingHorizontal: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+              backgroundColor: colors.surfaceContainerHigh,
+              borderWidth: 1,
+              borderColor: colors.outlineVariant,
+            }}
+          >
+            <FontAwesome name={isDark ? 'sun-o' : 'moon-o'} size={14} color={colors.primary} />
+            <Text style={{ fontSize: 12, fontWeight: '700', color: colors.onSurface }}>
+              {isDark ? 'Clair' : 'Sombre'}
+            </Text>
+          </TouchableOpacity>
+
           <Text style={{ fontSize: 48, marginBottom: 8 }}>⛵</Text>
           <Text style={{ fontSize: 28, fontWeight: '700', color: colors.onSurface, marginBottom: 4 }}>
             Doc2Sail
@@ -157,12 +184,40 @@ export default function LoginScreen() {
                 <Button onPress={handleVerifyCode} loading={loading} fullWidth disabled={code.length < 4}>
                   Se connecter
                 </Button>
-                <Button onPress={handleResendCode} loading={resending} variant="ghost" fullWidth>
-                  Renvoyer le code
-                </Button>
-                <Button onPress={() => { setStep('email'); setCode(''); setError(''); }} variant="ghost" fullWidth>
-                  ← Changer d'email
-                </Button>
+                <TouchableOpacity
+                  onPress={handleResendCode}
+                  disabled={resending}
+                  activeOpacity={0.72}
+                  style={{
+                    minHeight: 44,
+                    borderRadius: 8,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: resending ? 0.72 : 1,
+                  }}
+                >
+                  {resending ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <Text style={{ fontSize: 15, fontWeight: '700', color: colors.primary }}>
+                      Renvoyer le code
+                    </Text>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => { setStep('email'); setCode(''); setError(''); }}
+                  activeOpacity={0.72}
+                  style={{
+                    minHeight: 44,
+                    borderRadius: 8,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 15, fontWeight: '700', color: colors.onSurfaceVariant }}>
+                    ← Changer d'email
+                  </Text>
+                </TouchableOpacity>
               </View>
             </>
           )}
