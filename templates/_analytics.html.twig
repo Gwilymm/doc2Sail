@@ -1,0 +1,20 @@
+{% if app.environment == 'prod' %}
+    <!-- Privacy-friendly analytics by Plausible -->
+    <script async src="https://analytics.doc2sail.com/js/pa-6DaWILZSJ6u0yIvrlBAfY.js" data-turbo-eval="false"></script>
+    <script data-turbo-eval="false">
+        window.plausible =
+            window.plausible ||
+            function () {
+                (plausible.q = plausible.q || []).push(arguments);
+            };
+        plausible.init =
+            plausible.init ||
+            function (options) {
+                plausible.o = options || {};
+            };
+        // Turbo pageviews are sent once on turbo:load, including history restoration.
+        plausible.init({ autoCapturePageviews: false });
+    </script>
+    <!-- Umami (trial): tracks Turbo navigations itself via history.pushState -->
+    <script defer src="https://stats.bhn-logic.fr/script.js" data-website-id="5315dd51-de42-4d37-9f66-a9961d26ea43" data-turbo-eval="false"></script>
+{% endif %}
